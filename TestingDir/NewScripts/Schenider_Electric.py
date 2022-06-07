@@ -27,8 +27,6 @@ from selenium.webdriver.support import expected_conditions
 
 from selenium.webdriver.common.by import By
 
-from selenium.webdriver.common.touch_actions import TouchActions
-
 from urllib.parse import urlparse
 
 import re
@@ -65,11 +63,11 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    # file = open("/home/emr/config.json")
-    # data = json.load(file)
-    # db_path = data[0]['Db_Path']
-    # client = MongoClient(db_path)
-    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    data = json.load(file)
+    db_path = data[0]['Db_Path']
+    client = MongoClient(db_path)
+    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 

@@ -8,7 +8,7 @@
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 import json
 
-file = open("/home/emr/config.json")
+file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
 data = json.load(file)
 db_path = data[0]['Db_Path']
 

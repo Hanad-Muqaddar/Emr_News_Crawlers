@@ -29,7 +29,7 @@ running_Sequence = []
 started_on = datetime.now()
 c_name = 'ADHQ'
 try:
-    file = open("/home/emr/config.json")
+    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)

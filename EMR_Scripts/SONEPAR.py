@@ -13,7 +13,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.touch_actions import TouchActions
 from urllib.parse import urlparse
 import re
 import copy as copy
@@ -49,7 +48,7 @@ started_on = datetime.now()
 c_name = 'SONEPAR'
 opts.headless = True
 try:
-    file = open("/home/emr/config.json")
+    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)

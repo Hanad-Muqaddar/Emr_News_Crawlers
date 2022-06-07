@@ -70,7 +70,7 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/emr/config.json")
+    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)

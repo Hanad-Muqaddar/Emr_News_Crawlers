@@ -27,8 +27,6 @@ from selenium.webdriver.support import expected_conditions
 
 from selenium.webdriver.common.by import By
 
-from selenium.webdriver.common.touch_actions import TouchActions
-
 from urllib.parse import urlparse
 
 import re

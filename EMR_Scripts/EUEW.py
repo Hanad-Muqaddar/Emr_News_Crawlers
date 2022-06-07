@@ -12,7 +12,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.touch_actions import TouchActions
 from urllib.parse import urlparse
 import re
 import traceback
@@ -70,7 +69,7 @@ def News_SinglePageParser( url ):
     return news
 try:
     # client= MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin')
-    file = open("/home/emr/config.json")
+    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)

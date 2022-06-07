@@ -49,7 +49,7 @@ c_name = 'NAED'
 opts.headless = True
 try:
     # client= MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin')
-    file = open("/home/emr/config.json")
+    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)
