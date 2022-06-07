@@ -1,0 +1,211 @@
+# Packages to be imported
+import requests
+import time
+import json
+from random import randint
+from bs4 import BeautifulSoup
+from pymongo import MongoClient
+from bs4 import BeautifulSoup
+from selenium import webdriver
+# from webdriver_manager.chrome import ChromeDriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.common.by import By
+# from selenium.webdriver.common.touch_actions import TouchActions
+from urllib.parse import urlparse
+import re
+import traceback
+import urllib
+import dateparser
+from datetime import datetime
+from bson.objectid import ObjectId
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
+from newspaper import fulltext
+# ************************************************************************
+# defining variables
+opts = Options()
+opts.add_argument("--window-size=190,100")
+opts.add_argument("--disable-automation")
+opts.add_argument("--no-sandbox")
+opts.add_argument('--profile-directory=Default')
+opts.add_argument("start-maximized")
+opts.add_argument("disable-infobars")
+opts.add_argument("--lang=en")
+opts.add_argument("--enable-javascript")
+opts.add_argument("--enable-cookies")
+opts.add_argument('user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36')
+lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
+prefs = {
+  "translate_whitelists": lang_dict,
+  "translate":{"enabled":"true"}
+}
+opts.add_experimental_option("prefs", prefs)
+opts.headless = True
+running_Sequence = []
+started_on = datetime.now()
+c_name = 'Emerson_Group' # Name of the Collection
+total_crwalled_links = 0
+Already_exist = 0
+# *************************************************************************
+# trying to connect with mongodb
+try:
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB
+    running_Sequence.append('Connected to DB Server')
+except:
+    running_Sequence.append('Not Connected')
+# *************************************************************************
+client_name = 'TEMP_EMR_NEWS_Crawler_DB'
+news =  client[client_name]
+collection = news[c_name]
+error_logs = client['Logs_DB']['Logs_TEMP_EMR_NEWS_Crawler_DB']
+last_insertion = None
+last_time = ''
+# ****************************************************************************
+try:
+    for l_i in collection.find().sort('Date', -1).limit(1):
+        last_insertion = l_i
+except:
+    last_insertion = None
+if last_insertion == None:
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
+    Crwl_time = datetime.now()
+else:
+    last_time = last_insertion['Date']
+    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+    Crwl_time = last_insertion['Date']
+# ****************************************************************************
+####################################################
+############# Every Company Logic Here #############
+####################################################
+# *****************************************************************************
+try:
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    # service = Service("C:\Program Files (x86)\chromedriver.exe")
+    # driver = webdriver.Chrome(service=service)
+    print("Coming on driver")
+    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)
+    print("driver getting")
+    driver.get("https://www.emerson.com/en-us/news/search?cmFacetId=34014")
+    print("saving screenshot")
+    # driver.save_screenshot('emerson_group_screenshot.png')
+    time.sleep(5)
+    news_links = []
+    news_dates = []
+    links = driver.find_elements(By.XPATH, '//div[@class="card-content"]')
+    for link in links:
+        news_link = link.find_element(By.XPATH, './/a[@class="cta-text cta--primary cta--internal "]').get_attribute('href')
+        news_links.append(news_link)
+        date1 = link.find_element(By.XPATH, './/div[@class="meta-bar"]/label[@class="meta-3"]').text
+        news_dates.append(date1)
+    # print(news_links)
+    # print(news_dates)
+    for i, L_date in zip(news_links, news_dates):
+    # for i in news_links:
+        response = requests.get(i, headers=headers)
+        data = BeautifulSoup(response.content, 'lxml')
+        try:
+            title = data.find('meta', attrs = {"property":"og:title"}).get("content")
+            title = title.replace('| Emerson US','')
+            # print(title)
+        except:
+            title = data.find('title').get_text(strip=True)
+            title = title.replace('| Emerson US','')
+            # print(title)
+        language = "en-us"
+        announcement_type = "News"
+        try:
+            image = data.find("div", class_="cm-teaser--embedded").find("img").get('data-cm-responsive-media')
+            newimg = json.loads(image)
+            img = newimg[0]['linksForWidth']['768']
+        except:
+            img = ""
+        try:
+            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            # print(sub_category)
+        except:
+            sub_category = ""
+        try:
+            analysis = data.find('meta', attrs = {"name":"og:description"}).get("content")
+            # print(analysis)
+        except:
+            analysis = ""
+        try:
+            # dateparser.parse(L_date,settings={'DATE_ORDER': 'YMD'})
+            news_date = dateparser.parse(L_date,settings={'DATE_ORDER': 'YMD'})
+            # print(news_date)
+        except:
+            news_date = ""
+        page_source = "https://www.emerson.com/en-us/news/search?cmFacetId=34014"
+        news_weblink = i
+        try:
+            announcement = data.find('div', class_="col-xs-12").find("div", class_="padded-container").get_text(strip=True)
+            # print(announcement)
+        except:
+            announcement = ""
+            # print(announcement)
+        date = datetime.now()
+        # print(date)
+        # Creating a list of links already avilable in database
+        links_list = []
+        mydoc = collection.find()
+        for x in mydoc:
+            links_list.append(x['News_Weblink'])
+        if news_weblink in links_list:
+            total_crwalled_links += 1
+            Already_exist += 1
+            continue
+        else:
+            company_news = {}
+            company_news['companyId'] = ''
+            company_news['location']=''
+            company_news['comment']=''
+            company_news['Date']= news_date
+            company_news['Crawled_on']=date
+            company_news['title']=title
+            company_news['Language']= language
+            company_news['announcementType']= announcement_type
+            company_news['Source'] = page_source
+            company_news['News_Weblink'] = news_weblink
+            company_news['photo']= img
+            company_news['videos']= ''
+            company_news['announcement']=announcement
+            company_news['historySubCategory']= sub_category
+            company_news['analysis'] = analysis
+            try:
+                collection.insert_one(company_news)
+                total_crwalled_links += 1
+            except Exception as e:
+                running_Sequence.append(e)
+    if Already_exist >= 1:
+        tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
+    else:
+        tmp_txt = ''
+    running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
+    ended_on = datetime.now()
+except:
+    Error_Time =  datetime.now()
+    Reported_Error = traceback.format_exc()
+# **************************************************************************
+rep = ''
+try:
+    Error = {}
+    Error['Error_Detail'] = Reported_Error
+    Error['Error_Time'] = Error_Time
+except Exception as e:
+    rep = traceback.format_exc()
+    pass
+log = {}
+log['Crawler_name'] = c_name+'.py'
+log['Crawler_type'] = c_name
+log['Starting_time'] = started_on
+log['Ending_time'] = Error_Time if rep == '' else ended_on
+log['Error_Detail'] =  Error if rep == '' else ''
+log['Crawler_Runing Sequence'] = running_Sequence if running_Sequence else ''
+log['Links_Skipped'] = Already_exist
+log['Last_news_crawl_time'] = last_time
+log['Browser'] = 'None'
+error_logs.insert_one(log)
