@@ -163,9 +163,9 @@ def crawler_health_function(crawler_name, path):
     item['Latest_News_Date'] = ""
     item['Last_News_Date'] = ""
     item['Error_Type'] = ""
-    item['Is_Latest'] = "true"
+    item['Is_Latest'] = True
     try:
-        MyCollection.update_many({"Crawler_Name":crawler_name, "Is_Latest":"true"},{"$set":{"Is_Latest":"false"}})
+        MyCollection.update_many({"Crawler_Name":crawler_name, "Is_Latest":True},{"$set":{"Is_Latest":False}})
         new_item = copy.deepcopy(item)
         new_item['Crawler_Name'] = crawler_name
         new_item['Status'] = "Running"
@@ -183,7 +183,6 @@ def crawler_health_function(crawler_name, path):
             startDate = data[-1]['Date']
             MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"Status":"Finished", "News_Count":documents_count, "Latest_News_Date":endDate, "Last_News_Date":startDate}})
     except Exception as e:
-        print(e)
         MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"Status":"Error In Crawler", "Error_Type":str(e)}})
 
 
