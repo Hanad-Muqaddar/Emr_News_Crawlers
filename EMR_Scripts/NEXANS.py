@@ -94,7 +94,7 @@ try:
     urls = []
     for i in range(28):
         urls.append('https://www.nexans.com/newsroom/news.html?currentPage='+str(i+1))
-    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)
+    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe',options=opts)
     driver.set_page_load_timeout(220)
     driver.implicitly_wait(220)
     skip_next = False

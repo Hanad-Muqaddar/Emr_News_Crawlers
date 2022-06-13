@@ -145,7 +145,7 @@ else:
 # *****************************************************************************
 
 try:
-    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver', options=opts)
+    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe', options=opts)
     driver.get("https://www.spelsberg.com/news/news-press/")
     time.sleep(10)
     data = driver.find_elements_by_xpath("//div[@class='news-list-view']/div[@itemscope='itemscope']")

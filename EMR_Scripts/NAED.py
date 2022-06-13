@@ -93,7 +93,7 @@ news_dict_template = {
 try:
     url = 'https://blog.naed.org/page/0'
     root = 'https://blog.naed.org'
-    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)
+    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe',options=opts)
     driver.set_page_load_timeout(220)
     driver.implicitly_wait(220)
     new_url = ''

@@ -145,7 +145,7 @@ else:
 # *****************************************************************************
 
 try:
-    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver', options=opts)
+    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe', options=opts)
     driver.get("https://www.southwire.com/newsroom")
     data = driver.find_elements_by_xpath("//div[@id='BusinessArticleTabComponent_0']//div[@class='col-xs-12 col-sm-6 col-md-3 SouthwireArticleComponent']")
     for i in data:

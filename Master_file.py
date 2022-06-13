@@ -39,7 +39,6 @@ crawlerToCollectionMapping={
     "Phoenix_Contact":"Phoenix Contact",
     "Prysmian_Group":"Prysmian_Group",
     "RDM":"RDM",
-    "REXEL":"REXEL",
     "RITTAL":"RITTAL",
     "ROCKWELL":"ROCKWELL",
     "SCHNIDER_ELECTRIC":"SCHNIDER_ELECTRIC",
@@ -72,7 +71,7 @@ crawlerToCollectionMapping={
     "Dehn_International":"DEHN",
     "Draka_Comteq":"Draka_Comteq",
     "Eaton":"EATON",
-    "ELEKTROKABLE":"ELEKTROKABEL",
+    "ELEKTROKABEL":"ELEKTROKABEL",
     "Emerson_Group":"Emerson_Group",
     "Emiloffelhardt_Gmbh":"Emiloffelhardt_GmbH",
     "ES_ELECTRO":"ES_ELECTRO",
@@ -164,7 +163,9 @@ def crawler_health_function(crawler_name, path):
     item['Latest_News_Date'] = ""
     item['Last_News_Date'] = ""
     item['Error_Type'] = ""
+    item['Is_Latest'] = "true"
     try:
+        MyCollection.update_many({"Crawler_Name":crawler_name, "Is_Latest":"true"},{"$set":{"Is_Latest":"false"}})
         new_item = copy.deepcopy(item)
         new_item['Crawler_Name'] = crawler_name
         new_item['Status'] = "Running"
@@ -213,7 +214,6 @@ Emr_News_Cralers_Dict = {
     "Phoenix_Contact":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "Prysmian_Group":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "RDM":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
-    "REXEL":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "RITTAL":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "ROCKWELL":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "SCHNIDER_ELECTRIC":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
@@ -246,9 +246,9 @@ Emr_News_Cralers_Dict = {
     "Dehn_International":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Draka_Comteq":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Eaton":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
-    "ELEKTROKABLE":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
+    "ELEKTROKABEL":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Emerson_Group":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
-    "Emiloffelhardt_Gmbh":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
+    "Emiloffelhardt_GmbH":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Ledvance":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "ES_ELECTRO":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "EsyLux":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",

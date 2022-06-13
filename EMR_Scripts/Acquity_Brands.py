@@ -145,7 +145,7 @@ else:
 # *****************************************************************************
 try:
 
-    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)  # path to the driver is here
+    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe',options=opts)  # path to the driver is here
     url = "https://insights.acuitybrands.com/news-releases"
     driver.implicitly_wait(30)
     try:

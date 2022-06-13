@@ -151,7 +151,7 @@ else:
 # *****************************************************************************
 
 try:
-    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver', options=opts)
+    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe', options=opts)
     driver.get("https://www.zvei.org/presse-medien/pressebereich")
     response = Selector(text=driver.page_source.encode('utf-8'))
     all_links = response.css("#ke_search-results a::attr(href)").getall()

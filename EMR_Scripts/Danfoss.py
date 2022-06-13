@@ -144,7 +144,7 @@ else:
 # *****************************************************************************
 # Writing driver path
 try:
-    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)
+    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver',options=opts)
     print("1st step")
     links = ["https://www.danfoss.com/en/about-danfoss/news/?sort=startDate_desc", "https://www.danfoss.com/en/service-and-support/case-stories/?sort=startDate_desc"]
     for i in links:

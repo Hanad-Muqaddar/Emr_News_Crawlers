@@ -136,7 +136,7 @@ else:
 
 try:
     # driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver')
-    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver', options= options)
+    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe', options= options)
     links = ['https://z.lighting/en/group/news-insights/?category=company', 'https://z.lighting/en/group/news-insights/?category=zumtobel']
     for i in links:
         driver.get(i)

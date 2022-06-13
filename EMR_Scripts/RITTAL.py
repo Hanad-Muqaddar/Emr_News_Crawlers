@@ -92,7 +92,7 @@ news_dict_template = {
 }
 try:
     urls = ['https://www.rittal.com/com-en/News']
-    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)
+    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe',options=opts)
     driver.set_page_load_timeout(220)
     driver.implicitly_wait(220)
     for url in urls:

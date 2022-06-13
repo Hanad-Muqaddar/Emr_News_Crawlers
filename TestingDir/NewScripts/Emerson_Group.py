@@ -87,7 +87,7 @@ try:
     # service = Service("C:\Program Files (x86)\chromedriver.exe")
     # driver = webdriver.Chrome(service=service)
     print("Coming on driver")
-    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)
+    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe',options=opts)
     print("driver getting")
     driver.get("https://www.emerson.com/en-us/news/search?cmFacetId=34014")
     print("saving screenshot")

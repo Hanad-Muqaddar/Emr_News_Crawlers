@@ -27,8 +27,8 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 opts = Options()
-# opts.add_argument("--window-size=190,100")
-# opts.add_argument("--disable-automation")
+opts.add_argument("--window-size=190,100")
+opts.add_argument("--disable-automation")
 opts.add_argument("--no-sandbox")
 opts.add_argument('--profile-directory=Default')
 opts.add_argument("start-maximized")
@@ -99,7 +99,7 @@ else:
 total_crwalled_links = 0
 Already_exist = 0
 try:
-    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)
+    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe',options=opts)
     driver.set_page_load_timeout(220)
     driver.implicitly_wait(220)
     driver.get('https://www.euew.org/news')

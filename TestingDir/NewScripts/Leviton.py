@@ -145,7 +145,7 @@ else:
 # *****************************************************************************
 
 try:
-    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver', options= opts)
+    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe', options= opts)
     link = "https://www.leviton.com/en/company/news-events/press-releases"
     all_links = []
     dates = []

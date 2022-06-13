@@ -127,7 +127,7 @@ else:
 try:   
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    service = Service("C:\Program Files (x86)\chromedriver.exe")
+    service = Service("/home/ubuntu/chrome_driver/chromedriver.exe")
     driver = webdriver.Chrome(service=service)
 
     Main_url = "https://www.leviton.com"

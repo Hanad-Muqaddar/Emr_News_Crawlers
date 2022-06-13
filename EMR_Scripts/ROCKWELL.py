@@ -91,7 +91,7 @@ news_dict_template = {
         "historySubCategory" : "",
 }
 try:
-    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)
+    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe',options=opts)
     driver.set_page_load_timeout(220)
     driver.implicitly_wait(220)
     driver.get('https://ir.rockwellautomation.com/press-releases/default.aspx')
@@ -100,7 +100,7 @@ try:
         urls.append('https://ir.rockwellautomation.com/press-releases/default.aspx'+i.find('a').get('href'))
     news_list = []
     for link in urls:
-        driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)
+        driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe',options=opts)
         driver.set_page_load_timeout(700)
         driver.implicitly_wait(700)
         driver.get(link)

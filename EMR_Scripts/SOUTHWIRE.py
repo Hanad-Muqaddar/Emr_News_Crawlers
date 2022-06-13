@@ -91,7 +91,7 @@ total_crwalled_links = 0
 Already_exist = 0
 try:
     urls = ['https://www.southwire.com/newsroom']
-    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)
+    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe',options=opts)
     driver.set_page_load_timeout(220)
     driver.implicitly_wait(220)
     for url in urls:

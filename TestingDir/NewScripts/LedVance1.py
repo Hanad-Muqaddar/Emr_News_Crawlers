@@ -143,7 +143,7 @@ else:
 ####################################################
 
 # *****************************************************************************
-driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver', options= opts)
+driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe', options= opts)
 try:
     driver.get("https://www.ledvance.com/professional/company/newsroom/press-releases?limit=500")
     data = driver.find_elements_by_xpath("//ul[@class='divided-list']/li")
