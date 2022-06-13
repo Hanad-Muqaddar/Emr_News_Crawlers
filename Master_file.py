@@ -182,6 +182,7 @@ def crawler_health_function(crawler_name, path):
             startDate = data[-1]['Date']
             MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"Status":"Finished", "News_Count":documents_count, "Latest_News_Date":endDate, "Last_News_Date":startDate}})
     except Exception as e:
+        print(e)
         MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"Status":"Error In Crawler", "Error_Type":str(e)}})
 
 
