@@ -11,6 +11,17 @@ MyDatabase2 = myclient2['TEMP_EMR_NEWS_Crawler_DB']
 MyCollection = MyDatabase["Crawler_Status"]
 today_date = datetime.datetime.now()
 
+
+def calculate_time_interval(start_time, end_time):                   
+    duration = end_time - start_time                        
+    duration_in_s = duration.total_seconds()
+    days    = divmod(duration_in_s, 86400)
+    hours   = divmod(days[1], 3600)
+    minutes = divmod(hours[1], 60)
+    seconds = divmod(minutes[1], 1)
+    time_interval = "Time Taken: %d days, %d hours, %d minutes, %d seconds" % (days[0], hours[0], minutes[0], seconds[0])
+    return time_interval
+
 crawlerToCollectionMapping={
     "ABB":"ABB",
     "ACOME":"ACOME",
@@ -164,6 +175,7 @@ def crawler_health_function(crawler_name, path):
     item['Last_News_Date'] = ""
     item['Error_Type'] = ""
     item['Is_Latest'] = True
+    item['Time_Interval_Taken_To_Run'] = ""
     try:
         MyCollection.update_many({"Crawler_Name":crawler_name, "Is_Latest":True},{"$set":{"Is_Latest":False}})
         new_item = copy.deepcopy(item)
@@ -171,19 +183,22 @@ def crawler_health_function(crawler_name, path):
         new_item['Status'] = "Running"
         returning_id = MyCollection.insert_one(new_item)
         path = path + crawler_name + ".py"
+        start_time = datetime.datetime.now()
         exec(open(path).read())
+        end_time = datetime.datetime.now()
+        time_interval = calculate_time_interval(start_time, end_time)
         MyCollection2 = MyDatabase2[crawlerToCollectionMapping[crawler_name]]
         date_to_query = datetime.datetime(today_date.year,today_date.month,today_date.day)
         documents_count = MyCollection2.count_documents({"Crawled_on":{"$gte": date_to_query}})
         if int(documents_count) == 0:
-            MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"Status":"Finished", "News_Count":documents_count}})
+            MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"Status":"Finished", "News_Count":documents_count, "Time_Interval_Taken_To_Run":time_interval}})
         else:
             data =  list(MyCollection2.aggregate([{"$match":{"Crawled_on":{"$gte": date_to_query}}},{"$sort":{"Date":-1}}]))
             endDate = data[0]['Date']
             startDate = data[-1]['Date']
-            MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"Status":"Finished", "News_Count":documents_count, "Latest_News_Date":endDate, "Last_News_Date":startDate}})
+            MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"Status":"Finished", "News_Count":documents_count, "Latest_News_Date":endDate, "Last_News_Date":startDate, "Time_Interval_Taken_To_Run":time_interval}})
     except Exception as e:
-        MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"Status":"Error In Crawler", "Error_Type":str(e)}})
+        MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"Status":"Error In Crawler", "Error_Type":str(e), "Time_Interval_Taken_To_Run":time_interval}})
 
 
 Emr_News_Cralers_Dict = {
