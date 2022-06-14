@@ -44,6 +44,7 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
+
 from newspaper import fulltext
 
 from googletrans import Translator
@@ -127,7 +128,8 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "http://nl.itsme.eu"
-    Base_url = "http://nl.itsme.eu/nl.itsme.eu/nieuws"
+    # Base_url = "http://nl.itsme.eu/nl.itsme.eu/nieuws"
+    Base_url = "https://nl.itsme.eu/itsme/nl/EUR/content/news/list"
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
 
@@ -140,50 +142,40 @@ try:
     news_links = []
     news_dates = [] 
 
-    links = soup.find("div",{ "class":"view-content"}).find_all("div",{ "class":"views-row"})
+    links = soup.find_all("li",{ "class":"itsme-content-list--item"})
     for link in links:
-        news_link = Main_url + link.find("div",{ "class" : "views-field-title"}).find("span",{ "class" : "field-content"}).find('a').get('href')
+        news_link = Main_url + link.find("a",{ "class" : "itsme-content-block--link"}).get('href')
         if news_link not in news_links:
             news_links.append(news_link)
             try:
-                news_date = link.find("div",{ "class" : "views-field-created"}).find("span",{ "class" : "field-content"}).get_text(strip=True)
+                news_date = link.find("span",{ "class" : "itsme-content-block--date"}).get_text(strip=True)
                 news_dates.append(news_date)
             except:
                 news_date = ""
                 news_dates.append(news_date)
 
-    print(news_links)
-    print(news_dates)
-    print(len(news_links))
-    print(len(news_dates))
 
     for i , N_Date in zip(news_links,news_dates):        
         response = requests.get(i, headers=headers)
         data = BeautifulSoup(response.content, 'lxml')
         try:
-            title = data.find('title').get_text().replace('| itsme','').strip()
+            title = data.find('title').get_text().replace('| itsme Nederland','').strip()
             title = translate(title)
-            print(title)
         except:
             title = ""
-            print(title)
        
         announcement_type = "News"
         language = "en-us"
 
         try:
-            image = data.find('div', {'id':'head-image'}).find('img').get('src')
-            print(image)
+            image = data.find('div', {"class" : "content"}).find('img').get('src')
         except:
             image = ""
-            print(image)
 
         try: 
-            video = soup.find('div',{'class':'node-inner'}).find('div',{'class':'content'}).find('iframe').get('src')        
-            print(video)
+            video = soup.find('iframe').get('src')        
         except:
             video = ""
-            print(video)
             
         try:
             sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
@@ -198,20 +190,18 @@ try:
             analysis = ""
         try:
             date = translate(N_Date)
-            print(date)
             news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
         except:
             news_date = ""
 
-        page_source = "http://nl.itsme.eu/nl.itsme.eu/nieuws"
+        page_source = "https://nl.itsme.eu/itsme/nl/EUR/content/news/list"
         news_weblink = i
         
         try:
-            announcement = data.find('div',{'class':'node-inner'}).find('div',{'class':'content'}).get_text() 
-            announcement = translate(announcement)
-            print(announcement)
-            
+            html = requests.get(i).text
+            announcement = fulltext(html)
+            announcement = announcement.replace('\n','<br>')
+            announcement = translate(announcement)  
         except:
             announcement = ""
         
