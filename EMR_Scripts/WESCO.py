@@ -1,161 +1,259 @@
+# Packages to be imported
+from functools import total_ordering
 import requests
+
 import time
+
 import json
+
 from random import randint
+
 from bs4 import BeautifulSoup
+
 from pymongo import MongoClient
+
+from bs4 import BeautifulSoup
+import scrapy
+
 from selenium import webdriver
-# from seleniumwire import webdriver as wireWebdriver  # Import from seleniumwire
-from selenium.webdriver.firefox.options import Options
-# from selenium.webdriver.chrome.options import Options
+
+# from webdriver_manager.chrome import ChromeDriver
+
+from selenium.webdriver.chrome.options import Options
+
 from selenium.webdriver.support.ui import WebDriverWait
+
+from selenium.webdriver.common.keys import Keys
+
+from selenium.webdriver.support import expected_conditions
+
+from selenium.webdriver.common.by import By
+
+from urllib.parse import urlparse
+
 import re
-from datetime import date, timedelta
-import datetime
-import dateparser
-import copy
-from datetime import datetime
-today = datetime.now()
+
 import traceback
-log_obj={
-    'Crawler_name':'WescoNewsCrawler',
-    'Starting_time':datetime.now(),
-    'Ending_time':'',
-    'Running_sequance':[],
-    }
 
-def CreateDbConnection(key):
-    try:
-        client= MongoClient(key)
-        log_obj['Running_sequance'].append('Connected to Server')
-    except:
-        log_obj['Running_sequance'].append('Not Connected')
-    return client
+import urllib
 
-def check_link_exists(url,db,collection):
-    ch=db.get_collection(collection).find({'News_Weblink':url})
-    check=[]
-    for x in ch:
-        check.append(x)
-    if(len(check)==0):
-        return False
-    else:
-        return True
-    
-def News_SinglePageParser(news_url,news_date,source):
-    response3 =  requests.get(news_url)
-    NewsData= {}
-    NewsData['Date']=news_date
-    NewsData['Source'] = source
-    NewsData['historySubCategory']=''
-    NewsData['News_Weblink'] = news_url
-    try:
-        title = BeautifulSoup(response3.content,'lxml').find('section',class_='main').find('div',class_='wd_title wd_language_left').text.strip()
-    except:
-        title=''
-    try:
-        NewsData['announcement'] = BeautifulSoup(response3.content,'lxml').find('section',class_='main').find('div',class_='wd_body wd_news_body').text
-    except:
-        NewsData['announcement']=''
-    NewsData['companyId'] = ''
-    NewsData['location']='' 
-    NewsData['comment']=''
-    NewsData['title']=title
-    NewsData['announcementType']='News Releases'
-    NewsData['photo']= ''
-    NewsData['Language']= 'English'
-    today=datetime.today()
-    NewsData['Crawled_on']=today        
-    refrences=''
-    analysis=''
-    validatedObject  ={}
-    validatedObject['companyId']=NewsData['companyId']
-    validatedObject['Date']=NewsData['Date']
-    validatedObject['title']=NewsData['title']
-    validatedObject['announcement']=NewsData['announcement']
-    validatedObject['announcementType']=NewsData['announcementType']
-    validatedObject['photo']=NewsData['photo']
-    validatedObject['analysis']=analysis
-    validatedObject['refrences ']=refrences
-    validatedObject['historySubCategory']= NewsData['historySubCategory']
-    NewsData['validatedObject']=validatedObject 
-    return NewsData
-    
-def History_newsParser(url,localDb,localCollectionName):
-    all_news=[]
-    start_page=0
-    try:
-        response1 =  requests.get(url)
-        pagination = BeautifulSoup(response1.content,'lxml').find('section',class_='main').find('div',class_='wd_page_menu').find_all('li')
-        end_page=int(pagination[-2].find('a').text)
-    except:
-        end_page=1 
+import dateparser
 
-    count=0
-    flag=False
-    while (start_page<end_page):
- 
-        if(flag):
-            break
-        page_url='http://wesco.investorroom.com/news-releases?l=100&o='+str(count)
-        try:
-            response2 =  requests.get(url)
-            news_liks = BeautifulSoup(response2.content,'lxml').find('section',class_='main').find('ul',class_='wd_layout-simple wd_item_list').find_all('li',class_='wd_item')
-        except:
-            rep = traceback.format_exc()
-            log_obj['Running_sequance'].append (rep)
-            break
+from datetime import datetime
+
+from bson.objectid import ObjectId
+
+from urllib.error import HTTPError
+
+from urllib.request import Request, urlopen
+
+from scrapy.selector import Selector
+
+from newspaper import fulltext
+
+# ************************************************************************
+# defining variables
+
+running_Sequence = []
+
+started_on = datetime.now()
+
+c_name = 'WESCO' # Name of the Collection
+
+total_crwalled_links = 0
+
+Already_exist = 0
+
+# *************************************************************************
+
+# trying to connect with mongodb
+
+try:
+    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    data = json.load(file)
+    db_path = data[0]['Db_Path']
+    client = MongoClient(db_path)
+    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    running_Sequence.append('Connected to DB Server')
+
+except:
+
+    running_Sequence.append('Not Connected')
+
+# *************************************************************************
+
+client_name = 'TEMP_EMR_NEWS_Crawler_DB'
+
+news =  client[client_name]
+
+collection = news[c_name]
+
+error_logs = client['Logs_DB']['Logs_TEMP_EMR_NEWS_Crawler_DB']
+
+last_insertion = None
+
+last_time = ''
+
+# ****************************************************************************
+
+try:
+
+    for l_i in collection.find().sort('Date', -1).limit(1):
+
+        last_insertion = l_i
+
+except:
+
+    last_insertion = None
+
+if last_insertion == None:
+
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
+
+    Crwl_time = datetime.now()
+
+else:
+
+    last_time = last_insertion['Date']
+
+    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+
+    Crwl_time = last_insertion['Date']
+
+# ****************************************************************************
+
+####################################################
+
+############# Every Company Logic Here #############
+
+####################################################
+
+# *****************************************************************************
+
+try:
+    link ="https://investors.wesco.com/feed/PressRelease.svc/GetPressReleaseList?LanguageId=1&bodyType=0&pressReleaseDateFilter=3&categoryId=1cb807d2-208f-4bc3-9133-6a9ad45ac3b0&pageSize=-1&pageNumber=0&tagList=&includeTags=true&year=2022&excludeSelection=1"
+    result = requests.get(link)
+    page_source = "https://investors.wesco.com/news-events/news/default.aspx"
+    data = result.json()['GetPressReleaseListResult']
+    for i in data:
+        db_list = []
+        mydoc = collection.find()
+        for x in mydoc:
+            db_list.append(x['News_Weblink'])
+        news_weblink = "https://investors.wesco.com" + i['LinkToDetailPage']
+        if news_weblink in db_list:
+            # print("Link Already exists in database")
+            total_crwalled_links += 1
+            Already_exist += 1
+            continue
+        else:
+            res = requests.get(news_weblink)
+            response = Selector(res)
+            try:
+                title = i['Headline']
+            except:
+                title = ""
+            try:
+                sub_category = ""
+            except:
+                sub_category = ""
+            try:
+                analysis = response.xpath("//meta[@name='twitter:description']/@content").get()
+            except:
+                analysis = ""
+            try:
+                image = i['MediaCollection'][0]
+            except:
+                image = ""
+            try:
+                news_date = dateparser.parse(i['PressReleaseDate'])
+            except:
+                news_date = ""
+            try:
+                announcement = fulltext(res.text)
+            except:
+                announcement = ""
+            try:
+                announcement_type = "Press Release"
+            except:
+                announcement_type = ""
+            language = "en-US"
+            crawled_date = datetime.now()
             
-        for news in news_liks:
-            news_url=news.find('div',class_='wd_title').find('a').get('href')
-            status=check_link_exists(news_url,localDb,localCollectionName)
-            if(status):
-                flag=True
-#                 print ('exist')
-#                 print ('*************')
-                break
-            else:
-#                 print ("Not Exist in db")
-                source=page_url
-                try:
-                    news_date=news.find('div',class_='wd_date').text
-                    news_date=dateparser.parse(news_date)
-                except:
-                    news_date=''
-                data=News_SinglePageParser(news_url,news_date,source)
-                all_news.append(data)  
-        
-        count+=100
-        start_page+=1
-     
-        
+            company_news = {}
+            company_news['companyId'] = ''
+            company_news['location']=''
+            company_news['comment']=''
+            company_news['Date']= news_date
+            company_news['Crawled_on']=crawled_date
+            company_news['title']=title
+            company_news['Language']= language
+            company_news['announcementType']= announcement_type
+            company_news['Source'] = page_source
+            company_news['News_Weblink'] = news_weblink
+            company_news['photo']= image
+            company_news['videos']= ''
+            company_news['announcement']=announcement
+            company_news['historySubCategory']= sub_category
+            company_news['analysis'] = analysis
+            try:
+                collection.insert_one(company_news)
+                total_crwalled_links += 1
+            except Exception as e:
+                running_Sequence.append(e)
+    
+    if Already_exist >= 1:
 
-    if(len(all_news)>0):
-        localDb.get_collection(localCollectionName).insert_many(all_news)
-    log_obj['Running_sequance'].append(str(len(all_news))+ " new news inserted in db.")
-                       
-        
-if __name__ == "__main__":    
-    #   -----------LocalDBMapping---------------
-    try:
-        key='mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin'
-#         key='mongodb://localhost:27017/'
-        dbName='TEMP_EMR_NEWS_Crawler_DB'
-#         dbName='WESCO'
-#         collectionName='news_test'
-        collectionName='WESCO'
-        url='https://investors.wesco.com/news-and-events/news-releases/'
-        Client=CreateDbConnection(key)
-        db =  Client[dbName]
-        log_collection=db['logs']
-        History_newsParser(url,db,collectionName)
-        log=copy.deepcopy(log_obj)
-        log['Ending_time']=datetime.now()
-        
-        log_collection.insert_one(log)
-    except:
-        rep = traceback.format_exc()
-        log=copy.deepcopy(log_obj)
-        log_obj['Running_sequance'].append (rep)
-        log['Ending_time']=datetime.now()
-        log_collection.insert_one(log)
+        tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
+
+    else:
+
+        tmp_txt = ''
+
+        running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
+
+        ended_on = datetime.now()
+except:
+    Error_Time =  datetime.now()
+
+    Reported_Error = traceback.format_exc()
+
+
+# **************************************************************************
+rep = ''
+
+try:
+
+    Error = {}
+
+    Error['Error_Detail'] = Reported_Error
+
+    Error['Error_Time'] = Error_Time
+
+except Exception as e:
+
+    rep = traceback.format_exc()
+
+    pass
+
+log = {}
+
+log['Crawler_name'] = c_name+'.py'
+
+log['Crawler_type'] = c_name
+
+log['Starting_time'] = started_on
+
+log['Ending_time'] = Error_Time if rep == '' else ended_on
+
+log['Error_Detail'] =  Error if rep == '' else ''
+
+log['Crawler_Runing Sequence'] = running_Sequence if running_Sequence else ''
+
+log['Links_Skipped'] = Already_exist
+
+log['Last_news_crawl_time'] = last_time
+
+log['Browser'] = 'None'
+
+error_logs.insert_one(log)
