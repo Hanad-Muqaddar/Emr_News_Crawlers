@@ -5,10 +5,10 @@ import copy
 myclient = pymongo.MongoClient("mongodb://su-du-ad:updatedSuperDuperAdmin@34.121.98.98:27017/emrweb?authSource=admin")
 myclient2 = pymongo.MongoClient("mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin")
 
-MyDatabase = myclient["TEMP_EMR_NEWS_Crawler_Status"]
+MyDatabase = myclient["emrdevelopment"]
 MyDatabase2 = myclient2['TEMP_EMR_NEWS_Crawler_DB']
 
-MyCollection = MyDatabase["Crawler_Status"]
+MyCollection = MyDatabase["crawlerStatus"]
 today_date = datetime.datetime.now()
 
 
@@ -62,7 +62,6 @@ crawlerToCollectionMapping={
     "Weidmuller":"Weidmuller",
     "WESCO":"WESCO",
     "WURTH":"WURTH",
-
     "AHLSELL":"AHLSELL",
     "Alexander_Burkle":"Alexander_Burkle",
     "Amazon_Business":"Amazon_Business",
@@ -164,18 +163,18 @@ crawlerToCollectionMapping={
     "Zumtobel":"Zumtobel",
     "MSC_ Industrial_Supply":"MSC_ Industrial_Supply"
 }
-
-def crawler_health_function(crawler_name, path):
+def crawler_health_function(crawler_name, path, count_c):
+    # print(count_c)
     item = {}
-    item["Crawler_Name"] = ""
-    item['Running_DateTime'] = today_date
-    item['Status'] = ""
-    item['News_Count'] = ""
-    item['Latest_News_Date'] = ""
-    item['Last_News_Date'] = ""
-    item['Error_Type'] = ""
-    item['Is_Latest'] = True
-    item['Time_Interval_Taken_To_Run'] = ""
+    item["name"] = ""
+    item['runningDateTime'] = today_date
+    item['status'] = ""
+    item['newsCount'] = ""
+    item['latestNewsDate'] = ""
+    item['lastNewsDate'] = ""
+    item['errorType'] = ""
+    item['isLatest'] = True
+    item['timeIntervalTakenToRun'] = ""
     try:
         MyCollection.update_many({"Crawler_Name":crawler_name, "Is_Latest":True},{"$set":{"Is_Latest":False}})
         new_item = copy.deepcopy(item)
@@ -240,7 +239,6 @@ Emr_News_Cralers_Dict = {
     "Weidmuller":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "WESCO":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "WURTH":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
-
     "AHLSELL":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Alexander_Burkle":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Amazon_Business":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
@@ -343,8 +341,9 @@ Emr_News_Cralers_Dict = {
     "MSC_ Industrial_Supply":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/"
 }
 
-
+count_c = 0
 for key, value in Emr_News_Cralers_Dict.items():
-    crawler_health_function(key, value)
+    crawler_health_function(key, value, count_c)
+    count_c +=1 
 
 
