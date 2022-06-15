@@ -8,7 +8,7 @@ myclient2 = pymongo.MongoClient("mongodb://su-du-ad:updatedSuperDuperAdmin@18.15
 MyDatabase = myclient["emrdevelopment"]
 MyDatabase2 = myclient2['TEMP_EMR_NEWS_Crawler_DB']
 
-MyCollection = MyDatabase["crawlerStatus"]
+MyCollection = MyDatabase["crawler_status"]
 today_date = datetime.datetime.now()
 
 
@@ -176,7 +176,7 @@ def crawler_health_function(crawler_name, path, count_c):
     item['isLatest'] = True
     item['timeIntervalTakenToRun'] = ""
     try:
-        MyCollection.update_many({"Crawler_Name":crawler_name, "Is_Latest":True},{"$set":{"Is_Latest":False}})
+        MyCollection.update_many({"Crawler_Name":crawler_name, "isLatest":True},{"$set":{"isLatest":False}})
         new_item = copy.deepcopy(item)
         new_item['Crawler_Name'] = crawler_name
         new_item['Status'] = "Running"
@@ -190,14 +190,14 @@ def crawler_health_function(crawler_name, path, count_c):
         date_to_query = datetime.datetime(today_date.year,today_date.month,today_date.day)
         documents_count = MyCollection2.count_documents({"Crawled_on":{"$gte": date_to_query}})
         if int(documents_count) == 0:
-            MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"Status":"Finished", "News_Count":documents_count, "Time_Interval_Taken_To_Run":time_interval}})
+            MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"status":"Finished", "newsCount":documents_count, "timeIntervalTakenToRun":time_interval}})
         else:
             data =  list(MyCollection2.aggregate([{"$match":{"Crawled_on":{"$gte": date_to_query}}},{"$sort":{"Date":-1}}]))
             endDate = data[0]['Date']
             startDate = data[-1]['Date']
-            MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"Status":"Finished", "News_Count":documents_count, "Latest_News_Date":endDate, "Last_News_Date":startDate, "Time_Interval_Taken_To_Run":time_interval}})
+            MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"status":"Finished", "newsCount":documents_count, "latestNewsDate":endDate, "lastNewsDate":startDate, "timeIntervalTakenToRun":time_interval}})
     except Exception as e:
-        MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"Status":"Error In Crawler", "Error_Type":str(e), "Time_Interval_Taken_To_Run":time_interval}})
+        MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"status":"Error In Crawler", "errorType":str(e), "timeIntervalTakenToRun":time_interval}})
 
 
 Emr_News_Cralers_Dict = {
