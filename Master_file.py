@@ -178,8 +178,8 @@ def crawler_health_function(crawler_name, path, count_c):
     try:
         MyCollection.update_many({"Crawler_Name":crawler_name, "isLatest":True},{"$set":{"isLatest":False}})
         new_item = copy.deepcopy(item)
-        new_item['Crawler_Name'] = crawler_name
-        new_item['Status'] = "Running"
+        new_item['name'] = crawler_name
+        new_item['status'] = "Running"
         returning_id = MyCollection.insert_one(new_item)
         path = path + crawler_name + ".py"
         start_time = datetime.datetime.now()
