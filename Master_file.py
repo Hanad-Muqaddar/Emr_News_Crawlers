@@ -176,7 +176,7 @@ def crawler_health_function(crawler_name, path, count_c):
     item['isLatest'] = True
     item['timeIntervalTakenToRun'] = ""
     try:
-        MyCollection.update_many({"Crawler_Name":crawler_name, "isLatest":True},{"$set":{"isLatest":False}})
+        MyCollection.update_many({"name":crawler_name, "isLatest":True},{"$set":{"isLatest":False}})
         new_item = copy.deepcopy(item)
         new_item['name'] = crawler_name
         new_item['status'] = "Running"
@@ -344,6 +344,6 @@ Emr_News_Cralers_Dict = {
 count_c = 0
 for key, value in Emr_News_Cralers_Dict.items():
     crawler_health_function(key, value, count_c)
-    count_c +=1 
+    count_c +=1
 
 

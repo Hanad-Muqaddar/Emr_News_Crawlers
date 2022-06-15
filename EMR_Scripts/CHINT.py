@@ -163,12 +163,9 @@ def Parser(source,localDb,localCollectionName):
         
 if __name__ == "__main__":    
     try:    
-        key='mongodb://localhost:27017/'
-    #         dbName='chintglobal'
-    #         collectionName='news_test'
-    #     key='mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin'
+        key='mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin'
         dbName='TEMP_EMR_NEWS_Crawler_DB'
-        collectionName='chintglobal'
+        collectionName='CHINT'
         url='https://chintglobal.com/news-center-14'
         Client=CreateDbConnection(key)
         db =  Client[dbName]
