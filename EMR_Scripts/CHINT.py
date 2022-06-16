@@ -173,7 +173,7 @@ if __name__ == "__main__":
         Parser(url,db,collectionName)
         log=copy.deepcopy(log_obj)
         log['Ending_time']=datetime.now()
-        log_collection.insert_one(log)
+        # log_collection.insert_one(log)
     except:
         rep = traceback.format_exc()
         log=copy.deepcopy(log_obj)

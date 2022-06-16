@@ -197,6 +197,8 @@ def crawler_health_function(crawler_name, path, count_c):
             startDate = data[-1]['Date']
             MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"status":"Finished", "newsCount":documents_count, "latestNewsDate":endDate, "lastNewsDate":startDate, "timeIntervalTakenToRun":time_interval}})
     except Exception as e:
+        end_time = datetime.datetime.now()
+        time_interval = calculate_time_interval(start_time, end_time)
         MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"status":"Error In Crawler", "errorType":str(e), "timeIntervalTakenToRun":time_interval}})
 
 
@@ -208,7 +210,7 @@ Emr_News_Cralers_Dict = {
     "ADHQ":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "Atkore_International":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "Belden_International":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
-    "CHINT":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
+    # "CHINT":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "Danfoss":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "Ensto_Group":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "EUEW":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
