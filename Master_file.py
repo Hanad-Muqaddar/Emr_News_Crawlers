@@ -214,7 +214,7 @@ Emr_News_Cralers_Dict = {
     # "EUEW":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "FEGIME":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "Friedhelm_Group":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
-    "GRAYBAR_ELECTRIC":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
+    # "GRAYBAR_ELECTRIC":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "HAGER":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "HITACHI_ABB":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "HONEYWELL":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
