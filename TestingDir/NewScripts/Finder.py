@@ -21,6 +21,8 @@ from selenium.webdriver.chrome.options import Options
 
 from selenium.webdriver.support.ui import WebDriverWait
 
+from selenium.webdriver.chrome.service import Service
+
 from selenium.webdriver.common.keys import Keys
 
 from selenium.webdriver.support import expected_conditions
@@ -44,7 +46,9 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
+
 from newspaper import fulltext
+
 
 # ************************************************************************
 # defining variables
@@ -123,71 +127,88 @@ else:
 
 # *****************************************************************************
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    Main_url = "https://www.findernet.com"
-    Base_url = "https://www.findernet.com/news-sitemap.xml"
-    result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
-    
-    news_links = []
+    # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = True
 
-    links = soup.find_all("loc")
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)
+    driver.get("https://www.findernet.com/en/worldwide/news/")
+    time.sleep(5)
+
+    news_links = []
+    news_dates = []
+    links = driver.find_elements(By.XPATH, '//div[@class="style__StyledNewsListing-pjpy3m-0 gGKRCh"]//div[contains(@class,"style__StyledNewsCard-ojiq1d-12 kTaOuC")]')
     for link in links:
-        news_link = link.text
-        if "en/worldwide/news/" in news_link and news_link not in news_links:
-            news_links.append(news_link)
+        # news_link = link.find_element(By.XPATH, './/a[@class="read-more arrow-right-link animated-arrow-right-link"]').get_attribute('href')
+        news_link = link.find_element(By.XPATH, './/a').get_attribute('href')
+        news_links.append(news_link)
+        
+        date1 = link.find_element(By.XPATH, './/div[@class="style__StyledNewsCardDate-ojiq1d-2 duzsjo"]').text
+        news_dates.append(date1)
 
     print(news_links)
+    print(len(news_links))
+    print(news_dates)
+    print(len(news_dates))
 
-    for i in news_links[1:]:        
+    for i, L_date in zip(news_links, news_dates):
+    # for i in news_links:
         response = requests.get(i, headers=headers)
         data = BeautifulSoup(response.content, 'lxml')
-
         try:
             title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-            # print(title)
+            title = title.replace('- Finder' , '')
+            print(title)
         except:
-            title = data.find('title').get_text(strip=True)
-            # print(title)
-        
+            title = ""
+      
+        language = "en-us"        
         announcement_type = "News"
 
-        language = "en-us"
+        img = ""
 
         try:
-            image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-        except:
-            image = ""
-        
-        try:
             sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            # print(sub_category)
         except:
             sub_category = ""
         
         try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+            analysis = data.find('meta', attrs = {"name":"og:description"}).get("content")
+            # print(analysis)
         except:
             analysis = ""
         try:
-            date = data.find('meta', attrs = {"property":"article:modified_time"}).get("content")
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+            news_date = dateparser.parse(L_date,settings={'DATE_ORDER': 'YMD'})
             # print(news_date)
         except:
             news_date = ""
 
         page_source = "https://www.findernet.com/en/worldwide/news/"
         news_weblink = i
-        
-        try:
+
+        try:        
             html = requests.get(i).text
             announcement = fulltext(html)
             announcement = announcement.replace('\n','<br>')
-            # print(announcement)
-            
+            print(announcement)
+                
         except:
             announcement = ""
+    
         
         date = datetime.now()
+        # print(date)
         # Creating a list of links already avilable in database
         links_list = []
         mydoc = collection.find()
@@ -210,7 +231,7 @@ try:
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
             company_news['News_Weblink'] = news_weblink
-            company_news['photo']= image
+            company_news['photo']= img
             company_news['videos']= ''
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
@@ -254,7 +275,6 @@ except Exception as e:
     rep = traceback.format_exc()
 
     pass
-
 
 log = {}
 

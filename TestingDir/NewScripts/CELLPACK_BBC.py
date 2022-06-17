@@ -126,14 +126,14 @@ try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://www.bbcgroup.com"
     Base_url = "https://www.bbcgroup.com/en/news-bbc-group-schweiz/"
-    result = requests.get(Base_url,headers=headers)
+    result = requests.get(Base_url,headers=headers, verify=False)
     soup = BeautifulSoup(result.content , 'lxml')
     
     news_links = []
 
     links = soup.find_all('div',{ "class" : "news-list-item"})
     for link in links:
-        news_link = Main_url + link.find('span',{ "class" : "news-list-morelink"}).find('a').get('href')
+        news_link = Main_url + link.find('a').get('href')
         if news_link not in news_links:
             news_links.append(news_link)
 
@@ -141,7 +141,7 @@ try:
     print(len(news_links))
 
     for i in news_links:        
-        response = requests.get(i, headers=headers)
+        response = requests.get(i, headers=headers, verify=False)
         data = BeautifulSoup(response.content, 'lxml')
 
         try:
