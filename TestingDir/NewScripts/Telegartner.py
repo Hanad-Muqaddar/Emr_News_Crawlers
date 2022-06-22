@@ -44,8 +44,8 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
+
 from newspaper import fulltext
-from sympy import im
 
 # ************************************************************************
 # defining variables
@@ -138,31 +138,22 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
 
-    print(news_links)
-    print(len(news_links))
-
     for i in news_links:        
         response = requests.get(i, headers=headers)
         data = BeautifulSoup(response.content, 'lxml')
 
         try:
             title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-            print(title)
         except:
             title = data.find('title').text
-            print(title)
-        
         announcement_type = "Press release"
 
         language = "en-us"
 
         try:
             image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-            print(image)
         except:
             image = ""
-            print(image)
-
         try:
             sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
         except:
@@ -174,9 +165,7 @@ try:
             analysis = ""
         try:
             date = data.find('span', {"class":"post-date text-color-primary pr-2"}).find('time', attrs = {"itemprop":"datePublished"}).get_text(strip=True)
-            print(date)
             news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
         except:
             news_date = ""
 
@@ -186,9 +175,7 @@ try:
         try:
             html = requests.get(i).text
             announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            print(announcement)
-            
+            announcement = announcement.replace('\n','<br>')    
         except:
             announcement = ""
         

@@ -44,6 +44,7 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
+
 from newspaper import fulltext
 
 from googletrans import Translator
@@ -111,7 +112,7 @@ else:
 
     last_time = last_insertion['Date']
 
-    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+    # running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
 
     Crwl_time = last_insertion['Date']
 
@@ -152,10 +153,10 @@ try:
                 news_date = ""
                 news_dates.append(news_date)
 
-    print(news_links)
-    print(news_dates)
-    print(len(news_links))
-    print(len(news_dates))
+    # print(news_links)
+    # print(news_dates)
+    # print(len(news_links))
+    # print(len(news_dates))
 
     for i , N_Date in zip(news_links,news_dates):        
         response = requests.get(i, headers=headers)
@@ -163,10 +164,10 @@ try:
         try:
             title = data.find('meta', attrs = {"property":"og:title"}).get("content")
             title = translate(title)
-            print(title)
+            # print(title)
         except:
             title = ""
-            print(title)
+            # print(title)
        
         announcement_type = "News"
         language = "en-us"
@@ -186,9 +187,9 @@ try:
             analysis = ""
         try:
             date = translate(N_Date)
-            print(date)
+            # print(date)
             news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
+            # print(news_date)
         except:
             news_date = ""
 
@@ -200,11 +201,9 @@ try:
             announcement = fulltext(html)
             announcement = announcement.replace('\n','<br>')
             announcement = translate(announcement)
-            print(announcement)
-            
+            # print(announcement)
         except:
             announcement = ""
-        
         
         date = datetime.now()
         # Creating a list of links already avilable in database

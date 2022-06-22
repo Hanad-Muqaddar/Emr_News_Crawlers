@@ -44,8 +44,8 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
+
 from newspaper import fulltext
-from sympy import im
 
 from googletrans import Translator
 # ************************************************************************

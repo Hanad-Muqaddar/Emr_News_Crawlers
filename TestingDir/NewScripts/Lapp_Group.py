@@ -45,8 +45,6 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
-from sqlalchemy import true
-
 from newspaper import fulltext
 
 # ************************************************************************

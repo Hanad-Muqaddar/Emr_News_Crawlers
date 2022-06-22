@@ -1,5 +1,4 @@
 # Packages to be imported
-from functools import total_ordering
 import requests
 
 import time
@@ -10,13 +9,11 @@ from random import randint
 
 from bs4 import BeautifulSoup
 
-from pymongo import MongoClient
+from pymongo import MongoClient, response
 
 from bs4 import BeautifulSoup
 
 from selenium import webdriver
-
-# from webdriver_manager.chrome import ChromeDriver
 
 from selenium.webdriver.chrome.options import Options
 
@@ -28,8 +25,6 @@ from selenium.webdriver.support import expected_conditions
 
 from selenium.webdriver.common.by import By
 
-from urllib.parse import urlparse
-
 import re
 
 import traceback
@@ -38,7 +33,6 @@ import urllib
 
 import dateparser
 
-# from datetime import datetime
 import datetime
 
 from bson.objectid import ObjectId
@@ -47,26 +41,11 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
-# ************************************************************************
-# defining variables
-opts = Options()
-opts.add_argument("--window-size=190,100")
-opts.add_argument("--disable-automation")
-opts.add_argument("--no-sandbox")
-opts.add_argument('--profile-directory=Default')
-opts.add_argument("start-maximized")
-opts.add_argument("disable-infobars")
-opts.add_argument("--lang=en")
-opts.add_argument("--enable-javascript")
-opts.add_argument("--enable-cookies")
-lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-prefs = {
-  "translate_whitelists": lang_dict,
-  "translate":{"enabled":"true"}
-}
-opts.add_experimental_option("prefs", prefs)
-opts.headless = True
+from scrapy import Selector
 
+from newspaper import fulltext
+
+# ************************************************************************
 running_Sequence = []
 
 started_on = datetime.datetime.now()
@@ -82,7 +61,7 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/emr/config.json")
+    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)
@@ -130,7 +109,7 @@ else:
 
     last_time = last_insertion['Date']
 
-    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+    # running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
 
     Crwl_time = last_insertion['Date']
 
@@ -143,62 +122,75 @@ else:
 ####################################################
 
 # *****************************************************************************
-driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe', options= opts)
+
 try:
-    driver.get("https://www.ledvance.com/professional/company/newsroom/press-releases?limit=500")
-    data = driver.find_elements_by_xpath("//ul[@class='divided-list']/li")
-    for i in data:
-        try: 
-            news_weblink = i.find_element_by_tag_name("a").get_attribute("href")
-        except:
-            news_weblink = ""
+    Base_Url = "https://www.ledvance.com"
+    result = requests.get("https://www.ledvance.com/professional/company/newsroom/press-releases")
+    response = Selector(result)
+    links = response.css(".teaser-footer a ::attr(href)").getall()
+    
+    all_links = []
+    for link in links:
+        all_links.append(Base_Url + link)
+    
+    for i in all_links:
         db_list = []
         mydoc = collection.find()
         for x in mydoc:
             db_list.append(x['News_Weblink'])
-        if news_weblink in db_list:
+        
+        if i in db_list:
+            Already_exist += 1
             total_crwalled_links += 1
-            Already_exist +=1 
             continue
         else:
+            result1 = requests.get(i)
+            response1 = Selector(result1)
             try:
-                title = i.find_element_by_tag_name("h4").text
-            except:
-                title = ""
-            try:
-                announcementtype = i.find_element_by_tag_name("span").text
-            except:
-                announcementtype = ""
-            try:
-                news_date = i.find_element_by_tag_name("time").text
+                news_date = response1.xpath("//time/@datetime").get().strip()
                 news_date = dateparser.parse(news_date)
             except:
                 news_date = ""
             try:
-                analysis = i.find_element_by_class_name("teaser-body").text
+                title = response1.xpath('//h1[@class="headline -size-large -bold"]/text()').get()
+            except:
+                title = ""
+            try:
+                analysis = response1.xpath("//meta[@name='description']/@content").get()
             except:
                 analysis = ""
-
             try:
-                image  = i.find_element_by_tag_name("img").get_attribute("src")
+                image = Base_Url +  response1.css(".a-image picture img::attr(src)").get()
             except:
                 image = ""
+            try:
+                sub_category = response1.xpath("//h4[@class='headline -size-small -bold']/text()").get()
+            except:
+                sub_category = ""
+            try:
+                announcement = fulltext(result1.text)
+                announcement = announcement.replace('\n','<br>')
+            except:
+                announcement = ""
+            try:
+                announcement_type = response1.xpath("//h4[@class='headline -size-small -bold']/text()").get()
+            except:    
+                announcement_type = "PRESS RELEASE"
+            language = "en-US"
             page_source = "https://www.ledvance.com/professional/company/newsroom/press-releases"
-            crawled_on_date = datetime.datetime.now()
-            language = "en"
-            sub_category = ""
-            announcement = ""
+            crawled_date = datetime.datetime.now()
+
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
             company_news['comment']=''
             company_news['Date']= news_date
-            company_news['Crawled_on']=crawled_on_date
+            company_news['Crawled_on']=crawled_date
             company_news['title']=title
             company_news['Language']= language
-            company_news['announcementType']= announcementtype
+            company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
+            company_news['News_Weblink'] = i
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement
@@ -208,7 +200,7 @@ try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
-                running_Sequence.append(e)  
+                running_Sequence.append(e)
     
     if Already_exist >= 1:
 
@@ -226,6 +218,7 @@ except Exception as e:
     Reported_Error = traceback.format_exc()
 
     running_Sequence.append(e)
+
 
 # **************************************************************************
 

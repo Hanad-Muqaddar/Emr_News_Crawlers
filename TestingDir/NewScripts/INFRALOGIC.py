@@ -37,14 +37,16 @@ import urllib
 
 import dateparser
 
-from datetime import datetime
+import datetime 
 
 from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
+
 from newspaper import fulltext
+
 from googletrans import Translator
 
 # ************************************************************************
@@ -52,7 +54,7 @@ from googletrans import Translator
 
 running_Sequence = []
 
-started_on = datetime.now()
+started_on = datetime.datetime.now()
 
 c_name = 'INFRALOGIC' # Name of the Collection
 
@@ -102,15 +104,15 @@ except:
 
 if last_insertion == None:
 
-    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
 
-    Crwl_time = datetime.now()
+    Crwl_time = datetime.datetime.now()
 
 else:
 
     last_time = last_insertion['Date']
 
-    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+    # running_Sequence.append('Last News Crawled on -> '+ str(last_insertion['Date'].date()))
 
     Crwl_time = last_insertion['Date']
 
@@ -144,9 +146,6 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
 
-    print(news_links)
-    print(len(news_links))
-
     for i in news_links:   
         response = requests.get(i, headers=headers)
         data = BeautifulSoup(response.content, 'lxml')
@@ -154,10 +153,8 @@ try:
         try:
             title = data.find('title').get_text().replace('Infralogic -','').strip()
             title = translate(title)
-            print(title)
         except:
             title =""
-            print(title)
         
         announcement_type = "Press Release"
         language = "en-us"        
@@ -172,13 +169,11 @@ try:
         try:
             analysis = data.find('meta', attrs = {"name":"description"}).get("content")
             analysis = translate(analysis)
-            print(analysis)
         except:
             analysis = ""
 
         try:            
-            news_date = dateparser.parse(datetime.now(),  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
+            news_date = dateparser.parse(datetime.datetime.now(),  settings={'DATE_ORDER': 'YMD'} )
         except:
             news_date = ""
 
@@ -187,12 +182,11 @@ try:
         
         try:
             announcement = data.find('div',{"itemprop":"articleBody"}).get_text()
-            announcement = translate(announcement)
-            print(announcement)          
+            announcement = translate(announcement)         
         except:
             announcement = ""
         
-        date = datetime.now()
+        date = datetime.datetime.now()
         # Creating a list of links already avilable in database
         links_list = []
         mydoc = collection.find()
@@ -236,9 +230,9 @@ try:
 
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
-    ended_on = datetime.now()
+    ended_on = datetime.datetime.now()
 except:
-    Error_Time =  datetime.now()
+    Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()
 
