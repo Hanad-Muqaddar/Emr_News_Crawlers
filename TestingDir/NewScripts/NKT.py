@@ -133,12 +133,12 @@ try:
 
     links = soup.find_all('div',{ "class" : "NewsList__NewsItem-sc-17d1yjo-2 gsKqmo"})
     for link in links:
-        news_link = Main_url + link.find('a',{ "class" : "TextLink__TextLinkStyled-sc-17yt8vk-0 jYZmtm"}).get('href')
+        news_link = Main_url + link.find('a',{ "class" : "TextLink__TextLinkStyled-sc-17yt8vk-0 bFZJSi"}).get('href')
         if news_link not in news_links:
             news_links.append(news_link)
 
-    print(news_links)
-    print(len(news_links))
+    # print(news_links)
+    # print(len(news_links))
 
     for i in news_links:        
         response = requests.get(i, headers=headers)
@@ -146,20 +146,20 @@ try:
 
         try:
             title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-            print(title)
+            # print(title)
         except:
             title = data.find('title').text
-            print(title)
+            # print(title)
         
         announcement_type = "Press Releases"
         language = "en-us"
 
         try:
             image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-            print(image)
+            # print(image)
         except:
             image = ""
-            print(image)
+            # print(image)
 
         try:
             sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
@@ -173,9 +173,9 @@ try:
             
         try:
             date = data.find('p', {"class":"NewsDate__NewsDateStyled-sc-4544h7-0 hUJDWR"}).get_text(strip=True)
-            print(date)
+            # print(date)
             news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'})
-            print(news_date)
+            # print(news_date)
         except:
             news_date = ""
 
@@ -186,7 +186,7 @@ try:
             html = requests.get(i).text
             announcement = fulltext(html)
             announcement = announcement.replace('\n','<br>')
-            print(announcement)
+            # print(announcement)
             
         except:
             announcement = ""

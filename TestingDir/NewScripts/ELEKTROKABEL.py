@@ -144,8 +144,8 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
 
-    print(news_links)
-    print(len(news_links))
+    # print(news_links)
+    # print(len(news_links))
 
     for i in news_links:        
         response = requests.get(i, headers=headers)
@@ -154,20 +154,23 @@ try:
         try:
             title = data.find('h1',attrs = {'id':'pagetitle'}).get_text(strip=True)
             title = translate(title)
-            print(title)
+            if title == "":
+                title = data.find("title").get_text(strip=True)
+                title = translate(title)
         except:
-            title =""
-            print(title)
+            title = ""
+        
+            # print(title)
         
         announcement_type = "News"
         language = "en-us"
 
         try:            
             image = Main_url + data.find('img',{'class':'detail_picture'}).get('src')
-            print(image)
+            # print(image)
         except:
             image = ""
-            print(image)
+            # print(image)
 
         try:
             sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
@@ -178,14 +181,14 @@ try:
         try:
             analysis = data.find('meta',attrs = {'name':'description'}).get("content")
             analysis = translate(analysis)
-            print(analysis)
+            # print(analysis)
         except:
             analysis = ""
         try:
             date = data.find('div',{'class':'news-date'}).get_text()
-            print(date)
+            # print(date)
             news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
+            # print(news_date)
         except:
             news_date = ""
 
@@ -195,7 +198,7 @@ try:
         try:
             announcement = data.find('div',{'class':'news-detail'}).get_text(strip=True)
             announcement = translate(announcement)
-            print(announcement)            
+            # print(announcement)            
         except:
             announcement = ""
         

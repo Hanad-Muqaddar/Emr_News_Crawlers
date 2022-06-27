@@ -137,7 +137,7 @@ try:
         Trans_text = translator.translate(Trans,dest='en')
         return Trans_text.text
 
-    links = soup.find_all('div',{ "class" : "use-spring-carousel-item"})
+    links = soup.find_all('div',{ "class" : "newstilestyled__NewsTileWrapper-sc-94h61i-1 VhXTt"})
     for link in links:
         news_link = Main_url + link.find('a').get('href')
         if news_link not in news_links:
@@ -150,10 +150,10 @@ try:
                 news_date = ""
                 news_dates.append(news_date)
 
-    print(news_links)
-    print(news_dates)
-    print(len(news_links))
-    print(len(news_dates))
+    # print(news_links)
+    # print(news_dates)
+    # print(len(news_links))
+    # print(len(news_dates))
 
     for i , N_Date in zip(news_links,news_dates):        
         response = requests.get(i, headers=headers)

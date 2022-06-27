@@ -144,31 +144,31 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
 
-    print(news_links)
-    print(len(news_links))
+    # print(news_links)
+    # print(len(news_links))
 
     for i in news_links:   
         response = requests.get(i, headers=headers)
         data = BeautifulSoup(response.content, 'lxml')
 
         try:
-            title = data.find('meta',attrs = {'property':'og:title'}).get('content')
+            title = data.find('title').get_text(strip=True)
             title = title.replace('- Oosterberg','')
             title = translate(title)
-            print(title)
+            # print(title)
         except:
             title =""
-            print(title)
+            # print(title)
         
         announcement_type = "News"
         language = "en-us"
 
         try:            
             image = Main_url + data.find('div',attrs = {"class":"parallaxer"}).find('img').get('src')
-            print(image)
+            # print(image)
         except:
             image = ""
-            print(image)
+            # print(image)
 
         try:
             sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
@@ -179,13 +179,13 @@ try:
         try:
             analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
             analysis = translate(analysis)
-            print(analysis)
+            # print(analysis)
         except:
             analysis = ""
         try:
             date = data.find('meta', attrs = {"property":"article:published_time"}).get('content')
             news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
+            # print(news_date)
         except:
             news_date = ""
 
@@ -195,7 +195,7 @@ try:
         try:
             announcement = data.find('div',{'id':'left-content'}).find('article').get_text()
             announcement = translate(announcement).replace('Back to General news','')
-            print(announcement)            
+            # print(announcement)            
         except:
             announcement = ""
         
