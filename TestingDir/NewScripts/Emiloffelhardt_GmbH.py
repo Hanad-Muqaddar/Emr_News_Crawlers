@@ -144,8 +144,8 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
 
-    print(news_links)
-    print(len(news_links))
+    # print(news_links)
+    # print(len(news_links))
 
     for i in news_links:        
         response = requests.get(i, headers=headers)
@@ -154,20 +154,20 @@ try:
         try:
             title = data.find('title').get_text(strip=True)
             title = translate(title)
-            print(title)
+            # print(title)
         except:
             title =""
-            print(title)
+            # print(title)
         
         announcement_type = "News"
         language = "en-us"
 
         try:            
             image = data.find('img', attrs = {"class":"img-responsive"}).get("src")
-            print(image)
+            # print(image)
         except:
             image = ""
-            print(image)
+            # print(image)
 
         try:
             sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
@@ -183,7 +183,7 @@ try:
         try:
             date = data.find('div', attrs = {"class":"outer-date"}).find('time', attrs = {"itemprop":"datePublished"}).get('datetime')
             news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
+            # print(news_date)
         except:
             news_date = ""
 
@@ -193,7 +193,7 @@ try:
         try:
             announcement = data.find('div', attrs = {"class":"news-text-wrap"}).get_text()
             announcement = translate(announcement)
-            print(announcement)            
+            # print(announcement)            
         except:
             announcement = ""
         

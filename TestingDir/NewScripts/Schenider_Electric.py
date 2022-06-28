@@ -263,4 +263,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'Chrome'
 
-error_logs.insert_one(log)
+# error_logs.insert_one(log)

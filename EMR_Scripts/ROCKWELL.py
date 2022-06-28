@@ -27,6 +27,8 @@ from datetime import datetime,date, timedelta
 from bson.objectid import ObjectId
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
+from selenium.webdriver.chrome.service import Service
+
 opts = Options()
 # opts.add_argument("--window-size=190,100")
 # opts.add_argument("--disable-automation")
@@ -37,12 +39,6 @@ opts.add_argument("disable-infobars")
 opts.add_argument("--lang=en")
 opts.add_argument("--enable-javascript")
 opts.add_argument("--enable-cookies")
-lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-prefs = {
-  "translate_whitelists": lang_dict,
-  "translate":{"enabled":"true"}
-}
-opts.add_experimental_option("prefs", prefs)
 
 running_Sequence = []
 started_on = datetime.now()
@@ -91,7 +87,9 @@ news_dict_template = {
         "historySubCategory" : "",
 }
 try:
-    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe',options=opts)
+    service = Service("/home/ubuntu/chrome_driver/chromedriver.exe")
+    driver = webdriver.Chrome(service=service, options=opts)
+
     driver.set_page_load_timeout(220)
     driver.implicitly_wait(220)
     driver.get('https://ir.rockwellautomation.com/press-releases/default.aspx')
@@ -161,7 +159,9 @@ try:
 
 ########################## Event ###########################################
 
-    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)
+    service = Service("/home/ubuntu/chrome_driver/chromedriver.exe")
+    driver = webdriver.Chrome(service=service, options=opts)
+
     driver.set_page_load_timeout(220)
     driver.implicitly_wait(220)
     driver.get('https://ir.rockwellautomation.com/events-and-presentations/default.aspx')

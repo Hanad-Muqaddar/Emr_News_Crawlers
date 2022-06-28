@@ -1,185 +1,255 @@
+# Packages to be imported
 import requests
-import time
-import traceback
-import json
-from random import randint
-from bs4 import BeautifulSoup
-from pymongo import MongoClient
-from bs4 import BeautifulSoup
-from selenium import webdriver
-# from webdriver_manager.chrome import ChromeDriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.common.by import By
-from urllib.parse import urlparse
-import re
-import copy as copy
-import pandas as pd
-import os
-import csv
-import urllib
-import time
-import dateparser
-from datetime import datetime,date, timedelta
-from bson.objectid import ObjectId
-from urllib.error import HTTPError
-from urllib.request import Request, urlopen
-opts = Options()
-# opts.add_argument("--window-size=190,100")
-# opts.add_argument("--disable-automation")
-opts.add_argument("--no-sandbox")
-opts.add_argument('--profile-directory=Default')
-opts.add_argument("start-maximized")
-opts.add_argument("disable-infobars")
-opts.add_argument("--lang=en")
-opts.add_argument("--enable-javascript")
-opts.add_argument("--enable-cookies")
-lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-prefs = {
-  "translate_whitelists": lang_dict,
-  "translate":{"enabled":"true"}
-}
-opts.add_experimental_option("prefs", prefs)
 
+import time
+
+import json
+
+from random import randint
+
+from bs4 import BeautifulSoup
+
+from pymongo import MongoClient, response
+
+from bs4 import BeautifulSoup
+
+from selenium import webdriver
+
+from selenium.webdriver.chrome.options import Options
+
+from selenium.webdriver.support.ui import WebDriverWait
+
+from selenium.webdriver.common.keys import Keys
+
+from selenium.webdriver.support import expected_conditions
+
+from selenium.webdriver.common.by import By
+
+import re
+
+import traceback
+
+import urllib
+
+import dateparser
+
+import datetime
+
+from bson.objectid import ObjectId
+
+from urllib.error import HTTPError
+
+from urllib.request import Request, urlopen
+
+from scrapy import Selector
+
+from newspaper import fulltext
+
+# ************************************************************************
 running_Sequence = []
-started_on = datetime.now()
-c_name = 'NEXANS'
-opts.headless = True
+
+started_on = datetime.datetime.now()
+
+c_name = 'NEXANS' # Name of the Collection
+
+total_crwalled_links = 0
+
+Already_exist = 0
+
+# *************************************************************************
+
+# trying to connect with mongodb
+
 try:
-    # client= MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin')
     file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)
-    # client= MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin')
+    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+
     running_Sequence.append('Connected to DB Server')
+
 except:
+
     running_Sequence.append('Not Connected')
+
+# *************************************************************************
+
 client_name = 'TEMP_EMR_NEWS_Crawler_DB'
+
 news =  client[client_name]
+
 collection = news[c_name]
+
 error_logs = client['Logs_DB']['Logs_TEMP_EMR_NEWS_Crawler_DB']
+
 last_insertion = None
+
 last_time = ''
+
+# ****************************************************************************
+
 try:
+
     for l_i in collection.find().sort('Date', -1).limit(1):
+
         last_insertion = l_i
+
 except:
-    # print('Fresh Starting News Crawler')
+
     last_insertion = None
+
 if last_insertion == None:
-    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
-    Crwl_time = datetime.now()
+
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
+
+    Crwl_time = datetime.datetime.now()
+
 else:
+
     last_time = last_insertion['Date']
+
     running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+
     Crwl_time = last_insertion['Date']
-total_crwalled_links = 0
-Already_exist = 0
-news_dict_template = { 
-        "Date" : "",
-        "announcementType" : "",
-        "Source" : "",
-        "News_Weblink" : "",
-        "title" : "",
-        "photo" : "",
-        "announcement" :'',
-        "Language" : "",
-        "analysis" : "",
-        "historySubCategory" : "",
-}
+
+# ****************************************************************************
+
+####################################################
+
+############# Every Company Logic Here #############
+
+####################################################
+
+# *****************************************************************************
+
 try:
-    urls = []
-    for i in range(28):
-        urls.append('https://www.nexans.com/newsroom/news.html?currentPage='+str(i+1))
-    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe',options=opts)
-    driver.set_page_load_timeout(220)
-    driver.implicitly_wait(220)
-    skip_next = False
-    for url in urls:
-        driver.get(url)
-        soup = BeautifulSoup(driver.page_source, 'lxml').find('ul',class_='list-news grid').find_all('div',class_='row')
-        for i in soup:
-            weblink = 'https://www.nexans.com'+ i.find('h2',class_='list-news__title').find('a').get('href')
-            l = False
-            for k in collection.find({ 'News_Weblink' : weblink }):
-                if k:
-                    skip_next = True
-                    l = True
-                    break
-                else:
-                    skip_next = False
-            if l:
-                total_crwalled_links +=1
-                Already_exist +=1
-                # print('\n'+news['Link']+'\nNews Already Exist in DB\n')        
-            else:
-                sub_category = i.find('div',class_='list-news__category').text.strip() if i.find('div',class_='list-news__category')!= None else ''
-                date = i.find('div',class_='list-news__date').text.strip() if i.find('div',class_='list-news__date')!= None else ''
-                title = i.find('h2',class_='list-news__title').find('a').text.strip()
-                link_web = 'https://www.nexans.com'+ i.find('h2',class_='list-news__title').find('a').get('href')
-                # ann = i.find('div',class_='cell-6 prepend-3 cell-t-12').text.strip()
-                ann = []
-                web_page = requests.get(weblink)
-                resp = BeautifulSoup(web_page.content,'lxml')
-                ann = resp.find('main',class_='main').text.strip()
-                if i.find('img') != None:
-                    image ='https://www.nexans.com'+  i.find('img').get('src')
-                else:
-                    image = ''
-                news = copy.deepcopy(news_dict_template)
-                news['Date'] = dateparser.parse(date) if dateparser.parse(date) != None else ''
-                news['announcementType'] = 'News'
-                news['Source'] = url
-                news['News_Weblink'] = link_web
-                news['title'] = title
-                news['announcement'] = ann
-                news['Language'] = 'English'
-                news['photo'] = image
-                news['analysis'] = resp.find('meta',attrs={'property':'og:description'}).get('content') if resp.find('meta',attrs={'property':'og:description'})!= None else ''
-                news['historySubCategory'] = sub_category
-                news['Crawled_on'] = datetime.now()
-                total_crwalled_links +=1
-                collection.insert_one(news)
-        if skip_next:
-            running_Sequence.append(url+'\nnext links are skipped')
-            break
+    result = requests.get("https://www.nexans.com/en/newsroom/news.html?currentPage=0")
+    response = Selector(result)
+    links = response.css(".list-news__title a ::attr(href)").getall()
+    Base_Link = "https://www.nexans.com"
+    final_links = [Base_Link + link for link in links]
+    
+    for i in links:
+        db_list = []
+        mydoc = collection.find()
+        for x in mydoc:
+            db_list.append(x['News_Weblink'])
+        
+        if i in db_list:
+            Already_exist += 1
+            total_crwalled_links += 1
+            continue
         else:
-            
-            pass
-       
-            
-    if Already_exist >=1:
+            result1 = requests.get(i)
+            response1 = Selector(result1)
+            try:
+                news_date = response1.css(".news-page--cover__date ::text").get()
+                news_date = dateparser.parse(news_date, settings={"DATE_ORDER":"YMD"})
+            except:
+                news_date = ""
+            try:
+                title = response1.css(".news-page--cover__title ::text").get()
+            except:
+                title = ""
+            try:
+                analysis = response1.xpath("//meta[@name='description']/@content").get()
+            except:
+                analysis = ""
+            try:
+                image = Base_Link +  response1.css(".news-page--cover__media img ::attr(src)").get()
+            except:
+                image = ""
+            sub_category = ""
+            try:
+                announcement = fulltext(result1.text)
+                announcement = announcement.replace('\n','<br>')
+            except:
+                announcement = ""
+            announcement_type = "Press Release"
+            language = "en-US"
+            page_source = "https://www.nexans.com/en/newsroom/news.html?currentPage=0"
+            crawled_date = datetime.datetime.now()
+
+            company_news = {}
+            company_news['companyId'] = ''
+            company_news['location']=''
+            company_news['comment']=''
+            company_news['Date']= news_date
+            company_news['Crawled_on']=crawled_date
+            company_news['title']=title
+            company_news['Language']= language
+            company_news['announcementType']= announcement_type
+            company_news['Source'] = page_source
+            company_news['News_Weblink'] = i
+            company_news['photo']= image
+            company_news['videos']= ''
+            company_news['announcement']=announcement
+            company_news['historySubCategory']= sub_category
+            company_news['analysis'] = analysis
+            try:
+                collection.insert_one(company_news)
+                total_crwalled_links += 1
+            except Exception as e:
+                running_Sequence.append(e)
+    
+    if Already_exist >= 1:
+
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
     else:
+
         tmp_txt = ''
 
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
-    ended_on = datetime.now()
-    driver.quit()
+
+    ended_on = datetime.datetime.now()
 except Exception as e:
-    driver.quit()
-    Error_Time =  datetime.now()
+    Error_Time =  datetime.datetime.now()
+
     Reported_Error = traceback.format_exc()
+
+    running_Sequence.append(e)
+
+
+# **************************************************************************
+
+# **************************************************************************
+
+# **************************************************************************
 rep = ''
+
 try:
+
     Error = {}
+
     Error['Error_Detail'] = Reported_Error
+
     Error['Error_Time'] = Error_Time
+
 except Exception as e:
-    driver.quit()
+
     rep = traceback.format_exc()
+
     pass
+
 log = {}
+
 log['Crawler_name'] = c_name+'.py'
+
 log['Crawler_type'] = c_name
+
 log['Starting_time'] = started_on
+
 log['Ending_time'] = Error_Time if rep == '' else ended_on
+
 log['Error_Detail'] =  Error if rep == '' else ''
+
 log['Crawler_Runing Sequence'] = running_Sequence if running_Sequence else ''
+
 log['Links_Skipped'] = Already_exist
+
 log['Last_news_crawl_time'] = last_time
-log['Browser'] = 'None'
-error_logs.insert_one(log)
+
+log['Browser'] = 'Chrome'
+
+# error_logs.insert_one(log)

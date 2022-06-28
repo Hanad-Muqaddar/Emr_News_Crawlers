@@ -1,137 +1,262 @@
-from hashlib import new
-from unicodedata import category
+# Packages to be imported
+from os import link
 import requests
+
 import time
+
 import json
+
 from random import randint
+
 from bs4 import BeautifulSoup
-from pymongo import MongoClient
+
+from pymongo import MongoClient, response
+
+from bs4 import BeautifulSoup
+
 from selenium import webdriver
-# from seleniumwire import webdriver as wireWebdriver  # Import from seleniumwire
-from selenium.webdriver.firefox.options import Options
-# from selenium.webdriver.chrome.options import Options
+
+from selenium.webdriver.chrome.options import Options
+
 from selenium.webdriver.support.ui import WebDriverWait
+
+from selenium.webdriver.common.keys import Keys
+
+from selenium.webdriver.support import expected_conditions
+
+from selenium.webdriver.common.by import By
+
 import re
-from datetime import date, timedelta
-import datetime
-import dateparser
-import copy
-from datetime import datetime
-today = datetime.now()
+
 import traceback
+
+import urllib
+
+import dateparser
+
+import datetime
+
+from bson.objectid import ObjectId
+
+from urllib.error import HTTPError
+
+from urllib.request import Request, urlopen
+
 from scrapy import Selector
 
-log_obj={
-    'Crawler_name':'hitachiabbNewsCrawler',
-    'Starting_time':datetime.now(),
-    'Ending_time':'',
-    'Running_sequance':[],
-    }
-def CreateDbConnection(key):
-    try:
-        client= MongoClient(key)
-        log_obj['Running_sequance'].append('Connected to Server')
-    except:
-        log_obj['Running_sequance'].append('Not Connected')
-    return client
+from newspaper import fulltext
 
-def check_link_exists(url,db,collection):
-    ch=db.get_collection(collection).find({'News_Weblink':url})
-    check=[]
-    for x in ch:
-        check.append(x)
-    if(len(check)==0):
-        return False
-    else:
-        return True 
+# ************************************************************************
+running_Sequence = []
 
+started_on = datetime.datetime.now()
 
-def Parser1(mainPageUrl, localdb, localcollectionname):
-    result = requests.get(mainPageUrl)
+c_name = 'GRAYBAR_ELECTRIC' # Name of the Collection
+
+total_crwalled_links = 0
+
+Already_exist = 0
+
+# *************************************************************************
+
+# trying to connect with mongodb
+
+try:
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+
+    running_Sequence.append('Connected to DB Server')
+
+except:
+
+    running_Sequence.append('Not Connected')
+
+# *************************************************************************
+
+client_name = 'TEMP_EMR_NEWS_Crawler_DB'
+
+news =  client[client_name]
+
+collection = news[c_name]
+
+error_logs = client['Logs_DB']['Logs_TEMP_EMR_NEWS_Crawler_DB']
+
+last_insertion = None
+
+last_time = ''
+
+# ****************************************************************************
+
+try:
+
+    for l_i in collection.find().sort('Date', -1).limit(1):
+
+        last_insertion = l_i
+
+except:
+
+    last_insertion = None
+
+if last_insertion == None:
+
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
+
+    Crwl_time = datetime.datetime.now()
+
+else:
+
+    last_time = last_insertion['Date']
+
+    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+
+    Crwl_time = last_insertion['Date']
+
+# ****************************************************************************
+
+####################################################
+
+############# Every Company Logic Here #############
+
+####################################################
+
+# *****************************************************************************
+
+try:
+    result = requests.get("https://www.graybar.com/news")
     response = Selector(result)
-    trs = response.css(".news tbody tr")
-    for tr in trs:
-        try:
-            news_web_link = "https://www.graybar.com/" + tr.css("a ::attr(href)").get()
-        except:
-            news_web_link = ""
-        if news_web_link == "":
-            continue
+    Base_Link = "https://www.graybar.com"
+    links = response.xpath('//td[@data-label="Title"]/a/@href').getall()
+    final_links = [Base_Link+link for link in links]
+    dates = response.xpath('//td[@data-label="Date"]/text()').getall()
+    announcement_type = response.xpath('//td[@data-label="Category"]/text()').getall()
+    titles = response.xpath('//td[@data-label="Title"]/a/text()').getall()
 
-        status=check_link_exists(news_web_link,localdb,localcollectionname)
-        if status:
+    for i , j ,k , title in zip(final_links, dates, announcement_type, titles):
+        db_list = []
+        mydoc = collection.find()
+        for x in mydoc:
+            db_list.append(x['News_Weblink'])
+        
+        if i in db_list:
+            Already_exist += 1
+            total_crwalled_links += 1
             continue
         else:
+            result1 = requests.get(i)
+            response1 = Selector(result1)
             try:
-                news_date = tr.xpath(".//td[@data-label='Date']/text()").get()
-                news_date = dateparser.parse(news_date)
+                news_date = dateparser.parse(j)
             except:
                 news_date = ""
             try:
-                title = tr.css('a ::text').get()
+                title = title.strip()
             except:
                 title = ""
             try:
-                category = tr.xpath('.//td[@data-label="Category"]/text()').get()
+                analysis = response1.xpath("//meta[@name='description']/@content").get()
             except:
-                category = ""
-            result2 = requests.get(news_web_link)
-            response2 = Selector(result2)
-
+                analysis = ""
             try:
-                announcement = response2.xpath("normalize-space(//div[@class='col-sm-9'])").get()
+                image = response1.css(".col-sm-9 img::attr(src)").get()
+            except:
+                image = ""
+            sub_category = ""
+            try:
+                announcement = fulltext(result1.text)
+                announcement = announcement.replace('\n','<br>')
             except:
                 announcement = ""
-            
-
-            NewsData= {}
-            NewsData['companyId'] = ''
-            NewsData['location']='' 
-            NewsData['comment']=''
-            NewsData['Date']=news_date
-            NewsData['Source'] = "https://www.graybar.com/news"
-            NewsData['historySubCategory']=category
-            NewsData['News_Weblink'] = news_web_link
-            NewsData['photo']= ""
-            NewsData['videos']= ""
-            NewsData['Language']= 'English'
-            today=datetime.today()
-            NewsData['Crawled_on']=today
-            NewsData['title']=title
-            NewsData['announcement']=announcement
-            NewsData['announcementType']=category
-
             try:
-                localdb.get_collection(localcollectionname).insert(NewsData)
-                # print("Inserted")
-            except Exception as e:
-                print(e)
-            
-                       
-        
-if __name__ == "__main__": 
+                announcement_type = k.strip()
+            except:
+                announcement_type = ""
 
-    try:
-             
-        key='mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin'
-        dbName='TEMP_EMR_NEWS_Crawler_DB'
-        collectionName='GRAYBAR_ELECTRIC'
-#         key='mongodb://localhost:27017/'
-#         dbName='GE'
-#         collectionName='news_test'
-        url='https://www.graybar.com/news'
-    #     url='https://www.hitachiabb-powergrids.com/content/pg/www/en/news/all-news/jcr:content/root/container/newslist.L2NvbnRlbnQvcGcvd3d3L2VuL21lZGlhL2pjcjpjb250ZW50L3Jvb3QvY29udGFpbmVyL2NvbnRhaW5lci9uZXdzbGlzdA==.list.json?page=0'
-        Client=CreateDbConnection(key)
-        db =  Client[dbName]
-        Parser1(url,db,collectionName)
-        log_collection=db['logs']
-        log=copy.deepcopy(log_obj)
-        log['Ending_time']=datetime.now()
-        log_collection.insert_one(log)
-    except:
-        log_collection=db['logs']
-        rep = traceback.format_exc()
-        log=copy.deepcopy(log_obj)
-        log_obj['Running_sequance'].append(rep)
-        log['Ending_time']=datetime.now()
-        log_collection.insert_one(log)
+            language = "en-US"
+            page_source = "https://www.graybar.com/news"
+            crawled_date = datetime.datetime.now()
+
+            company_news = {}
+            company_news['companyId'] = ''
+            company_news['location']=''
+            company_news['comment']=''
+            company_news['Date']= news_date
+            company_news['Crawled_on']=crawled_date
+            company_news['title']=title
+            company_news['Language']= language
+            company_news['announcementType']= announcement_type
+            company_news['Source'] = page_source
+            company_news['News_Weblink'] = i
+            company_news['photo']= image
+            company_news['videos']= ''
+            company_news['announcement']=announcement
+            company_news['historySubCategory']= sub_category
+            company_news['analysis'] = analysis
+            try:
+                collection.insert_one(company_news)
+                total_crwalled_links += 1
+            except Exception as e:
+                running_Sequence.append(e)
+    
+    if Already_exist >= 1:
+
+        tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
+    else:
+
+        tmp_txt = ''
+
+    running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
+
+    ended_on = datetime.datetime.now()
+except Exception as e:
+    Error_Time =  datetime.datetime.now()
+
+    Reported_Error = traceback.format_exc()
+
+    running_Sequence.append(e)
+
+
+# **************************************************************************
+
+# **************************************************************************
+
+# **************************************************************************
+rep = ''
+
+try:
+
+    Error = {}
+
+    Error['Error_Detail'] = Reported_Error
+
+    Error['Error_Time'] = Error_Time
+
+except Exception as e:
+
+    rep = traceback.format_exc()
+
+    pass
+
+log = {}
+
+log['Crawler_name'] = c_name+'.py'
+
+log['Crawler_type'] = c_name
+
+log['Starting_time'] = started_on
+
+log['Ending_time'] = Error_Time if rep == '' else ended_on
+
+log['Error_Detail'] =  Error if rep == '' else ''
+
+log['Crawler_Runing Sequence'] = running_Sequence if running_Sequence else ''
+
+log['Links_Skipped'] = Already_exist
+
+log['Last_news_crawl_time'] = last_time
+
+log['Browser'] = 'Chrome'
+
+error_logs.insert_one(log)

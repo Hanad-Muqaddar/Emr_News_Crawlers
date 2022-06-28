@@ -214,13 +214,13 @@ if __name__ == "__main__":
 
         log=copy.deepcopy(log_obj)
         log['Ending_time']=datetime.now()
-        log_collection.insert_one(log)
+        # log_collection.insert_one(log)
     except:
         rep = traceback.format_exc()
         log=copy.deepcopy(log_obj)
         log_obj['Running_sequance'].append (rep)
         log['Ending_time']=datetime.now()
-        log_collection.insert_one(log)
+        # log_collection.insert_one(log)
 
 
 # In[ ]:

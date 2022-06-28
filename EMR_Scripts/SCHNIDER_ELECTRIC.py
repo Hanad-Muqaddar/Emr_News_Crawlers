@@ -243,4 +243,4 @@ log['Crawler_Runing Sequence'] = running_sequence if running_sequence else ''
 log['Links_Skipped'] = Already_exist
 log['Last_news_crawl_time'] = last_time
 log['Browser'] = 'None'
-error_logs.insert_one(log)
+# error_logs.insert_one(log)

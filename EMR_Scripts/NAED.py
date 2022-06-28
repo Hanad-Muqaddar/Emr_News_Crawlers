@@ -13,6 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
 from urllib.parse import urlparse
 import re
 import copy as copy
@@ -41,7 +42,7 @@ prefs = {
   "translate_whitelists": lang_dict,
   "translate":{"enabled":"true"}
 }
-opts.add_experimental_option("prefs", prefs)
+# opts.add_experimental_option("prefs", prefs)
 
 running_Sequence = []
 started_on = datetime.now()
@@ -93,7 +94,10 @@ news_dict_template = {
 try:
     url = 'https://blog.naed.org/page/0'
     root = 'https://blog.naed.org'
-    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe',options=opts)
+
+    service = Service("/home/ubuntu/chrome_driver/chromedriver.exe")
+    driver = webdriver.Chrome(service=service, options=opts)
+    
     driver.set_page_load_timeout(220)
     driver.implicitly_wait(220)
     new_url = ''

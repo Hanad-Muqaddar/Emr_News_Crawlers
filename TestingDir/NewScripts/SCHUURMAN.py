@@ -102,7 +102,7 @@ except:
 
 if last_insertion == None:
 
-    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
+    # running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
 
     Crwl_time = datetime.now()
 
@@ -110,7 +110,7 @@ else:
 
     last_time = last_insertion['Date']
 
-    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+    # running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
 
     Crwl_time = last_insertion['Date']
 
@@ -144,8 +144,8 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
 
-    print(news_links)
-    print(len(news_links))
+    # print(news_links)
+    # print(len(news_links))
 
     for i in news_links:   
         response = requests.get(i, headers=headers)
@@ -154,20 +154,20 @@ try:
         try:
             title = data.find('title').get_text().replace('| Schuurman','').strip()
             title = translate(title)
-            print(title)
+            # print(title)
         except:
             title =""
-            print(title)
+            # print(title)
         
         announcement_type = "News"
         language = "en-us"        
 
         try:
             image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-            print(image)
+            # print(image)
         except:
             image = ""
-            print(image)
+            # print(image)
 
         try:
             sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
@@ -178,13 +178,13 @@ try:
         try:
             analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
             analysis = translate(analysis)
-            print(analysis)
+            # print(analysis)
         except:
             analysis = ""
 
         try:            
             news_date = dateparser.parse(datetime.now(),  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
+            # print(news_date)
         except:
             news_date = ""
 
@@ -195,7 +195,7 @@ try:
             html = requests.get(i).text
             announcement = fulltext(html)
             announcement = announcement.replace('\n','<br>')
-            print(announcement)       
+            # print(announcement)       
         except:
             announcement = ""
         

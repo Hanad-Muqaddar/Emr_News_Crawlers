@@ -5,9 +5,7 @@ from random import randint
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 from selenium import webdriver
-# from seleniumwire import webdriver as wireWebdriver  # Import from seleniumwire
 from selenium.webdriver.firefox.options import Options
-# from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 import re
 from datetime import date, timedelta
@@ -159,16 +157,9 @@ def Parser(source,localDb,localCollectionName):
         
 if __name__ == "__main__":    
     try:
-        file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-        data = json.load(file)
-        db_path = data[0]['Db_Path']
-        key = db_path
-        # key='mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin'
+        key='mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin'
         dbName='TEMP_EMR_NEWS_Crawler_DB'
         collectionName='HITACHI_ABB'
-#         key='mongodb://localhost:27017/'
-#         dbName='Hitachiabb'
-#         collectionName='news_test'
         url='https://www.hitachiabb-powergrids.com/content/pg/www/en/news/all-news/jcr:content/root/container/newslist.L2NvbnRlbnQvcGcvd3d3L2VuL21lZGlhL2pjcjpjb250ZW50L3Jvb3QvY29udGFpbmVyL2NvbnRhaW5lci9uZXdzbGlzdA==.list.json?page=0'
         Client=CreateDbConnection(key)
         db =  Client[dbName]

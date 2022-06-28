@@ -50,12 +50,23 @@ from newspaper import fulltext
 
 # ************************************************************************
 # defining variables
+opts = Options()
+# opts.add_argument("--window-size=190,100")
+# opts.add_argument("--disable-automation")
+opts.add_argument("--no-sandbox")
+opts.add_argument('--profile-directory=Default')
+opts.add_argument("start-maximized")
+opts.add_argument("disable-infobars")
+opts.add_argument("--lang=en")
+opts.add_argument("--enable-javascript")
+opts.add_argument("--enable-cookies")
+
 
 running_Sequence = []
 
 started_on = datetime.now()
 
-c_name = 'Leviton' # Name of the Collection
+c_name = 'LEVITON' # Name of the Collection
 
 total_crwalled_links = 0
 
@@ -128,7 +139,7 @@ try:
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     service = Service("/home/ubuntu/chrome_driver/chromedriver.exe")
-    driver = webdriver.Chrome(service=service)
+    driver = webdriver.Chrome(service=service, options=opts)
 
     Main_url = "https://www.leviton.com"
 
@@ -153,10 +164,10 @@ try:
 
         try:
             title = data.find('div', attrs = {"class":"title--a"}).get_text(strip=True)
-            print(title)
+            # print(title)
         except:
             title = data.find('title').text
-            print(title)
+            # print(title)
         
         announcement_type = "Press Release"
         language = "en-us"
@@ -173,7 +184,7 @@ try:
             analysis = ""
         try:
             news_date = dateparser.parse(L_date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
+            # print(news_date)
         except:
             news_date = ""
 
@@ -184,7 +195,7 @@ try:
             html = requests.get(i).text
             announcement = fulltext(html)
             announcement = announcement.replace('\n','<br>')
-            print(announcement)
+            # print(announcement)
             
         except:
             announcement = ""
