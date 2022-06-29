@@ -1,182 +1,256 @@
-# imporhttp://localhost:8888/notebooks/anaconda3/techlets/EMR-Scripts/chintglobal/chintglobal%20data.ipynb#t requests
-import time
-import json
+# Packages to be imported
 import requests
+
+import time
+
+import json
+
 from random import randint
+
 from bs4 import BeautifulSoup
-from pymongo import MongoClient
-# from selenium import webdriver
-# from seleniumwire import webdriver as wireWebdriver  # Import from seleniumwire
-# from selenium.webdriver.firefox.options import Options
-# from selenium.webdriver.chrome.options import Options
-# from selenium.webdriver.support.ui import WebDriverWait
+
+from pymongo import MongoClient, response
+
+from bs4 import BeautifulSoup
+
+from selenium import webdriver
+
+from selenium.webdriver.chrome.options import Options
+
+from selenium.webdriver.support.ui import WebDriverWait
+
+from selenium.webdriver.common.keys import Keys
+
+from selenium.webdriver.support import expected_conditions
+
+from selenium.webdriver.common.by import By
+
 import re
-from datetime import date, timedelta
-import datetime
-import dateparser
-import copy
-from datetime import datetime
-today = datetime.now()
+
 import traceback
-log_obj={
-    'Crawler_name':'ChintNewsCrawler',
-    'Starting_time':datetime.now(),
-    'Ending_time':'',
-    'Running_sequance':[],
-    }
 
-def CreateDbConnection(key):
-    try:
-        client= MongoClient(key)
-        log_obj['Running_sequance'].append('Connected to Server')
-    except:
-        log_obj['Running_sequance'].append('Not Connected')
-    return client
+import urllib
 
-def check_link_exists(url,db,collection):
-    ch=db.get_collection(collection).find({'News_Weblink':url})
-    check=[]
-    for x in ch:
-        check.append(x)
-    if(len(check)==0):
-        return False
-    else:
-        return True 
-    
-def scrap_page_news(source,news_link):
-    try:
-        news_req=requests.get(news_link, timeout=120)
-    except:
-        return False
-    news_soup=BeautifulSoup(news_req.content,'lxml')
-    main=news_soup.find('div',class_='chint-news-detail-container')
-    try:
-        title=main.find('div',class_='chint-news-detail-title').text.strip()
-    except:
-        title=''
-    try:
-        date=main.find('div',class_='chint-news-detail-time').text.strip()
-        date=dateparser.parse(date)
-    except:
-        date=''
-    try:
-        img=main.find('div',class_='disabled-ck-toolbar chint-news-detail ng-star-inserted').find('img').get('src')
-    except:
-        img=''
-    try:
-        paraDiv=main.find('div',class_='disabled-ck-toolbar chint-news-detail ng-star-inserted').find_all('p')
-        announcement=''
-        for p in paraDiv:
-            if(len(p.text.strip())>1):
-                announcement=announcement+' '+p.text.strip()
-    except:
-        announcement=''
-    catagory='News Center'
-    NewsData= {}
-    NewsData['companyId'] = ''
-    NewsData['location']='' 
-    NewsData['comment']=''
-    NewsData['Date']=date
-    NewsData['Source'] = source
-    NewsData['historySubCategory']='News Center'
-    NewsData['News_Weblink'] = news_link
-    NewsData['photo']= img
+import dateparser
 
-    NewsData['Language']= 'English'
-    today=datetime.today()
-    NewsData['Crawled_on']=today
-    NewsData['title']=title
+import datetime
 
-    NewsData['announcement']=announcement
-    NewsData['announcementType']='Company News'
+from bson.objectid import ObjectId
 
-    refrences=''
-    analysis=''
-    validatedObject  ={}
-    validatedObject['companyId']=NewsData['companyId']
-    validatedObject['Date']=NewsData['Date']
-    validatedObject['title']=NewsData['title']
-    validatedObject['announcement']=NewsData['announcement']
-    validatedObject['announcementType']=NewsData['announcementType']
-    validatedObject['photo']=NewsData['photo']
-    validatedObject['analysis']=analysis
-    validatedObject['refrences ']=refrences
-    validatedObject['historySubCategory']= NewsData['historySubCategory']
-    NewsData['validatedObject']=validatedObject 
-   
-    return NewsData
+from urllib.error import HTTPError
 
+from urllib.request import Request, urlopen
 
+from scrapy import Selector
 
-def Parser(source,localDb,localCollectionName):
-    scraped_News=[]
-    nWorking=True
-    try:
-        main_req=requests.get(source,timeout=240)
-    except:
-        log_obj['Running_sequance'].append('Website is not working')
-        nWorking=False
-    if(nWorking):
-        main_soup=BeautifulSoup(main_req.content,'lxml')
-        lastIndex=(main_soup.find('ul',class_='at-pagination at-pagination--normal ng-star-inserted').find_all('li'))[-2].text
-        flag=False
-        index=1
-        while(index<=int(lastIndex)):
-            if(flag):
-                break
-            page='https://chintglobal.com/news-center-14-page'+str(index)
-            
-            try:
-                page_req=requests.get(page, timeout=120)
-            except:
-                log_obj['Running_sequance'].append('page timeOut: '+page)
-                index+=1
-                continue
-            page_soup=BeautifulSoup(page_req.content,'lxml').find('div',class_='chint-news-center-container').find_all('div',class_='chint-news-box')
-            for oneNews in page_soup:
-                news_link=oneNews.find('a').get('href')
-                status=check_link_exists(news_link,localDb,localCollectionName)
-                if(status):
-                    print ('exist')
-                    flag=True
-                    break
-                else:
-                    print ('not exist')
-                    print (news_link)
-                    NewsData=scrap_page_news(source,news_link)
-                    if(NewsData==False):
-                        pass
-                        log_obj['Running_sequance'].append('News timeOut: '+news_link)
-                    else:
-                        scraped_News.append(NewsData)
-    #                 print ('**************************')
-    #                 print (NewsData)
+from newspaper import fulltext
 
-            index+=1
-        if(len(scraped_News)>0):
-            localDb.get_collection(localCollectionName).insert_many(scraped_News)
-        log_obj['Running_sequance'].append(str(len(scraped_News))+" new news inserted in db.")
-        return scraped_News
-    
-    
-                       
+# ************************************************************************
+running_Sequence = []
+
+started_on = datetime.datetime.now()
+
+c_name = 'CHINT' # Name of the Collection
+
+total_crwalled_links = 0
+
+Already_exist = 0
+
+# *************************************************************************
+
+# trying to connect with mongodb
+
+try:
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+
+    running_Sequence.append('Connected to DB Server')
+
+except:
+    running_Sequence.append('Not Connected')
+
+# *************************************************************************
+
+client_name = 'TEMP_EMR_NEWS_Crawler_DB'
+
+news =  client[client_name]
+
+collection = news[c_name]
+
+error_logs = client['Logs_DB']['Logs_TEMP_EMR_NEWS_Crawler_DB']
+
+last_insertion = None
+
+last_time = ''
+
+# ****************************************************************************
+
+try:
+
+    for l_i in collection.find().sort('Date', -1).limit(1):
+
+        last_insertion = l_i
+
+except:
+
+    last_insertion = None
+
+if last_insertion == None:
+
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
+
+    Crwl_time = datetime.datetime.now()
+
+else:
+
+    last_time = last_insertion['Date']
+
+    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+
+    Crwl_time = last_insertion['Date']
+
+# ****************************************************************************
+
+####################################################
+
+############# Every Company Logic Here #############
+
+####################################################
+
+# *****************************************************************************
+
+try:
+    result = requests.get("https://chintglobal.com/news-center-14")
+    response = Selector(result)
+    links = response.css(".chint-news-item-title a ::attr(href)").getall()
+    for i in links:
+        db_list = []
+        # mydoc = collection.find()
+        # for x in mydoc:
+        #     db_list.append(x['News_Weblink'])
         
-if __name__ == "__main__":    
-    try:    
-        key='mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin'
-        dbName='TEMP_EMR_NEWS_Crawler_DB'
-        collectionName='CHINT'
-        url='https://chintglobal.com/news-center-14'
-        Client=CreateDbConnection(key)
-        db =  Client[dbName]
-        log_collection=db['logs_test_chint']
-        Parser(url,db,collectionName)
-        log=copy.deepcopy(log_obj)
-        log['Ending_time']=datetime.now()
-        # log_collection.insert_one(log)
-    except:
-        rep = traceback.format_exc()
-        log=copy.deepcopy(log_obj)
-        log_obj['Running_sequance'].append (rep)
-        log['Ending_time']=datetime.now()
-        log_collection.insert_one(log)
+        if i in db_list:
+            Already_exist += 1
+            total_crwalled_links += 1
+            continue
+        else:
+            result1 = requests.get(i)
+            response1 = Selector(result1)
+            data = response1.xpath('//script[@type="application/ld+json"]/text()').get()
+            data = json.loads(data)
+            try:
+                news_date = data['datePublished']
+                news_date = dateparser.parse(news_date)
+            except:
+                news_date = ""
+            try:
+                title = data['headline']
+            except:
+                title = ""
+            try:
+                analysis = response1.xpath("//meta[@name='description']/@content").get()
+            except:
+                analysis = ""
+            try:
+                image = data['image'][0]
+            except:
+                image = ""
+            sub_category = ""
+            try:
+                announcement = fulltext(result1.text)
+                announcement = announcement.replace('\n','<br>')
+            except:
+                announcement = ""
+            try:
+                announcement_type = data['@type']
+            except:
+                announcement_type = ""
+            language = "en-US"
+            page_source = "https://chintglobal.com/news-center-14"
+            crawled_date = datetime.datetime.now()
+
+            company_news = {}
+            company_news['companyId'] = ''
+            company_news['location']=''
+            company_news['comment']=''
+            company_news['Date']= news_date
+            company_news['Crawled_on']=crawled_date
+            company_news['title']=title
+            company_news['Language']= language
+            company_news['announcementType']= announcement_type
+            company_news['Source'] = page_source
+            company_news['News_Weblink'] = i
+            company_news['photo']= image
+            company_news['videos']= ''
+            company_news['announcement']=announcement
+            company_news['historySubCategory']= sub_category
+            company_news['analysis'] = analysis
+            try:
+                # collection.insert_one(company_news)
+                total_crwalled_links += 1
+            except Exception as e:
+                running_Sequence.append(e)
+    
+    if Already_exist >= 1:
+
+        tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
+    else:
+
+        tmp_txt = ''
+
+    running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
+
+    ended_on = datetime.datetime.now()
+except Exception as e:
+    Error_Time =  datetime.datetime.now()
+
+    Reported_Error = traceback.format_exc()
+
+    running_Sequence.append(e)
+
+
+# **************************************************************************
+
+# **************************************************************************
+
+# **************************************************************************
+rep = ''
+
+try:
+
+    Error = {}
+
+    Error['Error_Detail'] = Reported_Error
+
+    Error['Error_Time'] = Error_Time
+
+except Exception as e:
+
+    rep = traceback.format_exc()
+
+    pass
+
+log = {}
+
+log['Crawler_name'] = c_name+'.py'
+
+log['Crawler_type'] = c_name
+
+log['Starting_time'] = started_on
+
+log['Ending_time'] = Error_Time if rep == '' else ended_on
+
+log['Error_Detail'] =  Error if rep == '' else ''
+
+log['Crawler_Runing Sequence'] = running_Sequence if running_Sequence else ''
+
+log['Links_Skipped'] = Already_exist
+
+log['Last_news_crawl_time'] = last_time
+
+log['Browser'] = 'Chrome'
+
+error_logs.insert_one(log)

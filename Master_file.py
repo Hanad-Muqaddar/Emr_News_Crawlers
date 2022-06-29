@@ -40,7 +40,6 @@ crawlerToCollectionMapping={
     "Friedhelm_Group":"Friedhelm_Group",
     "GRAYBAR_ELECTRIC":"GRAYBAR_ELECTRIC",
     "HAGER":"HAGER",
-    "HITACHI_ABB":"HITACHI_ABB",
     "HONEYWELL":"HONEYWELL",
     "LEGRAND":"LEGRAND",
     "NAED":"NAED",
@@ -162,7 +161,17 @@ crawlerToCollectionMapping={
     "WEG":"WEG",
     "Zevi_Crawler":"ZVEI",
     "Zumtobel":"Zumtobel",
-    "MSC_ Industrial_Supply":"MSC_ Industrial_Supply"
+    "MSC_ Industrial_Supply":"MSC_ Industrial_Supply",
+    "Hitachi_Energy_Crawler":"HITACHI_ABB",
+    "Grainger_Crawler":"GRAINGER",
+    "HoneyWell_Press":"HONEYWELL",
+    "Honey_Well_News":"HONEYWELL",
+    "Legrand_News":"LEGRAND",
+    "OBO":"OBO",
+    "Scrapy_OSRAM":"OSRAM",
+    "SonePar_Crawler":"SONEPAR",
+    "Scrapy_Southwire":"SOUTHWIRE",
+    "Scrapy_Wesco":"WESCO",
 }
 def crawler_health_function(crawler_name, path, count_c):
     # print(count_c)
@@ -219,7 +228,6 @@ Emr_News_Cralers_Dict = {
     "Friedhelm_Group":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "GRAYBAR_ELECTRIC":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "HAGER":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
-    "HITACHI_ABB":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "HONEYWELL":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "LEGRAND":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "NAED":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
@@ -340,9 +348,20 @@ Emr_News_Cralers_Dict = {
     "Zevi_Crawler":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Zumtobel":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "MSC_ Industrial_Supply":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
-    # "CHINT":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
-    # "Schenider_Electric":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
-    # "farnell":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
+    "Hitachi_Energy_Crawler" : "/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/HI_EN_News_Crawler/HI_E/HI_E/spiders",
+    "Grainger_Crawler":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/Grainger_News_Crawler/Grainger/Grainger/spiders",
+    "HoneyWell_Press":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/HoneyWell_News_Crawler/HoneyWell/HoneyWell/spiders",
+    "Honey_Well_News":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/HoneyWell_News_Crawler/HoneyWell/HoneyWell/spiders",
+    "Legrand_News":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/Legrand_News_Crawler/Legrand/Legrand/spiders",
+    "OBO":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/OBO_News_Crawler/OBO_News/OBO_News/spiders",
+    "Scrapy_OSRAM" : "/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/Osram_News_Crawler/OSRAM_News/OSRAM_News/spiders",
+    "SonePar_Crawler":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/SonePar_News_Crawler/SonePar/SonePar/spiders",
+    "Scrapy_Southwire":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/SouthWire_News_Crawler/SouthWire/SouthWire/spiders",
+    "Scrapy_Wesco":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/Wesco_News_Crawler/Wesco/Wesco/spiders",
+    "CHINT":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
+    "farnell":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
+    "Schenider_Electric":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
+    
 }
 
 count_c = 0

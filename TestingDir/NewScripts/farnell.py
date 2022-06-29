@@ -44,6 +44,7 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
+import feedparser
 
 # ************************************************************************
 # defining variables
@@ -122,74 +123,52 @@ else:
 
 # *****************************************************************************
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    
-    result = requests.get("https://www.element14.com/news/tagfeed/en/tags/News",headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
-    
-    news_links = []
+    feed = feedparser.parse('https://www.element14.com/news/tagfeed/en/tags/News')
+    for i in feed['entries']:     
+        n_link =   i['link'] 
 
-    links = soup.find_all('guid')
-    for link in links:
-        news_link = link.text
-        if news_link not in news_links:
-            news_links.append(news_link)
-
-    print(news_links)
-
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-        try:
-            title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-        except:
-            title = ""
-        announcement_type = "News"
-        language = "en-us"
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            # date = data.find('meta', attrs = {"property":"article:published_time"}).get("content")
-            
-            news_day = data.find("div",{"class":"div_date_location"}).find("div",{"class":"pp_date_day"}).get_text(strip=True)
-            news_month = data.find("div",{"class":"div_date_location"}).find("div",{"class":"pp_date_month"}).get_text(strip=True)
-            news_year = data.find("div",{"class":"div_date_location"}).find("div",{"class":"pp_date_year"}).get_text(strip=True)
-            date = news_year +' '+ news_month +' '+ news_day
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://www.element14.com/news/"
-        news_weblink = i
-        try:
-            image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-        except:
-            image = ""
-        try:
-            announcement = data.find("div", class_="ppmodule_textblock pp_moduleblock").find("div", class_="text_companyprofile").text
-        except:
-            announcement = data.find("div", class_="ppmodule_textblock pp_moduleblock").text
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
+        db_list = []
         mydoc = collection.find()
         for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+            db_list.append(x['News_Weblink'])
+        if n_link in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             continue
-        else:
+
+        else:       
+            try:
+                title = i['title']
+            except:
+                title = ""
+
+            announcement_type = "News"
+            language = "en-us"
+            sub_category = ""
+            
+            try:
+                analysis = i['pp_subtitle']
+            except:
+                analysis = ""
+            try:
+                date = i['published']
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'})
+            except:
+                news_date = ""
+
+            page_source = "https://www.element14.com/news/"
+            news_weblink = i['link']
+            try:
+                image = i['pp_image']
+            except:
+                image = ""
+            try:
+                announcement = i['summary']
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

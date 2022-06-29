@@ -19,7 +19,7 @@ class AbbSpider(CrawlSpider):
     )
 
     def parse_item(self, response):
-        if '2021' in response.url:
+        if '2022' in response.url:
             if '/rd/' in response.url:
                 item = {}
                 item['companyId'] = ''

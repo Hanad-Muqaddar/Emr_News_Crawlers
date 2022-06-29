@@ -8,10 +8,10 @@
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 import json
 
-file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-data = json.load(file)
-db_path = data[0]['Db_Path']
-
+# file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+# data = json.load(file)
+# db_path = data[0]['Db_Path']
+db_path = "mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin"
 
 BOT_NAME = 'Abb'
 
