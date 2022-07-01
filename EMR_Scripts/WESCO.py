@@ -39,7 +39,7 @@ import urllib
 
 import dateparser
 
-from datetime import datetime
+import datetime
 
 from bson.objectid import ObjectId
 
@@ -56,7 +56,7 @@ from newspaper import fulltext
 
 running_Sequence = []
 
-started_on = datetime.now()
+started_on = datetime.datetime.now()
 
 c_name = 'WESCO' # Name of the Collection
 
@@ -108,9 +108,9 @@ except:
 
 if last_insertion == None:
 
-    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
 
-    Crwl_time = datetime.now()
+    Crwl_time = datetime.datetime.now()
 
 else:
 
@@ -178,7 +178,7 @@ try:
             except:
                 announcement_type = ""
             language = "en-US"
-            crawled_date = datetime.now()
+            crawled_date = datetime.datetime.now()
             
             company_news = {}
             company_news['companyId'] = ''
@@ -212,9 +212,9 @@ try:
 
         running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
-        ended_on = datetime.now()
+        ended_on = datetime.datetime.now()
 except:
-    Error_Time =  datetime.now()
+    Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()
 
