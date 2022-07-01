@@ -1,5 +1,4 @@
 # Packages to be imported
-from functools import total_ordering
 import requests
 
 import time
@@ -16,8 +15,6 @@ from bs4 import BeautifulSoup
 
 from selenium import webdriver
 
-# from webdriver_manager.chrome import ChromeDriver
-
 from selenium.webdriver.chrome.options import Options
 
 from selenium.webdriver.support.ui import WebDriverWait
@@ -30,15 +27,8 @@ from selenium.webdriver.common.by import By
 
 from urllib.parse import urlparse
 
-import re
-
 import traceback
 
-import urllib
-
-import dateparser
-
-# from datetime import datetime
 import datetime
 
 from bson.objectid import ObjectId
@@ -64,7 +54,7 @@ prefs = {
   "translate_whitelists": lang_dict,
   "translate":{"enabled":"true"}
 }
-opts.add_experimental_option("prefs", prefs)
+# opts.add_experimental_option("prefs", prefs)
 opts.headless = True
 
 running_Sequence = []
@@ -122,7 +112,7 @@ except:
 
 if last_insertion == None:
 
-    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
+    # running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
 
     Crwl_time = datetime.datetime.now()
 
@@ -130,7 +120,7 @@ else:
 
     last_time = last_insertion['Date']
 
-    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+    # running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
 
     Crwl_time = last_insertion['Date']
 
@@ -271,5 +261,5 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'Chrome'
 
-error_logs.insert_one(log)
+# error_logs.insert_one(log)
 

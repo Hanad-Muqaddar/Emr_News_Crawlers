@@ -1,5 +1,4 @@
 # Packages to be imported
-from functools import total_ordering
 import requests
 
 import time
@@ -10,13 +9,11 @@ from random import randint
 
 from bs4 import BeautifulSoup
 
-from pymongo import MongoClient
+from pymongo import MongoClient, response
 
 from bs4 import BeautifulSoup
 
 from selenium import webdriver
-
-# from webdriver_manager.chrome import ChromeDriver
 
 from selenium.webdriver.chrome.options import Options
 
@@ -28,8 +25,6 @@ from selenium.webdriver.support import expected_conditions
 
 from selenium.webdriver.common.by import By
 
-from urllib.parse import urlparse
-
 import re
 
 import traceback
@@ -38,7 +33,6 @@ import urllib
 
 import dateparser
 
-# from datetime import datetime
 import datetime
 
 from bson.objectid import ObjectId
@@ -47,26 +41,11 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
-#************************************************************************
-#defining variables
-opts = Options()
-opts.add_argument("--window-size=190,100")
-opts.add_argument("--disable-automation")
-opts.add_argument("--no-sandbox")
-opts.add_argument('--profile-directory=Default')
-opts.add_argument("start-maximized")
-opts.add_argument("disable-infobars")
-opts.add_argument("--lang=en")
-opts.add_argument("--enable-javascript")
-opts.add_argument("--enable-cookies")
-lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-prefs = {
-  "translate_whitelists": lang_dict,
-  "translate":{"enabled":"true"}
-}
-opts.add_experimental_option("prefs", prefs)
-opts.headless = True
+from scrapy import Selector
 
+from newspaper import fulltext
+
+# ************************************************************************
 running_Sequence = []
 
 started_on = datetime.datetime.now()
@@ -145,70 +124,66 @@ else:
 # *****************************************************************************
 
 try:
-    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe', options=opts)
-    driver.get("https://www.spelsberg.com/news/news-press/")
-    time.sleep(10)
-    data = driver.find_elements_by_xpath("//div[@class='news-list-view']/div[@itemscope='itemscope']")
-    for i in data:
-        try:
-            news_weblink = i.find_element_by_tag_name("a").get_attribute("href")
-        except:
-            news_weblink = ""
+    result = requests.get("https://www.spelsberg.com/news/news-press/")
+    response = Selector(result)
+    Base_Link = "https://www.spelsberg.com"
+    links = response.css(".article__teaser h3 a ::attr(href)").getall()
+    final_links = [Base_Link + link for link in links]
+    for i in final_links:
         db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+        # mydoc = collection.find()
+        # for x in mydoc:
+        #     db_list.append(x['News_Weblink'])
         
-        if news_weblink in db_list:
-            total_crwalled_links += 1
+        if i in db_list:
             Already_exist += 1
+            total_crwalled_links += 1
             continue
         else:
+            result1 = requests.get(i)
+            response1 = Selector(result1)
             try:
-                title = i.find_element_by_tag_name("a").get_attribute("title")
+                news_date = response1.xpath("//time[@itemprop='datePublished']/@datetime").get()
+                news_date = dateparser.parse(news_date,)
+            except:
+                news_date = ""
+            try:
+                title = response1.xpath("//h1[@itemprop='headline']/text()").get()
             except:
                 title = ""
             try:
-                image = i.find_element_by_tag_name("img").get_attribute("src")
-            except:
-                image = ""
-            try:
-                news_date = i.find_element_by_class_name("news-list-date").text
-                news_date = dateparser.parse(news_date)
-            except:
-                result = requests.get(news_weblink)
-                soup = BeautifulSoup(result.content, 'html.parser')
-                news_date = soup.find("span", class_='news-list-date').text.strip()
-                news_date = dateparser.parse(news_date)
-            try:
-                analysis = i.find_element_by_tag_name("p").text
+                analysis = response1.xpath("//meta[@name='description']/@content").get()
             except:
                 analysis = ""
-            crawled_on_date = datetime.datetime.now()
-            page_source = "https://www.spelsberg.com/news/news-press/"
-            announcement_type = "News and Press"
             try:
-                response = requests.get(news_weblink)
-                soup1 = BeautifulSoup(response.content, 'lxml')
-                announcement = soup1.find("div", class_='content').text
+                image = response1.xpath("//a[@rel='imagebox']/@href").get()
+            except:
+                image = ""
+            sub_category = ""
+            try:
+                announcement = fulltext(result1.text)
+                announcement = announcement.replace('\n','<br>')
             except:
                 announcement = ""
-            sub_category = ""
-            language = 'en'
+            announcement_type = "News and Press"
+            language = "en-US"
+            page_source = "https://www.spelsberg.com/news/news-press/"
+            crawled_date = datetime.datetime.now()
+
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
             company_news['comment']=''
-            company_news['Date']=news_date
-            company_news['Crawled_on']=crawled_on_date
-            company_news['title']= title
+            company_news['Date']= news_date
+            company_news['Crawled_on']=crawled_date
+            company_news['title']=title
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
+            company_news['News_Weblink'] = i
             company_news['photo']= image
             company_news['videos']= ''
-            company_news['announcement']= announcement
+            company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
@@ -216,82 +191,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    try:
-        while True:
-            button = driver.find_element_by_xpath("//li[@class='next']/a").get_attribute("href")
-            driver.get(button)
-            time.sleep(5)
-            data = driver.find_elements_by_xpath("//div[@class='news-list-view']/div[@itemscope='itemscope']")
-            for i in data:
-                try:
-                    news_weblink = i.find_element_by_tag_name("a").get_attribute("href")
-                except:
-                    news_weblink = ""
-                db_list = []
-                mydoc = collection.find()
-                for x in mydoc:
-                    db_list.append(x['News_Weblink'])
-                
-                if news_weblink in db_list:
-                    total_crwalled_links += 1
-                    Already_exist += 1
-                    continue
-                else:
-                    try:
-                        title = i.find_element_by_tag_name("a").get_attribute("title")
-                    except:
-                        title = ""
-                    try:
-                        image = i.find_element_by_tag_name("img").get_attribute("src")
-                    except:
-                        image = ""
-                    try:
-                        news_date = i.find_element_by_class_name("news-list-date").text
-                        news_date = dateparser.parse(news_date)
-                    except:
-                        import requests
-                        result = requests.get(news_weblink)
-                        soup = BeautifulSoup(result.content, 'html.parser')
-                        news_date = soup.find("span", class_='news-list-date').text.strip()
-                        news_date = dateparser.parse(news_date)
-                    try:
-                        analysis = i.find_element_by_tag_name("p").text
-                    except:
-                        analysis = ""
-                    page_source = button
-                    crawled_on_date = datetime.datetime.now()
-                    announcement_type = "News and Press"
-                    sub_category = ""
-                    language = 'en'
-                    try:
-                        response = requests.get(news_weblink)
-                        soup1 = BeautifulSoup(response.content, 'lxml')
-                        announcement = soup1.find("div", class_='content').text
-                    except:
-                        announcement = ""
-                    company_news = {}
-                    company_news['companyId'] = ''
-                    company_news['location']=''
-                    company_news['comment']=''
-                    company_news['Date']=news_date
-                    company_news['Crawled_on']=crawled_on_date
-                    company_news['title']= title
-                    company_news['Language']= language
-                    company_news['announcementType']= announcement_type
-                    company_news['Source'] = page_source
-                    company_news['News_Weblink'] = news_weblink
-                    company_news['photo']= image
-                    company_news['videos']= ''
-                    company_news['announcement']= announcement
-                    company_news['historySubCategory']= sub_category
-                    company_news['analysis'] = analysis
-                    try:
-                        collection.insert_one(company_news)
-                        total_crwalled_links += 1
-                    except Exception as e:
-                        running_Sequence.append(e)
-    except Exception as e:
-        running_Sequence.append(e)
+    
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
@@ -351,6 +251,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'Chrome'
 
-print (log)
-error_logs.insert_one(log)
-
+# error_logs.insert_one(log)
