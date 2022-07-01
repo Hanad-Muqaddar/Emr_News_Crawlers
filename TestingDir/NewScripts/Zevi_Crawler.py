@@ -1,7 +1,4 @@
 # Packages to be imported
-from functools import total_ordering
-from typing import final
-from click import option
 import requests
 
 import time
@@ -52,6 +49,9 @@ from urllib.request import Request, urlopen
 from scrapy import Selector
 from googletrans import Translator
 
+from selenium.webdriver.chrome.service import Service as ChromeService
+
+from webdriver_manager.chrome import ChromeDriverManager
 # ************************************************************************
 # defining variables
 opts = Options()
@@ -64,12 +64,6 @@ opts.add_argument("disable-infobars")
 opts.add_argument("--lang=en")
 opts.add_argument("--enable-javascript")
 opts.add_argument("--enable-cookies")
-lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-prefs = {
-  "translate_whitelists": lang_dict,
-  "translate":{"enabled":"true"}
-}
-opts.add_experimental_option("prefs", prefs)
 
 opts.headless = True
 
@@ -151,7 +145,7 @@ else:
 # *****************************************************************************
 
 try:
-    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe', options=opts)
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
     driver.get("https://www.zvei.org/presse-medien/pressebereich")
     response = Selector(text=driver.page_source.encode('utf-8'))
     all_links = response.css("#ke_search-results a::attr(href)").getall()

@@ -1,5 +1,4 @@
 # Packages to be imported
-from functools import total_ordering
 import requests
 
 import time
@@ -48,6 +47,9 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from scrapy import Selector
+from selenium.webdriver.chrome.service import Service as ChromeService
+
+from webdriver_manager.chrome import ChromeDriverManager
 
 # ************************************************************************
 
@@ -55,7 +57,7 @@ options = Options()
 options.add_argument("--window-size=1980,1020")
 options.add_argument("--headless")
 options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36")
-
+options.headless = True
 
 running_Sequence = []
 
@@ -135,8 +137,7 @@ else:
 # *****************************************************************************
 
 try:
-    # driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver')
-    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe', options= options)
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
     links = ['https://z.lighting/en/group/news-insights/?category=company', 'https://z.lighting/en/group/news-insights/?category=zumtobel']
     for i in links:
         driver.get(i)

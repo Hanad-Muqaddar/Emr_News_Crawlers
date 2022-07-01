@@ -169,7 +169,6 @@ crawlerToCollectionMapping={
     "OBO":"OBO",
     "Scrapy_OSRAM":"OSRAM",
     "SonePar_Crawler":"SONEPAR",
-    "Scrapy_Southwire":"SOUTHWIRE",
     "Scrapy_Wesco":"WESCO",
 }
 def crawler_health_function(crawler_name, path, count_c):
@@ -354,7 +353,6 @@ Emr_News_Cralers_Dict = {
     "OBO":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/OBO_News_Crawler/OBO_News/OBO_News/spiders/",
     "Scrapy_OSRAM" : "/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/Osram_News_Crawler/OSRAM_News/OSRAM_News/spiders/",
     "SonePar_Crawler":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/SonePar_News_Crawler/SonePar/SonePar/spiders/",
-    "Scrapy_Southwire":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/SouthWire_News_Crawler/SouthWire/SouthWire/spiders/",
     "Scrapy_Wesco":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/Wesco_News_Crawler/Wesco/Wesco/spiders/",
     "CHINT":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "farnell":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",

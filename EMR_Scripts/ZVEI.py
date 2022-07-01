@@ -26,9 +26,13 @@ from datetime import datetime,date, timedelta
 from bson.objectid import ObjectId
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
+from selenium.webdriver.chrome.service import Service as ChromeService
+
+from webdriver_manager.chrome import ChromeDriverManager
+
 opts = Options()
-# opts.add_argument("--window-size=190,100")
-# opts.add_argument("--disable-automation")
+opts.add_argument("--window-size=190,100")
+opts.add_argument("--disable-automation")
 opts.add_argument("--no-sandbox")
 opts.add_argument('--profile-directory=Default')
 opts.add_argument("start-maximized")
@@ -36,22 +40,12 @@ opts.add_argument("disable-infobars")
 opts.add_argument("--lang=en")
 opts.add_argument("--enable-javascript")
 opts.add_argument("--enable-cookies")
-lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en',
-             'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 
-             'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en',
-             'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en', 'ur': 'en'}
-prefs = {
-  "translate_whitelists": lang_dict,
-  "translate":{"enabled":"true"}
-}
-opts.add_experimental_option("prefs", prefs)
 
 running_Sequence = []
 started_on = datetime.now()
 c_name = 'ZVEI'
 opts.headless = True
 try:
-    # client= MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin')
     file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
     data = json.load(file)
     db_path = data[0]['Db_Path']

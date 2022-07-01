@@ -1,7 +1,4 @@
-from logging import setLoggerClass
-from regex.regex import match, sub
-import scrapy
-from scrapy.linkextractors import LinkExtractor, _matches
+from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 import datetime
 import dateparser
@@ -29,7 +26,7 @@ class LegrandNewsSpider(CrawlSpider):
         item = {}
         if "legrandgroup.com" in filter_link:
             item['title'] = self.legrand_group_title(response)
-            item['Date'] = self.legrand_group_news_date(response)
+            item['Date'] = dateparser.parse(self.legrand_group_news_date(response))
             item['Crawled_On'] = datetime.datetime.now()
             item['Language'] = 'en'
             item['News_Weblink'] = response.url
@@ -42,7 +39,7 @@ class LegrandNewsSpider(CrawlSpider):
             item['PageSource'] = self.legrand_group_pagesource(response)
         else:
             item['title'] = self.legrand_us_title(response)
-            item['Date'] = self.legrand_us_news_date(response)
+            item['Date'] = dateparser.parse(self.legrand_us_news_date(response))
             item['Crawled_On'] = datetime.datetime.now()
             item['Language'] = 'en'
             item['News_Weblink'] = response.url
