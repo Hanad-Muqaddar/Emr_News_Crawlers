@@ -1,4 +1,7 @@
 # Packages to be imported
+from functools import total_ordering
+from typing import final
+from click import option
 import requests
 
 import time
@@ -49,9 +52,6 @@ from urllib.request import Request, urlopen
 from scrapy import Selector
 from googletrans import Translator
 
-from selenium.webdriver.chrome.service import Service as ChromeService
-
-from webdriver_manager.chrome import ChromeDriverManager
 # ************************************************************************
 # defining variables
 opts = Options()
@@ -64,6 +64,12 @@ opts.add_argument("disable-infobars")
 opts.add_argument("--lang=en")
 opts.add_argument("--enable-javascript")
 opts.add_argument("--enable-cookies")
+lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
+prefs = {
+  "translate_whitelists": lang_dict,
+  "translate":{"enabled":"true"}
+}
+opts.add_experimental_option("prefs", prefs)
 
 opts.headless = True
 
@@ -86,6 +92,7 @@ try:
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)
+
     # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
@@ -145,19 +152,27 @@ else:
 # *****************************************************************************
 
 try:
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
-    driver.get("https://www.zvei.org/presse-medien/pressebereich")
-    response = Selector(text=driver.page_source.encode('utf-8'))
-    all_links = response.css("#ke_search-results a::attr(href)").getall()
-    final_links = ["https://www.zvei.org" + link for link in all_links if "https://www.zvei.org" not in link]
-    # print(final_links)
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    Main_url = "https://www.zvei.org/"
+    Base_url = "https://www.zvei.org/presse-medien/pressebereich"
+    result = requests.get(Base_url,headers=headers)
+    soup = BeautifulSoup(result.content , 'lxml')
+    
+    news_links = []
+
+    links = soup.find_all('div', { "class" : "content-list-element fade-in no-transition border-bottom month-6"})
+    for link in links:
+        news_link = Main_url + link.find('a').get('href')
+        if news_link not in news_links:
+            news_links.append(news_link)
+
     translator = Translator()
 
     def translate(Trans):
         Trans_text = translator.translate(Trans,dest='en')
         return Trans_text.text
 
-    for i in final_links:
+    for i in news_links:
         db_list = []
         mydoc = collection.find()
         for x in mydoc:
@@ -170,35 +185,40 @@ try:
             total_crwalled_links += 1
             continue
         else:
-            driver.get(i)
-            time.sleep(3)
-            new_response = Selector(text=driver.page_source.encode('utf-8'))
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
 
             try:
-                news_date = new_response.xpath("normalize-space(//div[@class='h6 date-update-wrapper'])").get()
-                news_date = dateparser.parse(news_date, settings={'DATE_ORDER': 'DMY'})
-            except:
-                news_date = ""
-            try:
-                title = new_response.xpath("normalize-space(//header/h1[1])").get()
+                title = data.find('header',{"class" :"headline headline-h1"}).find('h1').get_text(strip=True) 
                 title = translate(title)
             except:
                 title = ""
+                print(title)
+
+            image = ""
+            sub_category = ""
+            announcement_type = "PRESS RELEASES"
+            language = "en-US"
+
             try:
-                analysis = new_response.xpath("//meta[@name='description']/@content").get()
+                news_date = data.find('div',{"class" :"h6 date-update-wrapper"}).get_text(strip=True) 
+                news_date = dateparser.parse(news_date, settings={'DATE_ORDER': 'DMY'})
+            except:
+                news_date = ""
+            
+            try:
+                analysis = data.find('meta',attrs = {'name':'description'}).get('content')
                 analysis = translate(analysis)
             except:
                 analysis = ""
-            image = ""
-            sub_category = ""
+            
             try:
-                announcement = new_response.xpath("normalize-space(//div[@class='row content-area-middle'])").get()
+                announcement = data.find('div',{"class" :"row content-area-middle"}).get_text(strip=True) 
                 announcement = translate(announcement)
             except:
                 announcement = ""
                 
-            announcement_type = "PRESS RELEASES"
-            language = "en-US"
+            
             page_source = "https://www.zvei.org/presse-medien/pressebereich"
             crawled_date = datetime.datetime.now()
 
@@ -218,6 +238,7 @@ try:
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
+            
             try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1
