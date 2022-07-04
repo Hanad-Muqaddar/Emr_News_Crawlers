@@ -66,11 +66,11 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -136,6 +136,7 @@ try:
         result = requests.get(main_url, headers=headers)
     except Exception as e:
         print(e)
+
     xml_data = xmltodict.parse(result.text)
     json_dump = json.dumps(xml_data)
     json_data = json.loads(json_dump)
@@ -182,7 +183,7 @@ try:
                 title = ""
             crawled_on_date = datetime.datetime.now()
             analysis = ""
-            page_source = "https://www.weg.net/institutional/US/en/all-news/"
+            page_source = "https://www.weg.net/institutional/US/en/all-news/list"
 
             company_news = {}
             company_news['companyId'] = ''
@@ -266,5 +267,5 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'Chrome'
 
-error_logs.insert_one(log)
+# error_logs.insert_one(log)
 
