@@ -212,7 +212,7 @@ try:
 
         running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
-        ended_on = datetime.datetime.now()
+        # ended_on = datetime.datetime.now()
 except:
     Error_Time =  datetime.datetime.now()
 
@@ -244,7 +244,7 @@ log['Crawler_type'] = c_name
 
 log['Starting_time'] = started_on
 
-log['Ending_time'] = Error_Time if rep == '' else ended_on
+# log['Ending_time'] = Error_Time if rep == '' else ended_on
 
 log['Error_Detail'] =  Error if rep == '' else ''
 
@@ -256,4 +256,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'None'
 
-error_logs.insert_one(log)
+# error_logs.insert_one(log)
