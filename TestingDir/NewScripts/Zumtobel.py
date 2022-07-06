@@ -47,6 +47,7 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from scrapy import Selector
+
 from selenium.webdriver.chrome.service import Service as ChromeService
 
 from webdriver_manager.chrome import ChromeDriverManager

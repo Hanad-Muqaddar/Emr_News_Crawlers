@@ -239,14 +239,24 @@ try:
                     print(e)
 
                 announcement = ret_obj['filteredBody']
-                emr_essentail = ret_obj['emrEssential']
-                erm_lite = ret_obj['emrLite']
-                # announcement = re.sub(r'[^\x00-\x7F]+','',announcement).strip()
+                try:
+                    emr_essentail = ret_obj['emrEssential']
+                except:
+                    emr_essentail = ""
+                try:
+                    emr_executive = ret_obj['emrExecutive']
+                except:
+                    emr_executive = ""
+                try:
+                    erm_lite = ret_obj['emrLite']
+                except:
+                    erm_lite = ""
                 announcement = unicodedata.normalize("NFKD",announcement)
             except:
                 announcement = ""
                 emr_essentail = ""
                 erm_lite = ""
+                emr_executive = ""
 
 
             language = "en"
@@ -270,7 +280,7 @@ try:
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
-            company_news['emrExecutive'] = announcement
+            company_news['emrExecutive'] = emr_executive
             company_news['emrEssential'] = emr_essentail
             company_news['emrLite'] = erm_lite
             try:
