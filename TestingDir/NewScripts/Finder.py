@@ -148,7 +148,7 @@ try:
 
     news_links = []
     news_dates = []
-    links = driver.find_elements(By.XPATH, '//div[@class="style__StyledNewsListing-pjpy3m-0 gGKRCh"]//div[contains(@class,"style__StyledNewsCard-ojiq1d-12 kTaOuC")]')
+    links = driver.find_elements(By.XPATH, '//div[@class="style__StyledNewsListing-pjpy3m-0 gGKRCh"][1]//div[contains(@class,"style__StyledNewsListingItem-pjpy3m-5") or contains(@class,"style__StyledNewsListingHighlight-pjpy3m-4")]')
     for link in links:
         # news_link = link.find_element(By.XPATH, './/a[@class="read-more arrow-right-link animated-arrow-right-link"]').get_attribute('href')
         news_link = link.find_element(By.XPATH, './/a').get_attribute('href')
