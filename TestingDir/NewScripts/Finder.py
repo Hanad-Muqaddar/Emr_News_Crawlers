@@ -48,7 +48,8 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from newspaper import fulltext
-
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
 
 # ************************************************************************
 # defining variables
@@ -141,7 +142,7 @@ try:
     opts.headless = True
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
     driver.get("https://www.findernet.com/en/worldwide/news/")
     time.sleep(5)
 
@@ -156,10 +157,10 @@ try:
         date1 = link.find_element(By.XPATH, './/div[@class="style__StyledNewsCardDate-ojiq1d-2 duzsjo"]').text
         news_dates.append(date1)
 
-    print(news_links)
-    print(len(news_links))
-    print(news_dates)
-    print(len(news_dates))
+    # print(news_links)
+    # print(len(news_links))
+    # print(news_dates)
+    # print(len(news_dates))
 
     for i, L_date in zip(news_links, news_dates):
     # for i in news_links:
@@ -201,7 +202,7 @@ try:
             html = requests.get(i).text
             announcement = fulltext(html)
             announcement = announcement.replace('\n','<br>')
-            print(announcement)
+            # print(announcement)
                 
         except:
             announcement = ""
