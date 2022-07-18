@@ -154,10 +154,10 @@ try:
         try:
             title = data.find('section',attrs = {"class":"page-top"}).find('h1').get_text()
             title = translate(title)
-            # print(title)
+            print(title)
         except:
             title ="ERROR WALA TITLE CHAL RAHA"
-            # print(title)
+            print(title)
         
         announcement_type = "News"
         language = "en-us"
