@@ -86,6 +86,7 @@ try:
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)
+
     # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
@@ -148,7 +149,7 @@ try:
     link = "https://www.niedax-group.com/en/corporate-group/press-news/news/"
     result = requests.get(link)
     soup = BeautifulSoup(result.content, 'lxml')
-    data = soup.find_all("div", class_='content-menu line frame frame-csc-col-width-33 news articletype-0')
+    data = soup.find_all("div", class_='link-holder')
     for i in data:
         news_weblink = "https://www.niedax-group.com" + i.find("a").get("href")
         db_list = []
@@ -163,7 +164,8 @@ try:
             res = requests.get(news_weblink)
             soup1 = BeautifulSoup(res.content, 'lxml')
             try:
-                title = soup1.find("title").text
+                title = soup1.find("h1",attrs = {"class":"pt-2__0 pb-2__0"}).text
+                print(title)
             except:
                 title = ""
             try:
@@ -180,7 +182,8 @@ try:
                 analysis = ""
             try:
                 news_date = soup1.find("time").text.strip()
-                news_date = dateparser.parse(news_date)
+                news_date = dateparser.parse(news_date,  settings={'DATE_ORDER': 'YMD'})
+                # print(news_date)
             except:
                 news_date = ""
             page_source = "https://www.niedax-group.com/en/corporate-group/press-news/news/"
