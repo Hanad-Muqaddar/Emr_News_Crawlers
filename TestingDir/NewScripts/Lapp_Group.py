@@ -134,9 +134,15 @@ try:
     
     news_links = []
 
-    links = soup.find_all("div",{ "class" : "col-xs-12 col-md-6"})
+    # links = soup.find_all("div",{ "class" : "col-xs-12 col-md-6"})
+    # for link in links:
+    #     news_link = Main_url + link.find('a',{ "class" : "clean"}).get('href')
+    #     if news_link not in news_links:
+    #         news_links.append(news_link)
+
+    links = soup.find("div",{ "class" : "row js-calc-height"}).find_all('a',{ "class" : "clean"})
     for link in links:
-        news_link = Main_url + link.find('a',{ "class" : "clean"}).get('href')
+        news_link = Main_url + link.get('href')
         if news_link not in news_links:
             news_links.append(news_link)
 
@@ -148,7 +154,7 @@ try:
 
         try:
             title = data.find('title').get_text(strip=True)
-            print(title)
+            # print(title)
         except:
             title = ""
         
@@ -156,7 +162,7 @@ try:
         
         try:
             image = data.find('div',{ "class" : "intrinsic"}).find('img',{ "class" : "img-responsive"}).get('src')
-            print(image)
+            # print(image)
         except:
             image = ""
 
@@ -166,12 +172,12 @@ try:
         
         try:
             analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-            print(analysis)
+            # print(analysis)
         except:
             analysis = ""
         try:
             news_date = datetime.now()
-            print(news_date)
+            # print(news_date)
         except:
             news_date = ''
 
@@ -183,7 +189,7 @@ try:
             html = requests.get(i).text
             announcement = fulltext(html)
             announcement = announcement.replace('\n','<br>')
-            print(announcement)
+            # print(announcement)
             
         except:
             announcement = ""
