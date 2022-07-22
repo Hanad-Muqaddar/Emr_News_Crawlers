@@ -1,212 +1,294 @@
+# Packages to be imported
+from functools import total_ordering
 import requests
+
 import time
+
 import json
+
 from random import randint
+
 from bs4 import BeautifulSoup
+
 from pymongo import MongoClient
+
+from bs4 import BeautifulSoup
+
+from selenium import webdriver
+
+# from webdriver_manager.chrome import ChromeDriver
+
+from selenium.webdriver.chrome.options import Options
+
+from selenium.webdriver.support.ui import WebDriverWait
+
+from selenium.webdriver.common.keys import Keys
+
+from selenium.webdriver.support import expected_conditions
+
+from selenium.webdriver.common.by import By
+
+from urllib.parse import urlparse
+
+import re
+
 import traceback
 
-from datetime import date, timedelta
-from datetime import datetime
+import urllib
+
 import dateparser
-import copy
-today = datetime.now()
-running_sequence = []
-started_on = datetime.now()
 
-def CreateDbConnection(key,running_sequence):
-    try:
-        client= MongoClient(key)
-        running_sequence.append('Connected to Server')
-    except:
-        running_sequence.append('Not Connected')
-    return client
+# from datetime import datetime
+import datetime
 
-def check_link_exists(url,db,collection):
-    ch=db.get_collection(collection).find({'News_Weblink':url})
-    check=[]
-    for x in ch:
-        check.append(x)
-    if(len(check)<=0):
-        return False
-    else:
-        return True
+from bson.objectid import ObjectId
 
+from urllib.error import HTTPError
 
-def single_news_parser(url,source):
-    hist ={}
-    req1 = requests.get(url)
-    news_soup = BeautifulSoup(req1.content, 'lxml')
-    news_parentDiv = news_soup.find('div',class_='detail-content')
-    image=news_parentDiv.find('div',class_='twelve columns m04-top-image').find('img')
-    try:
-        image='https://www.hagergroup.com'+image['data-original']
-    except:
-        image=''
-    try:
-        d=(news_parentDiv.find('div',class_='detail-header').find('h4').text).strip().replace('.','-')
-        tmp_d = d.split('-')
-        tmp_d[len(tmp_d)-1] = "20"+tmp_d[len(tmp_d)-1]
-        d = "-".join(tmp_d)
-        date=dateparser.parse(d,settings={'DATE_ORDER': 'DMY'})
-    except:
-        date=''
-    try:
-        title=(news_parentDiv.find('div',class_='detail-header').find('h1').text).lstrip()
-    except:
-        title=''
-    try:
-        anouncement=news_parentDiv.find('div',class_='detail-content-inner').get_text()
-    except:
-        anouncement=''
+from urllib.request import Request, urlopen
 
-    hist['comment']=''
+# ************************************************************************
+# defining variables
+# opts = Options()
+# opts.add_argument("--window-size=190,100")
+# opts.add_argument("--disable-automation")
+# opts.add_argument("--no-sandbox")
+# opts.add_argument('--profile-directory=Default')
+# opts.add_argument("start-maximized")
+# opts.add_argument("disable-infobars")
+# opts.add_argument("--lang=en")
+# opts.add_argument("--enable-javascript")
+# opts.add_argument("--enable-cookies")
+# lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
+# prefs = {
+#   "translate_whitelists": lang_dict,
+#   "translate":{"enabled":"true"}
+# }
+# opts.add_experimental_option("prefs", prefs)
+# opts.headless = True
 
-    hist['companyId'] = '300000'
-    hist['Date'] = date
-    
-    hist['photo']= image
-    hist['Language']= 'English'
-    today=datetime.today()
-    hist['Crawled_on']=today
-                
-    hist['source'] = source
-    hist['News_Weblink'] = url
-    hist['historySubCategory']='Media'
-    hist['announcementType'] = 'Press Release'
-    hist['title']=title
-    hist['announcement']=anouncement
-    
-    refrences=''
-    analysis=''
-    validatedObject  ={}
-    validatedObject['companyId']=hist['companyId']
-    validatedObject['Date']=date
-    validatedObject['title']=title
-    validatedObject['announcement']=hist['announcement']
-    validatedObject['announcementType']=hist['announcementType']
+running_Sequence = []
 
-    validatedObject['photo']=image
-    validatedObject['analysis']=analysis
-    validatedObject['refrences ']=refrences
-    validatedObject['historySubCategory']= hist['historySubCategory']
+started_on = datetime.datetime.now()
 
-    hist['validatedObject']=validatedObject
-    return hist
-def History_newsParser(news_url,localDb,localCollectionName,running_sequence):
-    req = requests.get(news_url)
-    running_sequence.append('Getting News Links')
-    soup = BeautifulSoup(req.content, 'lxml')
-    parentDiv = soup.find('div',class_='row isotope')
-    urls=[]
-    all_news = []
-    url_count=0
-    count=0
-    for div in parentDiv:
-        if(count>0):
-            break
-        
-        try:  
-            url='https://www.hagergroup.com'+div.find('div',class_='list-tile-link').find('a').get('href')
-            status=check_link_exists(url,localDb,localCollectionName)
-          
-            if(status):
-                count+=1
-#                 print ('exist')
-#                 print ('----------------')
-                break
-            else:
-                urls.append(url)
-                url_count+=1
-#                 print (url_count)
-#                 print (url)
-#                 print ("Not Exist in db")
-                
-                hist=single_news_parser(url,news_url)
-                all_news.append(hist) 
-#                 print ('*****************')
-        except:
-            pass
-    return all_news     
-    
-last_insertion = None
-last_time = ''
-Already_exist = 0
+c_name = 'HAGER' # Name of the Collection
+
 total_crwalled_links = 0
-try:
-    
-#   -----------LocalNewsCrawler---------------
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    key = db_path
-    # key='mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin'
-    dbName='TEMP_EMR_NEWS_Crawler_DB'
-    c_name='HAGER'
-    url='https://www.hagergroup.com/en/media/hager-group-press-releases/1024-6023.htm?backpageid=160&backblockid=b10655674&backblockanchor=pressrelease'
-    
-    Client=CreateDbConnection(key,running_sequence)
-    db =  Client[dbName]
-    collection = db[c_name]
-    error_logs = Client['Logs_DB']['Logs_TEMP_EMR_NEWS_Crawler_DB']
-    try:
-        for l_i in collection.find().sort('Date', -1).limit(1):
-            last_insertion = l_i
-    except:
-        # print('Fresh Starting News Crawler')
-        last_insertion = None
-    if last_insertion == None:
-        running_sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
-        Crwl_time = datetime.now()
-    else:
-        last_time = last_insertion['Date']
 
-    news_list = History_newsParser(url,db,c_name,running_sequence)
-    
-    for i in news_list:
-        weblink = i['News_Weblink']
-        l = False
-        for k in collection.find({ 'News_Weblink' : weblink }):
-            if k:
-                l = True
-                break
-        if l:
-            total_crwalled_links +=1
-            Already_exist +=1
-            # print('\n'+news['Link']+'\nNews Already Exist in DB\n')        
+Already_exist = 0
+
+# *************************************************************************
+
+# trying to connect with mongodb
+
+try:
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+
+    running_Sequence.append('Connected to DB Server')
+
+except:
+
+    running_Sequence.append('Not Connected')
+
+# *************************************************************************
+
+client_name = 'TEMP_EMR_NEWS_Crawler_DB'
+
+news =  client[client_name]
+
+collection = news[c_name]
+
+error_logs = client['Logs_DB']['Logs_TEMP_EMR_NEWS_Crawler_DB']
+
+last_insertion = None
+
+last_time = ''
+
+# ****************************************************************************
+
+try:
+
+    for l_i in collection.find().sort('Date', -1).limit(1):
+
+        last_insertion = l_i
+
+except:
+
+    last_insertion = None
+
+if last_insertion == None:
+
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
+
+    Crwl_time = datetime.datetime.now()
+
+else:
+
+    last_time = last_insertion['Date']
+
+    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+
+    Crwl_time = last_insertion['Date']
+
+# ****************************************************************************
+
+####################################################
+
+############# Every Company Logic Here #############
+
+####################################################
+
+# *****************************************************************************
+
+try:
+    main_url = "https://www.hagergroup.com"
+    result = requests.get("https://www.hagergroup.com/en/hager-group-news/1024-2283.htm")
+    soup = BeautifulSoup(result.content, 'lxml')
+
+    data_links = soup.find('div',{ "class" : "row isotope"}).find_all('div',{ "class" : "list-tile-link"}) 
+    news_links = []
+    for link in data_links:
+        news_link = main_url + link.find('a',{ "class" : "elementdeeplink"}).get('href')
+        # print(news_link) 
+        if news_link not in news_links:
+            news_links.append( news_link)              
         else:
-            i['Crawled_on'] = datetime.now()
-            total_crwalled_links +=1
-            collection.insert_one(i)
-    if Already_exist >=1:
+            continue
+
+    for l in news_links[:20]:
+        db_list = []
+        mydoc = collection.find()
+        for x in mydoc:
+            db_list.append(x['News_Weblink'])
+        if l in db_list:
+            total_crwalled_links += 1
+            Already_exist += 1
+            continue
+        else:
+            res = requests.get(l)
+            soup = BeautifulSoup(res.content, 'lxml')
+            try:
+                title = soup.find('div',class_='detail-header').find('h1').get_text(strip=True)
+                print(title)
+            except:
+                title = ""
+            try:
+                analysis = soup.find("meta", attrs={"property":"og:description"}).get("content")
+            except:
+                analysis = ''
+            try:
+                image = soup.find("meta", attrs={"property":"og:image"}).get("content")
+            except:
+                image = ""
+
+            try:
+                date = soup.find('h4',class_='subheadline').get_text(strip=True)
+                # print(date)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'DMY'} )
+                print(news_date)
+            except:
+                news_date = ""
+
+            try:
+                announcement_type = soup.find("meta", attrs={"property":"og:type"}).get("content")
+            except:
+                announcement_type = ''
+            try:
+                announcement = soup.find('div',class_='detail-content-inner').get_text(strip=True)
+            except:
+                announcement = ""
+
+            page_source = "https://www.hagergroup.com/en/hager-group-news/1024-2283.htm"
+            language = "en"
+            crawled_date = datetime.datetime.now()
+            news_weblink = l
+
+            sub_category = ""
+            
+            company_news = {}
+            company_news['companyId'] = ''
+            company_news['location']=''
+            company_news['comment']=''
+            company_news['Date']= news_date
+            company_news['Crawled_on']=crawled_date
+            company_news['title']=title
+            company_news['Language']= language
+            company_news['announcementType']= announcement_type
+            company_news['Source'] = page_source
+            company_news['News_Weblink'] = news_weblink
+            company_news['photo']= image
+            company_news['videos']= ''
+            company_news['announcement']=announcement
+            company_news['historySubCategory']= sub_category
+            company_news['analysis'] = analysis
+            try:
+                collection.insert_one(company_news)
+                total_crwalled_links += 1
+            except Exception as e:
+                running_Sequence.append(e)
+    
+    if Already_exist >= 1:
+
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
     else:
+
         tmp_txt = ''
 
-    running_sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
-    ended_on = datetime.now()
-     
+    running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
+
+    ended_on = datetime.datetime.now()
 except Exception as e:
-     
-    Error_Time =  datetime.now()
+    Error_Time =  datetime.datetime.now()
+
     Reported_Error = traceback.format_exc()
+
+    running_Sequence.append(e)
+
+
+# **************************************************************************
+
+# **************************************************************************
+
+# **************************************************************************
 rep = ''
+
 try:
+
     Error = {}
+
     Error['Error_Detail'] = Reported_Error
+
     Error['Error_Time'] = Error_Time
+
 except Exception as e:
-     
+
     rep = traceback.format_exc()
+
     pass
+
 log = {}
+
 log['Crawler_name'] = c_name+'.py'
+
 log['Crawler_type'] = c_name
+
 log['Starting_time'] = started_on
+
 log['Ending_time'] = Error_Time if rep == '' else ended_on
+
 log['Error_Detail'] =  Error if rep == '' else ''
-log['Crawler_Runing Sequence'] = running_sequence if running_sequence else ''
+
+log['Crawler_Runing Sequence'] = running_Sequence if running_Sequence else ''
+
 log['Links_Skipped'] = Already_exist
+
 log['Last_news_crawl_time'] = last_time
-log['Browser'] = 'None'
-# error_logs.insert_one(log)
+
+log['Browser'] = 'Chrome'
+
+error_logs.insert_one(log)
+
