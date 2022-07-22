@@ -169,7 +169,7 @@ try:
                 'Accept-Encoding': 'gzip, deflate, br',
                 'Accept-Language': 'en-US,en;q=0.9'
                 }
-    result = requests.get("https://www.eaton.com/us/en-us/company/news-insights/news-releases.html", headers=headers, proxies=proxies)
+    result = requests.get("https://www.eaton.com/us/en-us/company/news-insights/news-releases.html", headers=headers)
     # print(result)
     response = Selector(result)
     # print(response)
@@ -195,7 +195,7 @@ try:
         else:
             # news, image = parse_newspaper_data(news_weblink)
             # print("Comes here at first point")
-            result1 = requests.get(news_weblink , headers=headers, proxies=proxies)
+            result1 = requests.get(news_weblink , headers=headers)
             result1.encoding = 'utf-8'
             response1 = Selector(result1)
             # print("reach to point 2")

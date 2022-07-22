@@ -69,11 +69,11 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -144,7 +144,7 @@ try:
     proxies = {'http': 'http://alihaider99:cheeta@de.proxymesh.com:31280',
             'https': 'http://alihaider99:cheeta@de.proxymesh.com:31280'}
 
-    result = requests.get("https://hubbell.gcs-web.com/rss/news-releases.xml", proxies=proxies)
+    result = requests.get("https://hubbell.gcs-web.com/rss/news-releases.xml")
     first_res = xmltodict.parse(result.text)
     d = json.dumps(first_res)
     data = json.loads(d)
@@ -279,4 +279,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'Chrome'
 
-error_logs.insert_one(log)
+# error_logs.insert_one(log)
