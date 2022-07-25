@@ -137,71 +137,59 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
 
-    print(news_links)
-    print(len(news_links))
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+    for i in news_links:
 
-        try:
-            title = data.find('meta',attrs = {'property':'og:title'}).get('content')
-            print(title)
-        except:
-            title = ""
-            print(title)
-        
-        announcement_type = "News"
-        language = "en-us"
-
-        try:
-            image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-            print(image)
-        except:
-            image = ""
-            print(image)
-
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            date = data.find('meta',attrs = {'property':'article:published_time'}).get('content')
-            print(date)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://harjuelekter.com/news/"
-        news_weblink = i
-        
-        try:            
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            print(announcement)
-            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             continue
         else:
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('meta',attrs = {'property':'og:title'}).get('content')
+            except:
+                title = ""
+            
+            announcement_type = "News"
+            language = "en-us"
+
+            try:
+                image = data.find('meta', attrs = {"property":"og:image"}).get("content")
+            except:
+                image = ""
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                date = data.find('meta',attrs = {'property':'article:published_time'}).get('content')
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+            except:
+                news_date = ""
+
+            page_source = "https://harjuelekter.com/news/"
+            
+            try:            
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')    
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -212,7 +200,7 @@ try:
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
+            company_news['News_Weblink'] = i
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement

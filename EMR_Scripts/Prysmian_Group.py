@@ -130,88 +130,86 @@ try:
         result = requests.get(i)
         page_source = i
         soup = BeautifulSoup(result.content, 'lxml')
-        loop_number = int(soup.find("li", class_='pager-last').find("a").get("href").split("=")[1])
-        for pages in range(loop_number + 1):
-            main_url = i + "?page={}".format(pages)
-            response = requests.get(main_url)
-            soup = BeautifulSoup(response.content, 'lxml')
-            all_links = soup.find_all("a", class_='btn btn-default btn-discover toggle-stick-to-bottom')
-            dates = soup.find_all("div", class_="news-archive-date")
-            dates_list = []
-            for z in dates:
-                dates_list.append(z.text.strip())
+        all_links = soup.find_all("a", class_='btn btn-default btn-discover toggle-stick-to-bottom')
+        dates = soup.find_all("div", class_="news-archive-date")
+        dates_list = []
+        for z in dates:
+            dates_list.append(z.text.strip())
                 
-            links_list = []
-            for j in all_links:
-                links_list.append("https://www.prysmiangroup.com" + j.get("href"))
+        links_list = []
+        for j in all_links:
+            links_list.append("https://www.prysmiangroup.com" + j.get("href"))
                 
-            db_list = []
-            mydoc = collection.find()
-            for x in mydoc:
-                db_list.append(x['News_Weblink'])
+        db_list = []
+        mydoc = collection.find()
+        for x in mydoc:
+            db_list.append(x['News_Weblink'])
 
-            for k,l in zip(links_list, dates_list):
-                if k in db_list:
-                    # print("Link Already exists in database")
-                    total_crwalled_links += 1
-                    Already_exist += 1
-                    continue
-                else:
-                    res = requests.get(k)
-                    soup = BeautifulSoup(res.content, 'lxml')
-                    try:
-                        title = soup.find("meta", attrs = {"property":"og:title"}).get("content")
-                    except:
-                        title = ""
-                    try:
-                        sub_category = soup.find("meta", attrs = {"property":"og:type"}).get("content")
-                    except:
-                        sub_category = ""
-                    try:
-                        news_weblink = "https://" + soup.find("meta", attrs = {"property":"og:url"}).get("content")
-                    except:
-                        news_weblink = ""
-                    try:
-                        analysis = soup.find("meta", attrs = {"name":"description"}).get("content")
-                    except:
-                        analysis = ""
-                    try:
-                        image = soup.find("meta", attrs = {"property":"og:image"}).get("content")
-                    except:
-                        image = ""
+        for k,l in zip(links_list, dates_list):
+            if k in db_list:
+                # print("Link Already exists in database")
+                total_crwalled_links += 1
+                Already_exist += 1
+                continue
+            else:
+                res = requests.get(k)
+                soup = BeautifulSoup(res.content, 'lxml')
+                try:
+                    title = soup.find("meta", attrs = {"property":"og:title"}).get("content")
+                except:
+                    title = ""
+                try:
+                    sub_category = soup.find("meta", attrs = {"property":"og:type"}).get("content")
+                except:
+                    sub_category = ""
+                try:
+                    news_weblink = k
+                except:
+                    news_weblink = ""
+                try:
+                    analysis = soup.find("meta", attrs = {"name":"description"}).get("content")
+                except:
+                    analysis = ""
+                try:
+                    image = soup.find("meta", attrs = {"property":"og:image"}).get("content")
+                except:
+                    image = ""
+                try:
                     news_date = dateparser.parse(l)
-                    try:
-                        announcement = soup.find("div", class_='main-container container-fluid pry-container').text
-                    except:
-                        announcement = ""
-                    try:
-                        announcement_type = news_weblink.replace("https://www.prysmiangroup.com/en/","").split("/")[0]
-                    except:
-                        announcement_type = ""
-                    language = "en-US"
-                    crawled_date = datetime.now()
-                    
-                    company_news = {}
-                    company_news['companyId'] = ''
-                    company_news['location']=''
-                    company_news['comment']=''
-                    company_news['Date']= news_date
-                    company_news['Crawled_on']=crawled_date
-                    company_news['title']=title
-                    company_news['Language']= language
-                    company_news['announcementType']= announcement_type
-                    company_news['Source'] = page_source
-                    company_news['News_Weblink'] = news_weblink
-                    company_news['photo']= image
-                    company_news['videos']= ''
-                    company_news['announcement']=announcement
-                    company_news['historySubCategory']= sub_category
-                    company_news['analysis'] = analysis
-                    try:
-                        collection.insert_one(company_news)
-                        total_crwalled_links += 1
-                    except Exception as e:
-                        running_Sequence.append(e)
+                except:
+                    news_date = datetime.now()
+                try:
+                    announcement = soup.find("div", class_='main-container container-fluid pry-container').text
+                except:
+                    announcement = ""
+                try:
+                    announcement_type = news_weblink.replace("https://www.prysmiangroup.com/en/","").split("/")[0]
+                except:
+                    announcement_type = ""
+                language = "en-US"
+                crawled_date = datetime.now()
+                
+                company_news = {}
+                company_news['companyId'] = ''
+                company_news['location']=''
+                company_news['comment']=''
+                company_news['Date']= news_date
+                company_news['Crawled_on']=crawled_date
+                company_news['title']=title
+                company_news['Language']= language
+                company_news['announcementType']= announcement_type
+                company_news['Source'] = page_source
+                company_news['News_Weblink'] = news_weblink
+                company_news['photo']= image
+                company_news['videos']= ''
+                company_news['announcement']=announcement
+                company_news['historySubCategory']= sub_category
+                company_news['analysis'] = analysis
+                try:
+                    collection.insert_one(company_news)
+                    total_crwalled_links += 1
+                except Exception as e:
+                    running_Sequence.append(e)
     
     if Already_exist >= 1:
 

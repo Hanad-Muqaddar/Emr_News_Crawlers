@@ -141,55 +141,55 @@ try:
         else:
             continue
     links = links[1:]
-    # print(links)
-    for j in links:
-        response = requests.get(j)
-        soup = BeautifulSoup(response.content, 'lxml')
-        try:
-            title = soup.find("title").text
-        except:
-            title = ""
-        try:
-            analysis = soup.find("meta", attrs={"name":"description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            d = soup.find("div", class_='field-content-published-date').text
-            news_date = dateparser.parse(d,  settings={'DATE_ORDER': 'MDY'} )
-        except:
-            news_date = ""
-        try:
-            announcement = soup.find("div", id='content').find("div", class_='row component column-splitter').text.strip()
-        except:
-            announcement = ""
-        try:
-            image = "https://www.belden.com" + soup.find("img").get("src")
-        except:
-            image = ""
-        try:
-            announcement_type = soup.find("div", class_="field-pre-text").text
-        except:
-            announcement_type = ""
-        try:
-            sub_category = soup.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
-        page_source = "https://www.belden.com/news#sort=%40contentpublisheddate%20descending"
-        language = "en-US"
-        
-        date = datetime.now()
-        news_weblink = j
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
+    
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        if news_weblink in links_list:
+    for j in links:
+
+        if j in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             continue
         else:
+            response = requests.get(j)
+            soup = BeautifulSoup(response.content, 'lxml')
+            try:
+                title = soup.find("title").text
+            except:
+                title = ""
+            try:
+                analysis = soup.find("meta", attrs={"name":"description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                d = soup.find("div", class_='field-content-published-date').text
+                news_date = dateparser.parse(d,  settings={'DATE_ORDER': 'MDY'} )
+            except:
+                news_date = ""
+            try:
+                announcement = soup.find("div", id='content').find("div", class_='row component column-splitter').text.strip()
+            except:
+                announcement = ""
+            try:
+                image = "https://www.belden.com" + soup.find("img").get("src")
+            except:
+                image = ""
+            try:
+                announcement_type = soup.find("div", class_="field-pre-text").text
+            except:
+                announcement_type = ""
+            try:
+                sub_category = soup.find('meta', attrs = {"property":"og:type"}).get("content")
+            except:
+                sub_category = ""
+            page_source = "https://www.belden.com/news#sort=%40contentpublisheddate%20descending"
+            language = "en-US"
+            
+            date = datetime.now()
+            # Creating a list of links already avilable in database
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -200,7 +200,7 @@ try:
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
+            company_news['News_Weblink'] = j
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement

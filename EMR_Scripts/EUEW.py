@@ -127,12 +127,11 @@ try:
     result = requests.get("https://www.euew.org/news")
     response = Selector(result)
     links = response.css(".pro-gallery .has-custom-focus ::attr(href)").getall()
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
     for i in links:
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
-        
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1

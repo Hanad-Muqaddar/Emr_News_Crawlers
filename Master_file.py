@@ -5,7 +5,7 @@ import copy
 myclient = pymongo.MongoClient("mongodb://su-du-ad:updatedSuperDuperAdmin@34.121.98.98:27017/emrweb?authSource=admin")
 myclient2 = pymongo.MongoClient("mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin")
 
-MyDatabase = myclient["emrdevelopment"]
+MyDatabase = myclient["emrweb"]
 MyDatabase2 = myclient2['TEMP_EMR_NEWS_Crawler_DB']
 
 MyCollection = MyDatabase["crawler_status"]

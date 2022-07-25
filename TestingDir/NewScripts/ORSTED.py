@@ -136,69 +136,57 @@ try:
         link = link.text
         if 'media/newsroom/news/' in link or 'en/company-announcement-list/'in link and link not in news_links:
             news_links.append(link) 
+    
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-    print(news_links)
-    print(len(news_links))
-
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-
-        try:
-            title = data.find('meta',attrs = {'property':'og:title'}).get('content')
-            print(title)
-        except:
-            title = ""
-            print(title)
-        
-        announcement_type = "News"
-        language = "en-us"
-
-        try:
-            image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-            print(image)
-        except:
-            image = ""
-            print(image)
-
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            date = data.find('p',attrs = {'class':"article-date"}).get_text(strip=True)
-            print(date)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://orsted.com/en/media/newsroom/news"
-        news_weblink = i
-        
-        try:         
-            announcement = data.find('div',attrs = {'class':"article-content richtext"}).find('div',attrs = {'class':"article-content-inner"}).get_text(strip=True)
-            print(announcement)
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+    for i in news_links:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             continue
-        else:
+        else:       
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('meta',attrs = {'property':'og:title'}).get('content')
+            except:
+                title = ""
+            
+            announcement_type = "News"
+            language = "en-us"
+
+            try:
+                image = data.find('meta', attrs = {"property":"og:image"}).get("content")
+            except:
+                image = ""
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                date = data.find('p',attrs = {'class':"article-date"}).get_text(strip=True)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+            except:
+                news_date = ""
+
+            page_source = "https://orsted.com/en/media/newsroom/news"
+            
+            try:         
+                announcement = data.find('div',attrs = {'class':"article-content richtext"}).find('div',attrs = {'class':"article-content-inner"}).get_text(strip=True)
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+        # Creating a list of links already avilable in database
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -209,7 +197,7 @@ try:
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
+            company_news['News_Weblink'] = i
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement

@@ -137,11 +137,13 @@ try:
         if "/news/press-releases/" in news_link and news_link not in news_links:
             news_links.append(news_link)
 
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     for i in news_links:
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+        
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -177,7 +179,6 @@ try:
                 news_date = ""
 
             page_source = "https://ams-osram.com/news"
-            news_weblink = i
             
             try:
                 html = requests.get(i).text
@@ -199,7 +200,7 @@ try:
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
+            company_news['News_Weblink'] = i
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement
