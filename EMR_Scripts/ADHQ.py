@@ -60,8 +60,8 @@ else:
 total_crwalled_links = 0
 Already_exist = 0
 try:
-    total_page = json.loads(requests.get('https://www.adhq.com/news/json/').text)['total_pages']
-    for i in range(total_page):
+    # total_page = json.loads(requests.get('https://www.adhq.com/news/json/').text)['total_pages']
+    for i in range(2):
         req_url = 'https://www.adhq.com/news/json/'+str(i+1)
         data = json.loads(requests.get(req_url).text)['articles']
         running_Sequence.append('Crawling News Data for ADHQ, count - ' +str(i+1))

@@ -157,7 +157,11 @@ try:
             title = translate(title)
             # print(title)
         except:
-            title =""
+            try:
+                title = data.find('title').get_text(strip=True)
+                title = title.replace('- Oosterberg','')
+            except:
+                title = ""
             # print(title)
         
         announcement_type = "News"
