@@ -141,12 +141,12 @@ try:
 
     links = soup.find_all('div',{ "class" : "views-row"})
     for link in links:
-        news_link = Main_url + link.find('a',{ "class" : "internal-icon"}).get('href')
+        news_link = Main_url + link.find('a').get('href')
         if news_link not in news_links:
             news_links.append(news_link)
 
-    print(news_links)
-    print(len(news_links))
+    # print(news_links)
+    # print(len(news_links))
 
     for i in news_links:        
         response = requests.get(i, headers=headers)
@@ -155,11 +155,11 @@ try:
         try:
             title = data.find('meta', attrs = {"property":"og:title"}).get("content")
             title = title.replace('| Latest releases SIMON','')
-            print(title)
+            # print(title)
         except:
             title = data.find('title').text
             title = title.replace('| Latest releases SIMON','')
-            print(title)
+            # print(title)
         
         announcement_type = "Press Release"
 
@@ -170,7 +170,7 @@ try:
             print(image)
         except:
             image = ""
-            print(image)
+            # print(image)
 
         try:
             sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
@@ -185,7 +185,7 @@ try:
             date = data.find('div', {"class":"field field--name-published-at field--type-published-at field--label-inline clearfix"}).find('div', {"class":"field__item"}).get_text().replace('de','')
             date = translate(date)
             news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
+            # print(news_date)
         except:
             news_date = ""
 
@@ -196,7 +196,7 @@ try:
             html = requests.get(i).text
             announcement = fulltext(html)
             announcement = announcement.replace('\n','<br>')
-            print(announcement)
+            # print(announcement)
             
         except:
             announcement = ""
