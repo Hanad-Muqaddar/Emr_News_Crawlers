@@ -31,7 +31,7 @@ running_Sequence = []
 started_on = datetime.now()
 c_name = 'OSRAM'
 try:
-    # client= MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin')
+    client= MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin')
     file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
     data = json.load(file)
     db_path = data[0]['Db_Path']
@@ -233,7 +233,10 @@ try:
                 news['Source'] = "https://www.osram.com/cb/news/index.jsp"
                 news['News_Weblink'] = link
                 news['analysis'] = x.find(class_='introPR').text[2:]
-                news['historySubCategory'] = ",".join([jj.text.strip() for jj in x.find_all('span',class_='addcomma')])
+                try:
+                    news['historySubCategory'] = ",".join([jj.text.strip() for jj in x.find_all('span',class_='addcomma')])
+                except:
+                    news['historySubCategory'] = ""
                 news['Crawled_on'] = datetime.now()
                 validation_obj = {}
                 validation_obj['companyId'] = news["companyId"]

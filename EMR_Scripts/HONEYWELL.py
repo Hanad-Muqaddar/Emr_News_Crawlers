@@ -26,6 +26,7 @@ from datetime import datetime,date, timedelta
 from bson.objectid import ObjectId
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
+from scrapy import Selector
 opts = Options()
 # opts.add_argument("--window-size=190,100")
 # opts.add_argument("--disable-automation")
@@ -138,6 +139,7 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
     running_Sequence.append('Starting Press Release Crawler')
     req = requests.get('https://www.honeywell.com/us/en/press')
+    scr_res = Selector(req)
     # driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)
     # driver.set_page_load_timeout(220)
     # driver.implicitly_wait(220)
@@ -175,7 +177,13 @@ try:
                     ann.append(p.text.strip())
             news['announcement'] = '\n'.join(ann)
             # news['Date'] = soup.find('meta',attrs={''})
-            news['title'] = sub_soup_1.find('title').text.strip()
+            try:
+                title = scr_res.xpath("//h1/text()").get()
+                if title == "":
+                    title = scr_res.xpath("//title/text()").get()
+            except:
+                title = ""
+            news['title'] = title
             news['historySubCategory'] = sub_soup_1.find('meta',attrs={'name':'keywords'}).get('content') if sub_soup_1.find('meta',attrs={'name':'keywords'})!=None else ''
             news['Source'] = 'https://www.honeywell.com/us/en/press'
             news['analysis'] = sub_soup_1.find('meta',attrs={'name':'description'}).get('content') if sub_soup_1.find('meta',attrs={'name':'description'})!=None else ''
