@@ -126,8 +126,11 @@ else:
 # *****************************************************************************
 
 try:
+    proxies = {'http': 'http://alihaider99:cheeta@de.proxymesh.com:31280',
+            'https': 'http://alihaider99:cheeta@de.proxymesh.com:31280'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     print("Starting Schenider Crawler")
-    result = requests.get("https://www.se.com/ww/en/about-us/newsroom/news/")
+    result = requests.get("https://www.se.com/ww/en/about-us/newsroom/news/", headers=headers, proxies=proxies)
     print("Passing Result ho gya")
     res = Selector(result)
     data = res.css(".sdl-wiztopic-press-releases_wiztopic-card")
@@ -152,7 +155,7 @@ try:
             continue
         else:
             print("andar wala url phans gya")
-            result2 = requests.get(news_weblink)
+            result2 = requests.get(news_weblink, headers=headers, proxies=proxies)
             print("andar wala v chal gya.")
             response1 = Selector(result2)
             try:
