@@ -126,9 +126,12 @@ else:
 # *****************************************************************************
 
 try:
+    print("Starting Schenider Crawler")
     result = requests.get("https://www.se.com/ww/en/about-us/newsroom/news/")
+    print("Passing Result ho gya")
     res = Selector(result)
     data = res.css(".sdl-wiztopic-press-releases_wiztopic-card")
+    print("DATA IS COMING")
     for i in data:
         try:
             news_weblink = "https://www.se.com" + i.css(".wiztopic-content a::attr(href)").get()
@@ -148,7 +151,9 @@ try:
             Already_exist += 1
             continue
         else:
+            print("andar wala url phans gya")
             result2 = requests.get(news_weblink)
+            print("andar wala v chal gya.")
             response1 = Selector(result2)
             try:
                 image = response1.xpath("//meta[@name='og:image']/@content").get()
