@@ -134,7 +134,7 @@ try:
     links = soup.find_all("loc")
     for link in links:
         news_link = link.text
-        if "/news/press-releases/" in news_link and news_link not in news_links:
+        if "/news/" in news_link and news_link not in news_links:
             news_links.append(news_link)
 
     db_list = []
@@ -156,7 +156,7 @@ try:
             try:
                 title = data.find('h1',attrs = {'class':'info-detail__title'}).find('span',attrs = {'class':'active'}).get_text(strip=True)
             except:
-                title = ""
+                title = title = data.find('h1',attrs = {'class':'info-detail__title'}).get_text(strip=True)
             
             announcement_type = "News"
 

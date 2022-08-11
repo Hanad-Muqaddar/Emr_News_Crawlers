@@ -46,11 +46,13 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
+from selenium.webdriver.chrome.service import Service as ChromeService
+
+from webdriver_manager.chrome import ChromeDriverManager
+
 # ************************************************************************
 # defining variables
 opts = Options()
-# opts.add_argument("--window-size=190,100")
-# opts.add_argument("--disable-automation")
 opts.add_argument("--no-sandbox")
 opts.add_argument('--profile-directory=Default')
 opts.add_argument("start-maximized")
@@ -58,12 +60,6 @@ opts.add_argument("disable-infobars")
 opts.add_argument("--lang=en")
 opts.add_argument("--enable-javascript")
 opts.add_argument("--enable-cookies")
-lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-prefs = {
-  "translate_whitelists": lang_dict,
-  "translate":{"enabled":"true"}
-}
-opts.add_experimental_option("prefs", prefs)
 opts.headless = True
 
 running_Sequence = []
@@ -144,7 +140,8 @@ else:
 # *****************************************************************************
 # Writing driver path
 try:
-    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver',options=opts)
+    # driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver',options=opts)
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
     print("1st step")
     links = ["https://www.danfoss.com/en/about-danfoss/news/?sort=startDate_desc", "https://www.danfoss.com/en/service-and-support/case-stories/?sort=startDate_desc"]
     for i in links:
@@ -197,7 +194,7 @@ try:
                     image = ""
                 try:
                     d = soup.find("div", class_='sub-title').text.strip()
-                    news_date = dateparser.parse(d)
+                    news_date = dateparser.parse(d, settings={'DATE_ORDER': 'YMD'})
                 except:
                     news_date = ""
                 try:

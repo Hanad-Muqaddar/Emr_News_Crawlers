@@ -1,4 +1,5 @@
 # Packages to be imported
+from pickle import FALSE
 import requests
 import time
 import json
@@ -25,26 +26,9 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from newspaper import fulltext
+from scrapy import Selector
 # ************************************************************************
-# defining variables
-opts = Options()
-opts.add_argument("--window-size=190,100")
-opts.add_argument("--disable-automation")
-opts.add_argument("--no-sandbox")
-opts.add_argument('--profile-directory=Default')
-opts.add_argument("start-maximized")
-opts.add_argument("disable-infobars")
-opts.add_argument("--lang=en")
-opts.add_argument("--enable-javascript")
-opts.add_argument("--enable-cookies")
-opts.add_argument('user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36')
-lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-prefs = {
-  "translate_whitelists": lang_dict,
-  "translate":{"enabled":"true"}
-}
-opts.add_experimental_option("prefs", prefs)
-opts.headless = True
+# defining variable
 running_Sequence = []
 started_on = datetime.now()
 c_name = 'Emerson_Group' # Name of the Collection
@@ -82,83 +66,70 @@ else:
 ############# Every Company Logic Here #############
 ####################################################
 # *****************************************************************************
+links_list = []
+mydoc = collection.find()
+for x in mydoc:
+    links_list.append(x['News_Weblink'])
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    # service = Service("C:\Program Files (x86)\chromedriver.exe")
-    # driver = webdriver.Chrome(service=service)
-    print("Coming on driver")
-    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe',options=opts)
-    print("driver getting")
-    driver.get("https://www.emerson.com/en-us/news/search?cmFacetId=34014")
-    print("saving screenshot")
-    # driver.save_screenshot('emerson_group_screenshot.png')
-    time.sleep(5)
-    news_links = []
-    news_dates = []
-    links = driver.find_elements(By.XPATH, '//div[@class="card-content"]')
-    for link in links:
-        news_link = link.find_element(By.XPATH, './/a[@class="cta-text cta--primary cta--internal "]').get_attribute('href')
-        news_links.append(news_link)
-        date1 = link.find_element(By.XPATH, './/div[@class="meta-bar"]/label[@class="meta-3"]').text
-        news_dates.append(date1)
+    result = requests.get("https://www.emerson.com/en-us/news", headers=headers)
+    response = Selector(result)
+    news_links = response.css("#section4 .card-item .display-content a::attr(href)").getall()
+    news_dates = response.css("#section4 .card-item .meta-4::text").getall()
     # print(news_links)
     # print(news_dates)
     for i, L_date in zip(news_links, news_dates):
-    # for i in news_links:
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-        try:
-            title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-            title = title.replace('| Emerson US','')
-            # print(title)
-        except:
-            title = data.find('title').get_text(strip=True)
-            title = title.replace('| Emerson US','')
-            # print(title)
-        language = "en-us"
-        announcement_type = "News"
-        try:
-            image = data.find("div", class_="cm-teaser--embedded").find("img").get('data-cm-responsive-media')
-            newimg = json.loads(image)
-            img = newimg[0]['linksForWidth']['768']
-        except:
-            img = ""
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-            # print(sub_category)
-        except:
-            sub_category = ""
-        try:
-            analysis = data.find('meta', attrs = {"name":"og:description"}).get("content")
-            # print(analysis)
-        except:
-            analysis = ""
-        try:
-            # dateparser.parse(L_date,settings={'DATE_ORDER': 'YMD'})
-            news_date = dateparser.parse(L_date,settings={'DATE_ORDER': 'YMD'})
-            # print(news_date)
-        except:
-            news_date = ""
-        page_source = "https://www.emerson.com/en-us/news/search?cmFacetId=34014"
-        news_weblink = i
-        try:
-            announcement = data.find('div', class_="col-xs-12").find("div", class_="padded-container").get_text(strip=True)
-            # print(announcement)
-        except:
-            announcement = ""
-            # print(announcement)
-        date = datetime.now()
-        # print(date)
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             continue
         else:
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+            try:
+                title = data.find('meta', attrs = {"property":"og:title"}).get("content")
+                title = title.replace('| Emerson US','')
+                # print(title)
+            except:
+                title = data.find('title').get_text(strip=True)
+                title = title.replace('| Emerson US','')
+                # print(title)
+            language = "en-us"
+            announcement_type = "News"
+            try:
+                image = data.find("div", class_="cm-teaser--embedded").find("img").get('data-cm-responsive-media')
+                newimg = json.loads(image)
+                img = newimg[0]['linksForWidth']['768']
+            except:
+                img = ""
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+                # print(sub_category)
+            except:
+                sub_category = ""
+            try:
+                analysis = data.find('meta', attrs = {"name":"og:description"}).get("content")
+                # print(analysis)
+            except:
+                analysis = ""
+            try:
+                # dateparser.parse(L_date,settings={'DATE_ORDER': 'YMD'})
+                news_date = dateparser.parse(L_date,settings={'DATE_ORDER': 'YMD'})
+                # print(news_date)
+            except:
+                news_date = ""
+            page_source = "https://www.emerson.com/en-us/news/search?cmFacetId=34014"
+            news_weblink = i
+            try:
+                announcement = data.find('div', class_="col-xs-12").find("div", class_="padded-container").get_text(strip=True)
+                # print(announcement)
+            except:
+                announcement = ""
+                # print(announcement)
+            date = datetime.now()
+            # print(date)
+            # Creating a list of links already avilable in database
+    
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -208,4 +179,4 @@ log['Crawler_Runing Sequence'] = running_Sequence if running_Sequence else ''
 log['Links_Skipped'] = Already_exist
 log['Last_news_crawl_time'] = last_time
 log['Browser'] = 'None'
-error_logs.insert_one(log)
+# error_logs.insert_one(log)
