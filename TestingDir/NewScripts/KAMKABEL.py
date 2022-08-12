@@ -144,8 +144,8 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
 
-    print(news_links)
-    print(len(news_links))
+    # print(news_links)
+    # print(len(news_links))
 
     for i in news_links:        
         response = requests.get(i, headers=headers)
@@ -154,10 +154,11 @@ try:
         try:
             title = data.find('section',attrs = {"class":"page-top"}).find('h1').get_text()
             title = translate(title)
-            print(title)
+            # print(title)
         except:
-            title ="ERROR WALA TITLE CHAL RAHA"
-            print(title)
+            title = data.find('title').get_text()
+            title = translate(title)
+            # print(title)
         
         announcement_type = "News"
         language = "en-us"
@@ -188,7 +189,11 @@ try:
             news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
             # print(news_date)
         except:
-            news_date = ""
+            date = data.find('div',{'class':'period'}).get_text()
+            date = translate(date)
+            # print(date)
+            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+            # print(news_date)
 
         page_source = "https://www.kamkabel.ru/press/news/"
         news_weblink = i

@@ -134,7 +134,7 @@ try:
     links = soup.find_all("loc")
     for link in links:
         news_link = link.text
-        if "/news/" in news_link and news_link not in news_links:
+        if "/news/press-releases/" in news_link and news_link not in news_links:
             news_links.append(news_link)
 
     db_list = []
@@ -155,8 +155,10 @@ try:
 
             try:
                 title = data.find('h1',attrs = {'class':'info-detail__title'}).find('span',attrs = {'class':'active'}).get_text(strip=True)
+                # print(title)
             except:
-                title = title = data.find('h1',attrs = {'class':'info-detail__title'}).get_text(strip=True)
+                title = data.find('h1',attrs = {'class':'info-detail__title'}).get_text(strip=True)
+                # print(title)
             
             announcement_type = "News"
 
@@ -173,8 +175,9 @@ try:
             except:
                 analysis = ""
             try:
-                date = data.find('p',{"class":"info-detail__left-date"}).get_text()
+                date = data.find('p',{"class":"info-detail__left-date"}).get_text(strip=True)
                 news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                # print(news_date)
             except:
                 news_date = ""
 

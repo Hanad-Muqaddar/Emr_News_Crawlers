@@ -1,5 +1,6 @@
 # Packages to be imported
 from functools import total_ordering
+from hashlib import new
 from urllib import response
 import requests
 
@@ -63,11 +64,11 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    # data = json.load(file)
-    # db_path = data[0]['Db_Path']
-    # client = MongoClient(db_path)
-    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    data = json.load(file)
+    db_path = data[0]['Db_Path']
+    client = MongoClient(db_path)
+    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -111,7 +112,7 @@ else:
 
     last_time = last_insertion['Date']
 
-    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+    # running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
 
     Crwl_time = last_insertion['Date']
 
@@ -131,14 +132,13 @@ try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     result = requests.get("https://www.se.com/ww/en/about-us/newsroom/news/", headers=headers, proxies=proxies)
     res = Selector(result)
-    data = res.css(".sdl-wiztopic-press-releases_wiztopic-card")
+    data = res.css(".sdl-wiztopic-press-releases_wiztopic-card .wiztopic-content")
     for i in data:
         try:
-            news_weblink = "https://www.se.com" + i.css(".wiztopic-content a::attr(href)").get()
+            news_weblink = "https://www.se.com" + i.css("a::attr(href)").get()
         except:
             news_weblink = ""
-        date_get = i.css(".date-published").xpath("normalize-space()").get()
-        location = i.css('.location').xpath("normalize-space()").get()
+        
         if news_weblink == "":
             continue
             
@@ -153,6 +153,8 @@ try:
         else:
             result2 = requests.get(news_weblink, headers=headers, proxies=proxies)
             response1 = Selector(result2)
+            date_get = response1.css(".sdl-wiztopic-press-release_publication-data p:nth-child(2) span").xpath("normalize-space()").get()
+            location = response1.css('.sdl-wiztopic-press-release_publication-data p:nth-child(1) span').xpath("normalize-space()").get()
             try:
                 image = response1.xpath("//meta[@name='og:image']/@content").get()
             except:
@@ -167,7 +169,7 @@ try:
                 title = ""
             try:
                 news_date = date_get
-                news_date = dateparser.parse(news_date, settings={"DATE_ORDER", "YMD"})
+                news_date = dateparser.parse(news_date)
             except:
                 news_date = ""
             try:

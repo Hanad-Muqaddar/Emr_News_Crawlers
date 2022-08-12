@@ -168,7 +168,7 @@ try:
         sub_category = ""   
         analysis = ""
         try:
-            news_date = dateparser.parse(N_Date,  settings={'DATE_ORDER': 'YMD'} )
+            news_date = dateparser.parse(N_Date)
             # print(news_date)
         except:
             news_date = ""
