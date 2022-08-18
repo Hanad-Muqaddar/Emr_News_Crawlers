@@ -35,12 +35,6 @@ opts.add_argument("disable-infobars")
 opts.add_argument("--lang=en")
 opts.add_argument("--enable-javascript")
 opts.add_argument("--enable-cookies")
-lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-prefs = {
-  "translate_whitelists": lang_dict,
-  "translate":{"enabled":"true"}
-}
-opts.add_experimental_option("prefs", prefs)
 opts.headless = True
 
 

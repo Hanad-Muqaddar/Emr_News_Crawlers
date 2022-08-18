@@ -165,8 +165,8 @@ try:
     'ORSTED' : ObjectId("623485b44bb2fdf4663a00d4"),
     'Phoenix Contact' : ObjectId("60c9ae6793a9401abe47dd4c"),
     'MSC_ Industrial_Supply' : ObjectId("61715d10c91d8776ded7c2bf"),
-    # '' : ObjectId(""),
-    # '' : ObjectId(""),
+    'Atkore_International' : ObjectId("60be0da5c35e8a6bcd13b54a"),
+    'Simon_Electric' : ObjectId("60cc323cf55392bb06c91ce4"),
     # '' : ObjectId(""),
     # '' : ObjectId(""),
     'Alexander_Burkle' : ObjectId('61cc5db183206f95a9113a5e'),
@@ -181,7 +181,7 @@ try:
     'Emiloffelhardt_GmbH' : ObjectId('61cd809683206f95a9119a48'),
     'Farnell' : ObjectId('6183995f4ddd028ed14aaf2f'),
     'Finder' : ObjectId('61cd61bc83206f95a9117e03'),
-    'Fluke' : ObjectId('61cc497f0e9e5244a6b493a3'),
+    'Fulke' : ObjectId('61cc497f0e9e5244a6b493a3'),
     'GGK_Gmbh' : ObjectId('61cd87c383206f95a9119c2b'),
     'Gira_Gmbh' : ObjectId('61cc365c0e9e5244a6b479e3'),
     'Glen_Dimplex' : ObjectId('61cd4f5183206f95a91146af'),
@@ -221,7 +221,7 @@ try:
     'OBO':ObjectId('5fc44ff12852a00420e0c984'),
     'WESCO':ObjectId('603c9b9b2852a0267c6c576b'),
     'IMELCO':ObjectId('60ae347f2852a02020c3f90a'),
-    #'RITTAL':ObjectId('60b624232852a01f70fef636'),
+    'RITTAL':ObjectId('60cb2dc7a893cf02bebede2d'),
     'FEGIME':ObjectId('60b62ef32852a01f70fef6a6'),
     'NAED': ObjectId('60b6365c2852a01f70fef71c'),
     'Acquity_Brands':ObjectId('60be08d1c35e8a6bcd13b4e3'),
@@ -358,4 +358,4 @@ log['CPU_Usage'] = str(psutil.cpu_percent())
 log['Total_RAM'] = str(psutil.virtual_memory().total)
 log['RAM_Usage'] = str(psutil.virtual_memory().percent)
 log['Avaiable_RAM_%'] = str(psutil.virtual_memory().available * 100 / psutil.virtual_memory().total)
-error_logs.insert_one(log)
+# error_logs.insert_one(log)

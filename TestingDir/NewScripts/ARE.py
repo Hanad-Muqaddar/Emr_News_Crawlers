@@ -53,7 +53,7 @@ running_Sequence = []
 
 started_on = datetime.now()
 
-c_name = 'ARE_Test_now' # Name of the Collection
+c_name = 'ARE' # Name of the Collection
 
 total_crwalled_links = 0
 
