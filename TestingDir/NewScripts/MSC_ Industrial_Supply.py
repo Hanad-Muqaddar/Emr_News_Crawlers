@@ -126,33 +126,40 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     proxies = {'http': 'http://alihaider99:cheeta@de.proxymesh.com:31280',
-            'https': 'http://alihaider99:cheeta@de.proxymesh.com:31280'}
+                'https': 'http://alihaider99:cheeta@de.proxymesh.com:31280'}
     Main_url = "https://www.mscdirect.com" 
     Base_url = "https://www.mscdirect.com/corporate/press-releases" 
     result = requests.get(Base_url,headers=headers, proxies=proxies)
     soup = BeautifulSoup(result.content , 'lxml')
           
-    A_news_titles = []
-    A_news_dates = [] 
+    total_titles = []
+    total_dates = []
+    total_links =[] 
 
     for t in soup.select('div.press-title'):
-        news_link = t.get_text(strip=True)
-    #     print(c)
-        A_news_titles.append(news_link)
+        title = t.get_text(strip=True)
+        # print(title)
+        total_titles.append(title)
 
     news_date = soup.select('div.press-date')  
     for d in news_date:
         news_date = d.get_text(strip=True)
-    #     print(c)
-        A_news_dates.append(news_date)
-    print(len(A_news_titles))
-    print(len(A_news_dates))
-
-    print(A_news_titles)
-    print(A_news_dates)
+        total_dates.append(news_date)
+    
+    Links = soup.select('div.press-title')    
+    for l in Links:
+        news_link = "https:" + l.find('a').get('href')
+        # print(news_link)
+        total_links.append(news_link)
+        
+    # print(len(A_news_titles))
+    # print(len(total_titles))
+    # print(A_news_titles)
+    # print(len(total_dates))
+    # print(len(total_links))
     
 
-    for i , N_Date in zip(A_news_titles,A_news_dates):        
+    for i , N_Date, lin in zip(total_titles,total_dates, total_links):        
         
         try:
             title = i
@@ -174,7 +181,8 @@ try:
             news_date = ""
 
         page_source = "https://www.mscdirect.com/corporate/press-releases"
-        news_weblink = i
+        news_weblink = lin
+        # print(news_weblink)
         
         announcement = ""
         

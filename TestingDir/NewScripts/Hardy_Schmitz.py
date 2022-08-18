@@ -144,8 +144,8 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
 
-    print(news_links)
-    print(len(news_links))
+    # print(news_links)
+    # print(len(news_links))
 
     for i in news_links:        
         response = requests.get(i, headers=headers)
@@ -157,7 +157,8 @@ try:
             title = translate(title)
             print(title)
         except:
-            title =""
+            title = data.find('title').get_text(strip=True)
+            title = title.replace('| Hardy Schmitz','')
             print(title)
         
         announcement_type = "News"
@@ -168,7 +169,7 @@ try:
             print(image)
         except:
             image = ""
-            print(image)
+            # print(image)
 
         try:
             sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
@@ -179,12 +180,12 @@ try:
         try:
             analysis = data.find('meta', attrs = {"name":"description"}).get("content")
             analysis = translate(analysis)
-            print(analysis)
+            # print(analysis)
         except:
             analysis = ""
         try:
             date = data.find('main', attrs = {"class":"flex-shrink-0"}).find('span').get_text()
-            date = translate(date).strip()            
+            # date = translate(date).strip()            
             news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
             print(news_date)
         except:
@@ -196,7 +197,7 @@ try:
         try:
             announcement = data.find('main', attrs = {"class":"flex-shrink-0"}).find('div', attrs = {"class":"container"}).get_text()
             announcement = translate(announcement)
-            print(announcement)            
+            # print(announcement)           
         except:
             announcement = ""
         
