@@ -163,7 +163,7 @@ try:
                 title = translate(title)
                 # print(title)
             except:
-                title = ""
+                title = data.find('h2', {"class":"header-2"}).get_text(strip=True)
             
             announcement_type = "News"
 
@@ -184,12 +184,14 @@ try:
                 analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
                 analysis = translate(analysis)
             except:
-                analysis = ""
+                try:
+                    analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+                except:
+                    analysis = ""
             try:
                 date = data.find('div', {"id":"main-content"}).find('div', {"class":"ce-bodytext"}).find('p').find('strong').get_text(strip=True)
                 f_date = date.split(',')[1].replace('–','').strip()
-                t_date = translate(f_date)
-                news_date = dateparser.parse(t_date,  settings={'DATE_ORDER': 'YMD'} )
+                news_date = dateparser.parse(f_date,  settings={'DATE_ORDER': 'YMD'} )
             except:
                 news_date = datetime.now()
 
@@ -202,7 +204,13 @@ try:
                 announcement = announcement.replace('\n','<br>')
                 announcement = translate(announcement)
             except:
-                announcement = ""
+                try:
+                    html = requests.get(i).text
+                    announcement = fulltext(html)
+                    announcement = announcement.replace('\n','<br>')
+                    announcement = translate(announcement)
+                except:
+                    announcement = ""
             
             date = datetime.now()
             # Creating a list of links already avilable in database
