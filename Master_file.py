@@ -46,7 +46,7 @@ crawlerToCollectionMapping={
     "RS_GROUP" : "RS_Components",
     "NEXANS":"NEXANS",
     "OSRAM_new":"OSRAM",
-    "Merten" : "Merten",
+    "Merten" : "Ritto_GmbH",
     "OSRAM":"OSRAM",
     "ams_Osram":"OSRAM",
     "PANDUIT":"PANDUIT",

@@ -54,7 +54,7 @@ running_Sequence = []
 
 started_on = datetime.now()
 
-c_name = 'Merten' # Name of the Collection
+c_name = 'Ritto_GmbH' # Name of the Collection
 
 total_crwalled_links = 0
 
