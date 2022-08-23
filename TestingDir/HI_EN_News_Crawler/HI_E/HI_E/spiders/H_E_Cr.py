@@ -1,4 +1,3 @@
-import imp
 from scrapy.spiders import SitemapSpider
 import dateparser
 import datetime
@@ -7,16 +6,14 @@ from scrapy.utils.project import get_project_settings
 import unicodedata
 import requests
 import json
-from HI_EN_News_Crawler import settings
 from pymongo import MongoClient
 
 
-
 class MySpider(SitemapSpider):
-    client = MongoClient(settings.MONGO_URI)
-    db_name = settings.Reading_Database
-    collection_name = settings.Collection_For_Storing_Results
-    result = client[db_name][collection_name].aggregate([
+    settings = get_project_settings()
+    
+    client = MongoClient(settings.get('MONGO_URI'))
+    result = client[settings.get('Reading_DB')][settings.get('collection')].aggregate([
             {
                 '$project': {
                     'News_Weblink': 1
