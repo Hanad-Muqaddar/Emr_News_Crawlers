@@ -14,8 +14,7 @@ NEWSPIDER_MODULE = 'HI_E.spiders'
 
 MONGO_URI = "mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin"
 MONGO_DATABASE = "TEMP_EMR_NEWS_Crawler_DB"
-Reading_DB = "TEMP_EMR_NEWS_Crawler_DB"
-collection = "HITACHI_ABB"
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'HI_E (+http://www.yourdomain.com)'
 # Obey robots.txt rules

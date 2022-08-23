@@ -10,10 +10,9 @@ from pymongo import MongoClient
 
 
 class MySpider(SitemapSpider):
-    settings = get_project_settings()
     
-    client = MongoClient(settings.get('MONGO_URI'))
-    result = client[settings.get('Reading_DB')][settings.get('collection')].aggregate([
+    client = MongoClient("mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin")
+    result = client["TEMP_EMR_NEWS_Crawler_DB"]["HITACHI_ABB"].aggregate([
             {
                 '$project': {
                     'News_Weblink': 1

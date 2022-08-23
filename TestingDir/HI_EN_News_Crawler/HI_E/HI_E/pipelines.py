@@ -18,8 +18,8 @@ class HiEPipeline:
 
 
 class MongoPipeline:
-    settings = get_project_settings()
-    collection_name = settings.get('collection') 
+    
+    collection_name = "HITACHI_ABB"
 
     def __init__(self, mongo_uri, mongo_db):
         self.mongo_uri = mongo_uri
@@ -47,7 +47,7 @@ class MongoPipeline:
 
 class DuplicatesPipeline:
 
-    collection_name = settings.get('collection')
+    collection_name = "HITACHI_ABB"
     urls_seen = []
     
     def __init__(self, mongo_uri, mongo_db):
