@@ -19,8 +19,6 @@ from selenium import webdriver
 
 from selenium.webdriver.chrome.options import Options
 
-from selenium.webdriver.chrome.service import Service
-
 from selenium.webdriver.support.ui import WebDriverWait
 
 from selenium.webdriver.common.keys import Keys
@@ -50,23 +48,12 @@ from newspaper import fulltext
 
 # ************************************************************************
 # defining variables
-opts = Options()
-# opts.add_argument("--window-size=190,100")
-# opts.add_argument("--disable-automation")
-opts.add_argument("--no-sandbox")
-opts.add_argument('--profile-directory=Default')
-opts.add_argument("start-maximized")
-opts.add_argument("disable-infobars")
-opts.add_argument("--lang=en")
-opts.add_argument("--enable-javascript")
-opts.add_argument("--enable-cookies")
-
 
 running_Sequence = []
 
 started_on = datetime.now()
 
-c_name = 'LEVITON' # Name of the Collection
+c_name = 'Leviton' # Name of the Collection
 
 total_crwalled_links = 0
 
@@ -135,84 +122,80 @@ else:
 ####################################################
 
 # *****************************************************************************
-try:   
-
+try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    service = Service("/home/ubuntu/chrome_driver/chromedriver.exe")
-    driver = webdriver.Chrome(service=service, options=opts)
 
+    Base_url = "https://www.leviton.com/sites/Satellite?pagename=LC/Utilities/GetAllPressReleases&d=Default&id=1469251297323"
     Main_url = "https://www.leviton.com"
-
-    driver.get("https://www.leviton.com/en/company/news-events/press-releases")
-    time.sleep(5)
+    page = requests.get(Base_url)
+    json_result = page.json()
 
     news_links = []
     news_dates = []
 
-    links = driver.find_elements(By.XPATH, '//div[@class="block--results__result"]')
-    for link in links:
-        news_link = link.find_element(By.XPATH, './/a[@class="ss-md block--results__title"]').get_attribute('href')
-        news_links.append(news_link)
-        
-        date1 = link.find_element(By.XPATH, './/a[@class="block--results__caption"]').text
-        news_dates.append(date1)
+    for data in json_result['pressreleases']:
+        date = data['shortdescription']
+        news_dates.append(date)
 
-    # for i in news_links:   
-    for i, L_date in zip(news_links, news_dates):     
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+        link = Main_url + data['assoc_link']
+        news_links.append(link)
 
-        try:
-            title = data.find('div', attrs = {"class":"title--a"}).get_text(strip=True)
-            # print(title)
-        except:
-            title = data.find('title').text
-            # print(title)
-        
-        announcement_type = "Press Release"
-        language = "en-us"
-        image = "" 
 
-        try:
-            sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            news_date = dateparser.parse(L_date,  settings={'DATE_ORDER': 'YMD'} )
-            # print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://www.leviton.com/en/company/news-events/press-releases"
-        news_weblink = i
-        
-        try:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            # print(announcement)
-            
-        except:
-            announcement = ""
-
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
+    for i,d in zip(news_links, news_dates):
+        db_list = []
         mydoc = collection.find()
         for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+            db_list.append(x['News_Weblink'])
+        if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             continue
-        else:
+
+        else:        
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('div', attrs = {"class":"title--a"}).get_text(strip=True)
+                print(title)
+            except:
+                title = data.find('title').text
+                print(title)
+            
+            announcement_type = "Press Release"
+            language = "en-us"
+            image = "" 
+
+            try:
+                sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"name":"description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                news_date = dateparser.parse(d,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://www.leviton.com/en/company/news-events/press-releases"
+            news_weblink = i
+            
+            try:
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
+                
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+            # Creating a list of links already avilable in database
+            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -290,4 +273,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'None'
 
-error_logs.insert_one(log)
+# error_logs.insert_one(log)

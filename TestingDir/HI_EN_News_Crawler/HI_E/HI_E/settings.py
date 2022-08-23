@@ -12,14 +12,16 @@ BOT_NAME = 'HI_E'
 SPIDER_MODULES = ['HI_E.spiders']
 NEWSPIDER_MODULE = 'HI_E.spiders'
 
+Reading_Database = "TEMP_EMR_NEWS_Crawler_DB"
+
 MONGO_URI = "mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin"
 MONGO_DATABASE = "TEMP_EMR_NEWS_Crawler_DB"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'HI_E (+http://www.yourdomain.com)'
-
+Collection_For_Storing_Results = "HITACHI_ABB"
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32

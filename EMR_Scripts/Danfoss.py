@@ -1,5 +1,4 @@
 # Packages to be imported
-from functools import total_ordering
 import requests
 
 import time
@@ -10,13 +9,11 @@ from random import randint
 
 from bs4 import BeautifulSoup
 
-from pymongo import MongoClient
+from pymongo import MongoClient, response
 
 from bs4 import BeautifulSoup
 
 from selenium import webdriver
-
-# from webdriver_manager.chrome import ChromeDriver
 
 from selenium.webdriver.chrome.options import Options
 
@@ -28,8 +25,6 @@ from selenium.webdriver.support import expected_conditions
 
 from selenium.webdriver.common.by import By
 
-from urllib.parse import urlparse
-
 import re
 
 import traceback
@@ -38,7 +33,7 @@ import urllib
 
 import dateparser
 
-from datetime import datetime
+import datetime
 
 from bson.objectid import ObjectId
 
@@ -46,25 +41,16 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
-from selenium.webdriver.chrome.service import Service as ChromeService
+from scrapy import Selector
 
-from webdriver_manager.chrome import ChromeDriverManager
+from newspaper import fulltext
+
+import unicodedata
 
 # ************************************************************************
-# defining variables
-opts = Options()
-opts.add_argument("--no-sandbox")
-opts.add_argument('--profile-directory=Default')
-opts.add_argument("start-maximized")
-opts.add_argument("disable-infobars")
-opts.add_argument("--lang=en")
-opts.add_argument("--enable-javascript")
-opts.add_argument("--enable-cookies")
-opts.headless = True
-
 running_Sequence = []
 
-started_on = datetime.now()
+started_on = datetime.datetime.now()
 
 c_name = 'Danfoss' # Name of the Collection
 
@@ -77,11 +63,11 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -117,9 +103,9 @@ except:
 
 if last_insertion == None:
 
-    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
 
-    Crwl_time = datetime.now()
+    Crwl_time = datetime.datetime.now()
 
 else:
 
@@ -128,6 +114,26 @@ else:
     running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
 
     Crwl_time = last_insertion['Date']
+
+
+def parse_filtered_news(announcement):
+    api_url = "https://admin.new.emr-online.com/api/history/filterbody"
+    # api_url = "http://192.168.60.120:3000/api/history/filterbody"
+    payload = json.dumps({
+                            "originalBody": announcement
+                            })
+    headers = {
+                'Content-Type': 'application/json'
+                }
+    return_response = requests.request("POST", api_url, headers=headers, data=payload)
+    new_data = return_response.text
+    new_data = json.loads(new_data)
+    status = new_data['statusCode']
+    if status == 200:
+        return new_data
+    else:
+        new_data =  ""
+        return new_data
 
 # ****************************************************************************
 
@@ -138,175 +144,187 @@ else:
 ####################################################
 
 # *****************************************************************************
-# Writing driver path
+
 try:
-    # driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver',options=opts)
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
-    print("1st step")
-    links = ["https://www.danfoss.com/en/about-danfoss/news/?sort=startDate_desc", "https://www.danfoss.com/en/service-and-support/case-stories/?sort=startDate_desc"]
-    for i in links:
-        driver.get(i)
-        page_source = i
-        time.sleep(5)
-        try:
-            accept_button = driver.find_element_by_xpath("//div[@class='coi-button-group']/button[@class='coi-banner__accept']")
-            accept_button.click()
-        except:
-            pass
-        print("First Step")
-        links = driver.find_elements_by_xpath("//div[@class='col-md-9 list__wrapper']//li[@class='tile  clearfix  ']/a")
-        news_weblinks = []
-        try:
-            for j in links:
-                news_weblinks.append(j.get_attribute("href"))
-        except Exception as e:
-            print(e)
-        print(news_weblinks)
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
+    Base_url = "https://www.danfoss.com"
+    result = requests.get("https://www.danfoss.com/sitemap.xml/en/")
+    soup = BeautifulSoup(result.content, "html.parser")
+    links = soup.find_all('loc')
+    final_links = [link.text for link in links if "/news/" in link.text or "/case-stories/" in link.text]
+    final_links.remove('https://www.danfoss.com/en/service-and-support/case-stories/')
+    final_links.remove('https://www.danfoss.com/en/about-danfoss/news/')
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+    for i in final_links:
+        if i in db_list:
+            Already_exist += 1
+            total_crwalled_links += 1
+            continue 
+        elif "/news/" in i:
+            result1 = requests.get(i)
+            response1 = Selector(result1)
+            try:
+                news_date = response1.css('.sub-title ::text').get()
+                news_date = dateparser.parse(news_date)
+            except:
+                news_date = ""
+            try:
+                title = response1.css(".page-heading ::text").get()
+            except:
+                title = ""
+            try:
+                analysis = response1.xpath("//meta[@name='description']/@content").get()
+            except:
+                analysis = ""
+            try:
+                image = response1.xpath("//meta[@property='og:image']/@content").get()
+            except:
+                image = ""
+            sub_category = ""
+            try:
+                announcement = response1.css(".page-content").get()
+                replace1 = response1.css(".card-wrapper").getall()
+                for tl in replace1:
+                    announcement = announcement.replace(tl, "")
+                images = response1.css(".page-content picture img::attr(src)").getall()
+                img_src_set = response1.css(".page-content picture img::attr(data-src)").getall()
+                images1 = response1.css(".page-content picture img").getall()
+                final_img_src = []
+                for ii, jj, kk in zip(images, img_src_set, images1):
+                    a = '<img src="' + ii
+                    b = '<img src="https://www.danfoss.com' + jj
+                    f_img = kk.replace(a, b)
+                    final_img_src.append(f_img)
+                for bef_img , after_img in zip(images1, final_img_src):
+                    announcement = announcement.replace(bef_img, after_img)
+                return_data = parse_filtered_news(announcement)
+                announcement = return_data['filteredBody']
+                announcement = unicodedata.normalize("NFKD",announcement)
+                emr_essentail = return_data['emrEssential']
+                emr_executive = return_data['emrExecutive']
+                emr_lite = return_data['emrLite']
+                emr_html = return_data['emrHtmlText']
+            except:
+                announcement = ""
+                emr_essentail = ""
+                emr_executive = ""
+                emr_lite = ""
+                emr_html = ""
 
-        for z in news_weblinks:
-            if z in links_list:
+            announcement_type = "News"
+            language = "en-US"
+            page_source = "https://www.danfoss.com/en/about-danfoss/news/?sort=startDate_desc"
+            crawled_date = datetime.datetime.now()
+
+            company_news = {}
+            company_news['companyId'] = ''
+            company_news['location']=''
+            company_news['comment']=''
+            company_news['Date']= news_date
+            company_news['Crawled_on']=crawled_date
+            company_news['title']=title
+            company_news['Language']= language
+            company_news['announcementType']= announcement_type
+            company_news['Source'] = page_source
+            company_news['News_Weblink'] = i
+            company_news['photo']= image
+            company_news['videos']= ''
+            company_news['announcement']=announcement
+            company_news['historySubCategory']= sub_category
+            company_news['analysis'] = analysis
+            company_news['emrExecutive'] = emr_executive
+            company_news['emrEssential'] = emr_essentail
+            company_news['emrLite'] = emr_lite
+            company_news['News_Html'] = emr_html
+            try:
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
-                Already_exist += 1
-                continue
-            else:
-                result = requests.get(z)
-                soup = BeautifulSoup(result.content, 'lxml')
-                try:
-                    title = soup.find("meta", attrs={"property":"og:title"}).get("content")
-                except:
-                    title = ""
-                news_weblink = z
-                try:
-                    analysis = soup.find("meta", attrs={"property":"og:description"}).get("content")
-                except:
-                    analysis = ""
-                try:
-                    sub_category = soup.find('meta', attrs = {"property":"og:type"}).get("content")
-                except:
-                    sub_category = ""
-                try:
-                    image = soup.find("meta", attrs={"property":"og:image"}).get("content")
-                except:
-                    image = ""
-                try:
-                    d = soup.find("div", class_='sub-title').text.strip()
-                    news_date = dateparser.parse(d, settings={'DATE_ORDER': 'YMD'})
-                except:
-                    news_date = ""
-                try:
-                    announcement = soup.find("div", attrs = {"role":"main"}).text.strip()
-                except:
-                    announcement = ""
-                try:
-                    announcement_type = soup.find("div", class_='breadcrumbs-container').find_all("li")[2].text.strip()
-                except:
-                    announcement_type = ""
-                language = "en-US"
-                crawled_date = datetime.now()
-                break_condition = 0
-                company_news = {}
-                company_news['companyId'] = ''
-                company_news['location']=''
-                company_news['comment']=''
-                company_news['Date']= news_date
-                company_news['Crawled_on']=crawled_date
-                company_news['title']=title
-                company_news['Language']= language
-                company_news['announcementType']= announcement_type
-                company_news['Source'] = page_source
-                company_news['News_Weblink'] = news_weblink
-                company_news['photo']= image
-                company_news['videos']= ''
-                company_news['announcement']=announcement
-                company_news['historySubCategory']= sub_category
-                company_news['analysis'] = analysis
-                try:
-                    collection.insert_one(company_news)
-                    total_crwalled_links += 1
-                except Exception as e:
-                    running_Sequence.append(e)
-        try:
-            while True:
-                button = driver.find_element_by_xpath("//li[@class='next']")
-                button.click()
-                time.sleep(5)
-                links = driver.find_elements_by_xpath("//div[@class='col-md-9 list__wrapper']//li[@class='tile  clearfix  ']/a")
-                news_weblinks = []
-                for j in links:
-                    news_weblinks.append(j.get_attribute("href"))
-                links_list = []
-                mydoc = collection.find()
-                for x in mydoc:
-                    links_list.append(x['News_Weblink'])
+            except Exception as e:
+                running_Sequence.append(e)
 
-                for z in news_weblinks:
-                    if z in links_list:
-                        total_crwalled_links += 1
-                        Already_exist += 1
-                        continue
-                    else:
-                        result = requests.get(z)
-                        soup = BeautifulSoup(result.content, 'lxml')
-                        try:
-                            title = soup.find("meta", attrs={"property":"og:title"}).get("content")
-                        except:
-                            title = ""
-                        news_weblink = z
-                        try:
-                            analysis = soup.find("meta", attrs={"property":"og:description"}).get("content")
-                        except:
-                            analysis = ""
-                        try:
-                            sub_category = soup.find('meta', attrs = {"property":"og:type"}).get("content")
-                        except:
-                            sub_category = ""
-                        try:
-                            image = soup.find("meta", attrs={"property":"og:image"}).get("content")
-                        except:
-                            image = ""
-                        try:
-                            d = soup.find("div", class_='sub-title').text.strip()
-                            news_date = dateparser.parse(d)
-                        except:
-                            news_date = ""
-                        try:
-                            announcement = soup.find("div", attrs = {"role":"main"}).text.strip()
-                        except:
-                            announcement = ""
-                        try:
-                            announcement_type = soup.find("div", class_='breadcrumbs-container').find_all("li")[2].text.strip()
-                        except:
-                            announcement_type = ""
-                        language = "en-US"
-                        crawled_date = datetime.now()
-                        break_condition = 0
-                        company_news = {}
-                        company_news['companyId'] = ''
-                        company_news['location']=''
-                        company_news['comment']=''
-                        company_news['Date']= news_date
-                        company_news['Crawled_on']=crawled_date
-                        company_news['title']=title
-                        company_news['Language']= language
-                        company_news['announcementType']= announcement_type
-                        company_news['Source'] = page_source
-                        company_news['News_Weblink'] = news_weblink
-                        company_news['photo']= image
-                        company_news['videos']= ''
-                        company_news['announcement']=announcement
-                        company_news['historySubCategory']= sub_category
-                        company_news['analysis'] = analysis
-                        try:
-                            collection.insert_one(company_news)
-                            total_crwalled_links += 1
-                        except Exception as e:
-                            running_Sequence.append(e)
-        except Exception as e:
-            running_Sequence.append(e)
+        elif "/case-stories/" in i:
+            result1 = requests.get(i)
+            response1 = Selector(result1)
+            try:
+                news_date = response1.css('.sub-title ::text').get()
+                news_date = dateparser.parse(news_date)
+            except:
+                news_date = ""
+            try:
+                title = response1.css(".page-heading ::text").get()
+            except:
+                title = ""
+            try:
+                analysis = response1.xpath("//meta[@name='description']/@content").get()
+            except:
+                analysis = ""
+            try:
+                image =  response1.xpath("//meta[@property='og:image']/@content").get()
+            except:
+                image = ""
+            sub_category = ""
+            try:
+                announcement = response1.css(".page-content").get()
+                replace1 = response1.css(".card-wrapper").getall()
+                for tl in replace1:
+                    announcement = announcement.replace(tl, "")
+                images = response1.css(".page-content picture img::attr(src)").getall()
+                img_src_set = response1.css(".page-content picture img::attr(data-src)").getall()
+                images1 = response1.css(".page-content picture img").getall()
+                final_img_src = []
+                for ii, jj, kk in zip(images, img_src_set, images1):
+                    a = '<img src="' + ii
+                    b = '<img src="https://www.danfoss.com' + jj
+                    f_img = kk.replace(a, b)
+                    final_img_src.append(f_img)
+                for bef_img , after_img in zip(images1, final_img_src):
+                    announcement = announcement.replace(bef_img, after_img)
+                return_data = parse_filtered_news(announcement)
+                announcement = return_data['filteredBody']
+                announcement = unicodedata.normalize("NFKD",announcement)
+                emr_essentail = return_data['emrEssential']
+                emr_executive = return_data['emrExecutive']
+                emr_lite = return_data['emrLite']
+                emr_html = return_data['emrHtmlText']
+            except:
+                announcement = ""
+                emr_essentail = ""
+                emr_executive = ""
+                emr_lite = ""
+                emr_html = ""
+
+            announcement_type = "Case Stories"
+            language = "en-US"
+            page_source = "https://www.danfoss.com/en/service-and-support/case-stories/?sort=startDate_desc"
+            crawled_date = datetime.datetime.now()
+
+            company_news = {}
+            company_news['companyId'] = ''
+            company_news['location']=''
+            company_news['comment']=''
+            company_news['Date']= news_date
+            company_news['Crawled_on']=crawled_date
+            company_news['title']=title
+            company_news['Language']= language
+            company_news['announcementType']= announcement_type
+            company_news['Source'] = page_source
+            company_news['News_Weblink'] = i
+            company_news['photo']= image
+            company_news['videos']= ''
+            company_news['announcement']=announcement
+            company_news['historySubCategory']= sub_category
+            company_news['analysis'] = analysis
+            company_news['emrExecutive'] = emr_executive
+            company_news['emrEssential'] = emr_essentail
+            company_news['emrLite'] = emr_lite
+            company_news['News_Html'] = emr_html
+            try:
+                collection.insert_one(company_news)
+                total_crwalled_links += 1
+            except Exception as e:
+                running_Sequence.append(e)
     
     if Already_exist >= 1:
 
@@ -317,12 +335,18 @@ try:
 
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
-    ended_on = datetime.now()
-except:
-    Error_Time =  datetime.now()
+    ended_on = datetime.datetime.now()
+except Exception as e:
+    Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()
 
+    running_Sequence.append(e)
+
+
+# **************************************************************************
+
+# **************************************************************************
 
 # **************************************************************************
 rep = ''
@@ -361,5 +385,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'Chrome'
 
-error_logs.insert_one(log)
-
+# error_logs.insert_one(log)

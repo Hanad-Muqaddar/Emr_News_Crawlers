@@ -6,9 +6,24 @@ from scrapy.utils.project import get_project_settings
 import unicodedata
 import requests
 import json
+from .. import settings
+from pymongo import MongoClient
+
 
 
 class MySpider(SitemapSpider):
+    client = MongoClient(settings.MONGO_URI)
+    db_name = settings.Reading_Database
+    collection_name = settings.Collection_For_Storing_Results
+    result = client[db_name][collection_name].aggregate([
+            {
+                '$project': {
+                    'News_Weblink': 1
+                }
+            }
+        ])
+    all_news_links = [i['News_Weblink'] for i in list(result)]
+    
     name = "Hitachi"
     sitemap_urls = ['https://www.hitachienergy.com/news/sitemap.xml']
     sitemap_rules = [
@@ -16,26 +31,29 @@ class MySpider(SitemapSpider):
     ]
 
     def parse_news(self, response):
-        item = {}
-        item['Date'] = self.parse_news_date(response)
-        item['Crawled_on'] = datetime.datetime.now()
-        item['announcementType'] = 'Press Release'
-        item['Source'] = 'https://www.hitachienergy.com/media'
-        item['News_Weblink'] = response.url
-        item['title'] = self.parse_title(response)
-        try:
-            item['photo'] = response.css(".cmp-container--full-width picture img::attr(href)").get()
-        except:
-            item['photo'] = ""
-        announcement , emr_essentail, emr_lite, emr_executive= self.parse_announcement(response)
-        item['announcement'] = announcement
-        item['Language'] = 'English'
-        item['analysis'] = self.parse_analysis(response)
-        item['historySubCategory'] = ''
-        item['emrExecutive'] = emr_executive
-        item['emrEssential'] = emr_essentail
-        item['emrLite'] = emr_lite
-        return item
+        if response.url in self.all_news_links:
+            return
+        else:
+            item = {}
+            item['Date'] = self.parse_news_date(response)
+            item['Crawled_on'] = datetime.datetime.now()
+            item['announcementType'] = 'Press Release'
+            item['Source'] = 'https://www.hitachienergy.com/media'
+            item['News_Weblink'] = response.url
+            item['title'] = self.parse_title(response)
+            try:
+                item['photo'] = response.css(".cmp-container--full-width picture img::attr(href)").get()
+            except:
+                item['photo'] = ""
+            announcement , emr_essentail, emr_lite, emr_executive= self.parse_announcement(response)
+            item['announcement'] = announcement
+            item['Language'] = 'English'
+            item['analysis'] = self.parse_analysis(response)
+            item['historySubCategory'] = ''
+            item['emrExecutive'] = emr_executive
+            item['emrEssential'] = emr_essentail
+            item['emrLite'] = emr_lite
+            return item
     
     def parse_news_date(self, response):
         try:

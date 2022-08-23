@@ -151,7 +151,7 @@ try:
     print(len(news_links))
 
     for i in news_links:        
-        response = requests.get(i, headers=headers)
+        response = requests.get(i, headers=headers, proxies=proxies)
         data = BeautifulSoup(response.content, 'lxml')
 
         try:

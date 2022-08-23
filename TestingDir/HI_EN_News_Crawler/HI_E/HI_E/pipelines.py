@@ -8,6 +8,7 @@
 from itemadapter import ItemAdapter
 import pymongo
 from scrapy.exceptions import DropItem
+from . import settings
 
 class HiEPipeline:
     def process_item(self, item, spider):
@@ -16,7 +17,7 @@ class HiEPipeline:
 
 class MongoPipeline:
 
-    collection_name = 'HITACHI_ABB'
+    collection_name = settings.Collection_For_Storing_Results
 
     def __init__(self, mongo_uri, mongo_db):
         self.mongo_uri = mongo_uri
@@ -44,7 +45,7 @@ class MongoPipeline:
 
 class DuplicatesPipeline:
 
-    collection_name = 'HITACHI_ABB'
+    collection_name = settings.Collection_For_Storing_Results
     urls_seen = []
     
     def __init__(self, mongo_uri, mongo_db):
