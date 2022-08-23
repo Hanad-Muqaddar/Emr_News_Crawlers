@@ -1,3 +1,4 @@
+import imp
 from scrapy.spiders import SitemapSpider
 import dateparser
 import datetime
@@ -6,7 +7,7 @@ from scrapy.utils.project import get_project_settings
 import unicodedata
 import requests
 import json
-from .. import settings
+from HI_EN_News_Crawler import settings
 from pymongo import MongoClient
 
 

@@ -8,7 +8,7 @@
 from itemadapter import ItemAdapter
 import pymongo
 from scrapy.exceptions import DropItem
-from . import settings
+from HI_EN_News_Crawler import settings
 
 class HiEPipeline:
     def process_item(self, item, spider):
