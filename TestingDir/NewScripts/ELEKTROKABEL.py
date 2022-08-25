@@ -222,7 +222,7 @@ try:
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
-            company_news['Exception'] = my_exception
+            company_news['Exception'] = str(my_exception)
             try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1

@@ -120,6 +120,7 @@ crawlerToCollectionMapping={
     "Leviton_new":"LEVITON",
     "MARCHIOL_D_O_O":"MARCHIOL_D_O_O",
     "Mennekes":"MENNEKES",
+    "MENNEKES2":"MENNEKES",
     "Mercateo":"Mercateo",
     "Mersen":"MERSEN",
     "MersenCom":"MERSEN",
@@ -165,6 +166,7 @@ crawlerToCollectionMapping={
     "Zevi_Crawler":"ZVEI",
     "Zumtobel":"Zumtobel",
     "MSC_ Industrial_Supply":"MSC_ Industrial_Supply",
+    "CHINT2" : "CHINT",
 }
 
 def crawler_health_function(crawler_name, path, count_c):
@@ -298,6 +300,7 @@ Emr_News_Cralers_Dict = {
     "Leviton_new":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "MARCHIOL_D_O_O":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Mennekes":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
+    "MENNEKES2":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Mercateo":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Mersen":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "MersenCom":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
@@ -343,6 +346,7 @@ Emr_News_Cralers_Dict = {
     "Zumtobel":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "MSC_ Industrial_Supply":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "CHINT":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
+    "CHINT2": "/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "farnell":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Schenider_Electric":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Schenider_Electric2":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/"
