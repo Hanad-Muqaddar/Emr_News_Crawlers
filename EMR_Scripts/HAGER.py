@@ -1,5 +1,4 @@
 # Packages to be imported
-from functools import total_ordering
 import requests
 
 import time
@@ -38,40 +37,23 @@ import urllib
 
 import dateparser
 
-# from datetime import datetime
-import datetime
+from datetime import datetime
 
 from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
+from newspaper import fulltext
 
 # ************************************************************************
 # defining variables
-# opts = Options()
-# opts.add_argument("--window-size=190,100")
-# opts.add_argument("--disable-automation")
-# opts.add_argument("--no-sandbox")
-# opts.add_argument('--profile-directory=Default')
-# opts.add_argument("start-maximized")
-# opts.add_argument("disable-infobars")
-# opts.add_argument("--lang=en")
-# opts.add_argument("--enable-javascript")
-# opts.add_argument("--enable-cookies")
-# lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-# prefs = {
-#   "translate_whitelists": lang_dict,
-#   "translate":{"enabled":"true"}
-# }
-# opts.add_experimental_option("prefs", prefs)
-# opts.headless = True
 
 running_Sequence = []
 
-started_on = datetime.datetime.now()
+started_on = datetime.now()
 
-c_name = 'HAGER' # Name of the Collection
+c_name = 'HAGER'
 
 total_crwalled_links = 0
 
@@ -82,10 +64,7 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    # data = json.load(file)
-    # db_path = data[0]['Db_Path']
-    # client = MongoClient(db_path)
+
     client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
@@ -122,9 +101,9 @@ except:
 
 if last_insertion == None:
 
-    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
 
-    Crwl_time = datetime.datetime.now()
+    Crwl_time = datetime.now()
 
 else:
 
@@ -143,85 +122,94 @@ else:
 ####################################################
 
 # *****************************************************************************
-
 try:
-    main_url = "https://www.hagergroup.com"
-    result = requests.get("https://hagergroup.com/en/media-and-publications/media-articles")
-    soup = BeautifulSoup(result.content, 'lxml')
-
-    data_links = soup.find('div',{ "class" : "row isotope"}).find_all('div',{ "class" : "list-tile-link"}) 
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    Main_url = "https://hagergroup.com"
+    Base_url = "https://hagergroup.com/sitemap.xml"
+    result = requests.get(Base_url,headers=headers)
+    soup = BeautifulSoup(result.content , 'lxml')
+    
     news_links = []
-    for link in data_links:
-        news_link = main_url + link.find('a',{ "class" : "elementdeeplink"}).get('href')
-        # print(news_link) 
-        if news_link not in news_links:
-            news_links.append( news_link)              
-        else:
-            continue
 
-    for l in news_links[:20]:
+    links = soup.find_all("loc")
+    for link in links:
+        news_link = link.text
+        if "en/media-and-publications/media-articles/" in news_link and news_link not in news_links:
+            news_links.append(news_link)
+
+    # print(news_links)
+
+    for i in news_links:
         db_list = []
         mydoc = collection.find()
         for x in mydoc:
             db_list.append(x['News_Weblink'])
-        if l in db_list:
+        if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             continue
-        else:
-            res = requests.get(l)
-            soup = BeautifulSoup(res.content, 'lxml')
+
+        else:        
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
             try:
-                title = soup.find('div',class_='detail-header').find('h1').get_text(strip=True)
-                print(title)
+                title = data.find('meta', attrs = {"name":"description"}).get("content")
+                # print(title)
             except:
                 title = ""
+            
+            announcement_type = "News"
+            language = "en-us"
+
             try:
-                analysis = soup.find("meta", attrs={"property":"og:description"}).get("content")
-            except:
-                analysis = ''
-            try:
-                image = soup.find("meta", attrs={"property":"og:image"}).get("content")
+                image = data.find('meta',attrs = {'property':'og:image'}).get('content')
             except:
                 image = ""
 
             try:
-                date = soup.find('h4',class_='subheadline').get_text(strip=True)
-                # print(date)
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'DMY'} )
-                print(news_date)
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                date = data.find('h3',class_="field-subtitle").get_text(strip=True)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'DMY'})
+                # print(news_date)
             except:
                 news_date = ""
 
+            page_source = "https://hagergroup.com/en/media-and-publications/media-articles"
+            news_weblink = i
+            
             try:
-                announcement_type = soup.find("meta", attrs={"property":"og:type"}).get("content")
-            except:
-                announcement_type = ''
-            try:
-                announcement = soup.find('div',class_='detail-content-inner').get_text(strip=True)
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')
+                # print(announcement)
             except:
                 announcement = ""
-
-            page_source = "https://www.hagergroup.com/en/hager-group-news/1024-2283.htm"
-            language = "en"
-            crawled_date = datetime.datetime.now()
-            news_weblink = l
-
-            sub_category = ""
+            
+            date = datetime.now()
+            # Creating a list of links already avilable in database
             
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
             company_news['comment']=''
             company_news['Date']= news_date
-            company_news['Crawled_on']=crawled_date
+            company_news['Crawled_on']=date
             company_news['title']=title
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
             company_news['News_Weblink'] = news_weblink
             company_news['photo']= image
-            company_news['videos']= ''
+            company_news['videos']= ""
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
@@ -234,24 +222,19 @@ try:
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
+
     else:
 
         tmp_txt = ''
 
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
-    ended_on = datetime.datetime.now()
-except Exception as e:
-    Error_Time =  datetime.datetime.now()
+    ended_on = datetime.now()
+except:
+    Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
 
-    running_Sequence.append(e)
-
-
-# **************************************************************************
-
-# **************************************************************************
 
 # **************************************************************************
 rep = ''
@@ -269,6 +252,7 @@ except Exception as e:
     rep = traceback.format_exc()
 
     pass
+
 
 log = {}
 
@@ -288,7 +272,6 @@ log['Links_Skipped'] = Already_exist
 
 log['Last_news_crawl_time'] = last_time
 
-log['Browser'] = 'Chrome'
+log['Browser'] = 'None'
 
-error_logs.insert_one(log)
-
+# error_logs.insert_one(log)
