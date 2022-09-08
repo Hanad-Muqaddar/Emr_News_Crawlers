@@ -153,8 +153,8 @@ def parse_filtered_news(announcement):
 count_break = 0
 
 try:
-    proxies = {'http': 'http://alihaider99:cheeta@nl.proxymesh.com:31280',
-            'https': 'http://alihaider99:cheeta@nl.proxymesh.com:31280'}
+    proxies = {'http': 'http://alihaider9:salman_walee@nl.proxymesh.com:31280',
+            'https': 'http://alihaider9:salman_walee@nl.proxymesh.com:31280'}
     headers = {"Connection": "keep-alive",
                 "sec-ch-ua":  'Not A;Brand";v="99", "Chromium";v="99", "Google Chrome";v="99"',
                 "sec-ch-ua-mobile": "?0",

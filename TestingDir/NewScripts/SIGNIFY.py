@@ -85,11 +85,11 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -148,13 +148,13 @@ else:
 # *****************************************************************************
 try:
     proxies = {
-            'http': 'http://alihaider99:cheeta@de.proxymesh.com:31280',
-            'https': 'http://alihaider99:cheeta@de.proxymesh.com:31280'
+            'http': 'http://alihaider9:salman_walee@de.proxymesh.com:31280',
+            'https': 'http://alihaider9:salman_walee@de.proxymesh.com:31280'
           }
     response = requests.get("https://www.signify.com/content/signify/en_AA/our-company/news/n13-press-releases.feeds.json", proxies=proxies)
 
     data = json.loads(response.text)
-    # print(data)
+    print(data)
     for i in data:
         try:
             news_weblink = i['link']
@@ -288,7 +288,7 @@ log['Links_Skipped'] = Already_exist
 log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'Chrome'
-try:
-    error_logs.insert_one(log)
-except:
-    print("Error occurs here")
+# try:
+#     error_logs.insert_one(log)
+# except:
+#     print("Error occurs here")

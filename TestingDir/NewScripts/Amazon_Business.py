@@ -62,8 +62,8 @@ else:
 ####################################################
 # *****************************************************************************
 try:
-    proxies = {'http': 'http://alihaider99:cheeta@de.proxymesh.com:31280',
-            'https': 'http://alihaider99:cheeta@de.proxymesh.com:31280'}
+    proxies = {'http': 'http://alihaider9:salman_walee@de.proxymesh.com:31280',
+            'https': 'http://alihaider9:salman_walee@de.proxymesh.com:31280'}
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Base_url = "https://press.aboutamazon.com"
     result = requests.get(Base_url,headers=headers, proxies=proxies)

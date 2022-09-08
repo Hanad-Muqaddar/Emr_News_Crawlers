@@ -146,7 +146,7 @@ else:
 
 try:
     main_url = "https://www.hagergroup.com"
-    result = requests.get("https://www.hagergroup.com/en/hager-group-news/1024-2283.htm")
+    result = requests.get("https://hagergroup.com/en/media-and-publications/media-articles")
     soup = BeautifulSoup(result.content, 'lxml')
 
     data_links = soup.find('div',{ "class" : "row isotope"}).find_all('div',{ "class" : "list-tile-link"}) 
