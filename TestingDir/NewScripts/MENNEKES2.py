@@ -157,7 +157,7 @@ try:
             title = translate(title)
             print(title)
         except:
-            title = ""
+            title = data.find('section').find('div', {"class":"container"}).find('h1').get_text(strip=True)
         
         announcement_type = "News"
         language = "en-us"

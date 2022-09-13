@@ -136,7 +136,6 @@ try:
         news_link = link.text
         if "/news/press-releases/" in news_link and news_link not in news_links:
             news_links.append(news_link)
-
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
@@ -149,31 +148,33 @@ try:
             Already_exist += 1
             continue
 
-        else:        
+        else:
             response = requests.get(i, headers=headers)
             data = BeautifulSoup(response.content, 'lxml')
-
             try:
                 title = data.find('h1',attrs = {'class':'info-detail__title'}).find('span',attrs = {'class':'active'}).get_text(strip=True)
                 # print(title)
             except:
-                title = data.find('h1',attrs = {'class':'info-detail__title'}).get_text(strip=True)
+                try:
+                    title = data.find('h1',attrs = {'class':'info-detail__title'}).get_text(strip=True)
+                except:
+                    title = ""
                 # print(title)
-            
             announcement_type = "News"
 
             language = "en-us"
 
             image = ""
+            
             try:
                 sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
             except:
                 sub_category = ""
-            
             try:
                 analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
             except:
                 analysis = ""
+            
             try:
                 date = data.find('p',{"class":"info-detail__left-date"}).get_text(strip=True)
                 news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
@@ -192,7 +193,6 @@ try:
             
             date = datetime.now()
             # Creating a list of links already avilable in database
-            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

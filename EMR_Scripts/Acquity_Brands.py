@@ -1,4 +1,6 @@
 # Packages to be imported
+from distutils.errors import LinkError
+from turtle import clear
 import requests
 
 import time
@@ -9,13 +11,11 @@ from random import randint
 
 from bs4 import BeautifulSoup
 
-from pymongo import MongoClient
+from pymongo import MongoClient, response
 
 from bs4 import BeautifulSoup
 
 from selenium import webdriver
-
-# from webdriver_manager.chrome import ChromeDriver
 
 from selenium.webdriver.chrome.options import Options
 
@@ -27,8 +27,6 @@ from selenium.webdriver.support import expected_conditions
 
 from selenium.webdriver.common.by import By
 
-from urllib.parse import urlparse
-
 import re
 
 import traceback
@@ -37,7 +35,7 @@ import urllib
 
 import dateparser
 
-from datetime import datetime
+import datetime
 
 from bson.objectid import ObjectId
 
@@ -45,28 +43,14 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
+from scrapy import Selector
+
+from newspaper import fulltext
+
 # ************************************************************************
-# defining variables
-opts = Options()
-# opts.add_argument("--window-size=190,100")
-# opts.add_argument("--disable-automation")
-opts.add_argument("--no-sandbox")
-opts.add_argument('--profile-directory=Default')
-opts.add_argument("start-maximized")
-opts.add_argument("disable-infobars")
-opts.add_argument("--lang=en")
-opts.add_argument("--enable-javascript")
-opts.add_argument("--enable-cookies")
-lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-prefs = {
-  "translate_whitelists": lang_dict,
-  "translate":{"enabled":"true"}
-}
-opts.add_experimental_option("prefs", prefs)
-opts.headless = True
 running_Sequence = []
 
-started_on = datetime.now()
+started_on = datetime.datetime.now()
 
 c_name = 'Acquity_Brands' # Name of the Collection
 
@@ -79,11 +63,11 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -93,7 +77,7 @@ except:
 
 # *************************************************************************
 
-client_name = 'TEMP_EMR_NEWS_Crawler_DB' 
+client_name = 'TEMP_EMR_NEWS_Crawler_DB'
 
 news =  client[client_name]
 
@@ -106,7 +90,6 @@ last_insertion = None
 last_time = ''
 
 # ****************************************************************************
-# Check Last News addedd in DB for the Collection
 
 try:
 
@@ -118,13 +101,11 @@ except:
 
     last_insertion = None
 
-
-
 if last_insertion == None:
 
-    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
 
-    Crwl_time = datetime.now()
+    Crwl_time = datetime.datetime.now()
 
 else:
 
@@ -143,86 +124,64 @@ else:
 ####################################################
 
 # *****************************************************************************
+
 try:
-
-    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe',options=opts)  # path to the driver is here
-    url = "https://insights.acuitybrands.com/news-releases"
-    driver.implicitly_wait(30)
-    try:
-        SCROLL_PAUSE_TIME = 20
-        driver.get(url)
-        last_height = driver.execute_script("return document.body.scrollHeight")    
-        while True:
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(SCROLL_PAUSE_TIME)
-            new_height = driver.execute_script("return document.body.scrollHeight")
-            if new_height == last_height:
-                break
-            last_height = new_height
-            
-        news_links = driver.find_elements_by_xpath("//section[@class='level-two']/div//ul/li/a[@class='item-link view hooked']")
-    except Exception as e:
-        running_Sequence.append(e)
-
-    links = []
-    for i in news_links:
-        links.append(i.get_attribute('href'))
-    driver.close()
-
-    for i in links:
-        result = requests.get(i)
-        soup = BeautifulSoup(result.content, 'lxml')
-        try:
-            title = soup.find("title").text.strip()
-        except:
-            title = ""
-        try:
-            analysis = soup.find("meta", attrs={"name":"description"}).get("content").strip()
-        except:
-            analysis = ""
-        page_source = "https://insights.acuitybrands.com/"
-        try:
-            d = soup.find("meta", attrs={"itemprop":"datePublished"}).get("content").strip()
-            news_date = dateparser.parse(d, settings={'DATE_ORDER': 'YMD'})
-        except:
-            news_date = ""
-        try:
-            announcement = soup.find("div", id='item-content').find("section", class_='level-three').text
-        except:
-            announcement = ""
-        try:
-            sub_category = soup.find("meta", attrs={"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
-        try:
-            image = soup.find("meta", attrs={"itemprop":"image"}).get("content")
-        except:
-            image = ""
-        news_weblink = i
-        date = datetime.now()
-        language = "en-US"
-        announcement_type = "News Releases"
-        
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-        if news_weblink in links_list:
-            total_crwalled_links += 1
+    BASE_URL = "https://www.investors.acuitybrands.com"
+    result = requests.get("https://www.investors.acuitybrands.com/news-releases")
+    response = Selector(result)
+    links = response.css(".news-releases a::attr(href)").getall()
+    FINAL_links = [BASE_URL + link for link in links]
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+    for i in FINAL_links:
+        if i in db_list:
             Already_exist += 1
+            total_crwalled_links += 1
             continue
         else:
+            result1 = requests.get(i)
+            response1 = Selector(result1)
+            try:
+                news_date = response1.css(".date-field .field__item ::text").get()
+                news_date = dateparser.parse(news_date,  settings={'DATE_ORDER': 'DMY'})
+            except:
+                news_date = ""
+            try:
+                title = response1.css(".field--name-field-nir-news-title .field__item ::text").get()
+            except:
+                title = ""
+            try:
+                analysis = response1.xpath("//meta[@name='description']/@content").get()
+            except:
+                analysis = ""
+            try:
+                image = response1.xpath("//meta[@property='og:image']/@content").get()
+            except:
+                image = ""
+            sub_category = ""
+            try:
+                announcement = fulltext(result1.text)
+                announcement = announcement.replace('\n','<br>')
+            except:
+                announcement = ""
+            announcement_type = "News"
+            language = "en-US"
+            page_source = "https://www.euew.org/news"
+            crawled_date = datetime.datetime.now()
+
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
             company_news['comment']=''
             company_news['Date']= news_date
-            company_news['Crawled_on']=date
+            company_news['Crawled_on']=crawled_date
             company_news['title']=title
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
+            company_news['News_Weblink'] = i
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement
@@ -233,25 +192,28 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-                
-
+    
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
-
     else:
 
         tmp_txt = ''
 
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
-    ended_on = datetime.now()
-
+    ended_on = datetime.datetime.now()
 except Exception as e:
-
-    Error_Time =  datetime.now()
+    Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()
+
+    running_Sequence.append(e)
+
+
+# **************************************************************************
+
+# **************************************************************************
 
 # **************************************************************************
 rep = ''
@@ -269,8 +231,6 @@ except Exception as e:
     rep = traceback.format_exc()
 
     pass
-
-
 
 log = {}
 
@@ -293,7 +253,3 @@ log['Last_news_crawl_time'] = last_time
 log['Browser'] = 'Chrome'
 
 error_logs.insert_one(log)
-
-
-
-

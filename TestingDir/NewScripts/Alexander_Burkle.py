@@ -163,7 +163,7 @@ try:
             title = translate(title)
             print(title)
         except:
-            title = ""
+            title = data.find('title').text
             # print(title)
        
         announcement_type = "News"
