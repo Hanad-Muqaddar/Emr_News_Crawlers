@@ -9,7 +9,7 @@ MyDatabase = myclient["emrweb"]
 MyDatabase2 = myclient2['TEMP_EMR_NEWS_Crawler_DB']
 
 MyCollection = MyDatabase["crawler_status"]
-today_date = datetime.datetime.now()
+
 
 
 def calculate_time_interval(start_time, end_time):                   
@@ -169,7 +169,7 @@ crawlerToCollectionMapping={
     "CHINT2" : "CHINT",
 }
 
-def crawler_health_function(crawler_name, path, count_c):
+def crawler_health_function(crawler_name, path, today_date):
     # print(count_c)
     item = {}
     item["name"] = ""
@@ -356,7 +356,7 @@ Emr_News_Cralers_Dict = {
 
 count_c = 0
 for key, value in Emr_News_Cralers_Dict.items():
-    crawler_health_function(key, value, count_c)
-    count_c +=1
+    today_date = datetime.datetime.now()
+    crawler_health_function(key, value, today_date)
 
 
