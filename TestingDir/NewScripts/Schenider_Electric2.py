@@ -127,8 +127,8 @@ else:
 # *****************************************************************************
 
 try:
-    proxies = {'http': 'http://alihaider99:cheeta@jp.proxymesh.com:31280',
-            'https': 'http://alihaider99:cheeta@jp.proxymesh.com:31280'}
+    proxies = {'http': 'http://alihaider9:salman_walee@jp.proxymesh.com:31280',
+            'https': 'http://alihaider9:salman_walee@jp.proxymesh.com:31280'}
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     result = requests.get("https://www.se.com/us/en/about-us/newsroom/news/", headers=headers, proxies=proxies)
     res = Selector(result)

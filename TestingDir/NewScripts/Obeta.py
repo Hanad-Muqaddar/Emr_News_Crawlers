@@ -144,8 +144,8 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
 
-    print(news_links)
-    print(len(news_links))
+    # print(news_links)
+    # print(len(news_links))
 
     for i in news_links:        
         response = requests.get(i, headers=headers)
@@ -154,20 +154,19 @@ try:
         try:
             title = data.find('meta',attrs = {'property':'og:title'}).get('content')
             title = translate(title)
-            print(title)
+            # print(title)
         except:
-            title =""
-            print(title)
+            title = data.find('meta',attrs = {'property':'og:title'}).get('content')
         
         announcement_type = "News"
         language = "en-us"
 
         try:            
             image = data.find('meta',attrs = {'property':'og:image'}).get('content')
-            print(image)
+            # print(image)
         except:
             image = ""
-            print(image)
+            # print(image)
 
         try:
             sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
@@ -178,13 +177,13 @@ try:
         try:
             analysis = data.find('meta',attrs = {'property':'og:title'}).find_previous_sibling('meta').get('description')
             analysis = translate(analysis)
-            print(analysis)
+            # print(analysis)
         except:
             analysis = ""
         try:
             date = data.find('meta', attrs = {"http-equiv":"last-modified"}).get('content')
             news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
+            # print(news_date)
         except:
             news_date = ""
 
@@ -194,7 +193,7 @@ try:
         try:
             announcement = data.find('td', attrs = {"id":"nf_mainContent"}).get_text()
             announcement = translate(announcement)
-            print(announcement)            
+            # print(announcement)            
         except:
             announcement = ""
         

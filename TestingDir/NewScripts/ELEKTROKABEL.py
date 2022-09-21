@@ -46,6 +46,7 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from newspaper import fulltext
 from googletrans import Translator
+# translator = Translator()
 
 # ************************************************************************
 # defining variables
@@ -130,10 +131,10 @@ try:
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
 
-    translator = Translator()
+    
 
     def translate(Trans):
-        Trans_text = translator.translate(Trans,dest='en')
+        Trans_text = Translator.translate(Trans,dest='en')
         return Trans_text.text
     
     news_links = []
@@ -158,7 +159,7 @@ try:
             title = translate(title)
         except Exception as e:
             my_exception = e
-            title = ""
+            title = data.find('h1',attrs = {'id':'pagetitle'}).get_text(strip=True)
         
         announcement_type = "News"
         language = "en-us"

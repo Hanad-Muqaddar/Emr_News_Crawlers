@@ -178,8 +178,8 @@ try:
             news['announcement'] = '\n'.join(ann)
             # news['Date'] = soup.find('meta',attrs={''})
             try:
-                title = scr_res.xpath("//h1/text()").get()
-                if title == "":
+                title = scr_res.xpath(".headline h1 ::text").get()
+                if title == None:
                     title = scr_res.xpath("//title/text()").get()
             except:
                 title = ""
