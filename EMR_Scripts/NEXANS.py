@@ -61,11 +61,11 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -130,7 +130,7 @@ try:
     Base_Link = "https://www.nexans.com"
     final_links = [Base_Link + link for link in links]
     
-    for i in links:
+    for i in final_links:
         db_list = []
         mydoc = collection.find()
         for x in mydoc:
@@ -150,6 +150,7 @@ try:
                 news_date = ""
             try:
                 title = response1.css(".news-page--cover__title ::text").get()
+                print(title)
             except:
                 title = ""
             try:

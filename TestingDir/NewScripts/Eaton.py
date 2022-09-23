@@ -133,7 +133,7 @@ else:
 # *****************************************************************************
 
 def parse_filtered_news(announcement):
-    api_url = "https://admin.dev.emr-online.com/api/history/filterbody"
+    api_url = "https://dev.emr-online.com/api/history/filterbody"
     payload = json.dumps({
                             "originalBody": announcement
                             })
@@ -210,6 +210,8 @@ try:
                 analysis = ""
             try:
                 title = response1.css(".eaton-title__headline ::text").get()
+                if title == None:
+                    title = response1.css(".b-heading-h1 ::text").get()
             except:
                 title = ""
             try:
@@ -226,14 +228,46 @@ try:
                 announcement_type = ""
             try:
                 announcement = response1.xpath("//div[@class='responsivegrid aem-GridColumn aem-GridColumn--default--12']").get()
-                announcement = announcement.replace("\n", "").replace("\r", "").replace("\t", "")
-                to_replace = response1.xpath("//div[@class='title aem-GridColumn aem-GridColumn--default--12']").get()
-                to_replace = to_replace.replace("\n", "").replace("\r", "").replace("\t", "")
-                to_replace2 = response1.css(".social-share").get()
-                to_replace2 = to_replace2.replace("\n", "").replace("\r", "").replace("\t", "")
-                announcement = announcement.replace(to_replace, "")
-                announcement = announcement.replace(to_replace2, "")
-                announcement = announcement.replace('data-src="', 'src="https://www.eaton.com')
+                try:
+                    announcement = announcement.replace("\n", "").replace("\r", "").replace("\t", "")
+                except:
+                    pass
+                try:
+                    to_replace = response1.xpath("//div[@class='title aem-GridColumn aem-GridColumn--default--12']").get()
+                except:
+                    pass
+                try:
+                    to_replace = to_replace.replace("\n", "").replace("\r", "").replace("\t", "")
+                except:
+                    pass
+                try:
+                    to_replace2 = response1.css(".social-share").get()
+                except:
+                    pass
+                try:
+                    to_replace2 = to_replace2.replace("\n", "").replace("\r", "").replace("\t", "")
+                except:
+                    pass
+                try:
+                    to_replace_3 = response1.css(".eaton-text-default__content div").get()
+                except:
+                    pass
+                try:
+                    announcement = announcement.replace(to_replace, "")
+                except:
+                    pass
+                try:
+                    announcement = announcement.replace(to_replace2, "")
+                except:
+                    pass
+                try:
+                    announcement = announcement.replace(to_replace_3, "")
+                except:
+                    pass
+                try:
+                    announcement = announcement.replace('data-src="', 'src="https://www.eaton.com')
+                except:
+                    pass
                 try:
                     ret_obj = parse_filtered_news(announcement)
                 except Exception as e:
@@ -253,11 +287,13 @@ try:
                 except:
                     erm_lite = ""
                 announcement = unicodedata.normalize("NFKD",announcement)
+                emr_html = ret_obj['emrHtmlText']
             except:
                 announcement = ""
                 emr_essentail = ""
                 erm_lite = ""
                 emr_executive = ""
+                emr_html = ""
 
 
             language = "en"
@@ -284,6 +320,7 @@ try:
             company_news['emrExecutive'] = emr_executive
             company_news['emrEssential'] = emr_essentail
             company_news['emrLite'] = erm_lite
+            company_news['News_Html'] = emr_html
             try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1

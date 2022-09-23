@@ -65,7 +65,7 @@ ROBOTSTXT_OBEY = False
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    'HI_E.pipelines.HiEPipeline': 300,
-   'HI_E.pipelines.MongoPipeline': 600,
+   'HI_E.pipelines.MongoPipeline': 200,
    'HI_E.pipelines.DuplicatesPipeline': 300,
 }
 

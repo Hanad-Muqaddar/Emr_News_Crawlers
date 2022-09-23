@@ -10,7 +10,7 @@ import pymongo
 from scrapy.exceptions import DropItem
 from scrapy.utils.project import get_project_settings
 
-from TestingDir.HI_EN_News_Crawler.HI_E.HI_E import settings
+# from TestingDir.HI_EN_News_Crawler.HI_E.HI_E import settings
 
 class HiEPipeline:
     def process_item(self, item, spider):

@@ -47,7 +47,11 @@ from urllib.request import Request, urlopen
 
 from newspaper import fulltext
 
+import unicodedata
+
 from googletrans import Translator
+
+from scrapy import Selector
 # ************************************************************************
 # defining variables
 
@@ -55,6 +59,7 @@ running_Sequence = []
 
 started_on = datetime.now()
 
+# c_name = 'Simon_Electric_Testing' # Name of the Collection
 c_name = 'Simon_Electric' # Name of the Collection
 
 total_crwalled_links = 0
@@ -115,6 +120,26 @@ else:
 
     Crwl_time = last_insertion['Date']
 
+
+def parse_filtered_news(announcement):
+    # api_url = "https://admin.dev.emr-online.com/api/history/filterbody"
+    api_url = "http://192.168.60.105:3000/api/history/filterbody"
+    payload = json.dumps({
+                            "originalBody": announcement
+                            })
+    headers = {
+                'Content-Type': 'application/json'
+                }
+    return_response = requests.request("POST", api_url, headers=headers, data=payload)
+    new_data = return_response.text
+    new_data = json.loads(new_data)
+    status = new_data['statusCode']
+    if status == 200:
+        return new_data
+    else:
+        new_data =  ""
+        return new_data
+
 # ****************************************************************************
 
 ####################################################
@@ -131,35 +156,30 @@ try:
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
 
-    translator = Translator()
-
     def translate(Trans):
+        translator = Translator()
         Trans_text = translator.translate(Trans,dest='en')
         return Trans_text.text
     
     news_links = []
-
     links = soup.find_all('div',{ "class" : "views-row"})
     for link in links:
         news_link = Main_url + link.find('a').get('href')
         if news_link not in news_links:
             news_links.append(news_link)
-
-    # print(news_links)
-    # print(len(news_links))
-
     for i in news_links:        
         response = requests.get(i, headers=headers)
+
         data = BeautifulSoup(response.content, 'lxml')
+        
+        res = Selector(response)
 
         try:
             title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-            title = title.replace('| Latest releases SIMON','')
-            # print(title)
+            title = translate(title.replace('| Latest releases SIMON',''))
         except:
             title = data.find('title').text
-            title = title.replace('| Latest releases SIMON','')
-            # print(title)
+            title = translate(title.replace('| Latest releases SIMON',''))
         
         announcement_type = "Press Release"
 
@@ -167,25 +187,22 @@ try:
 
         try:
             image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-            print(image)
         except:
             image = ""
-            # print(image)
 
         try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            sub_category = translate(data.find('meta', attrs = {"property":"og:type"}).get("content"))
         except:
             sub_category = ""
         
         try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+            analysis = translate(data.find('meta', attrs = {"property":"og:description"}).get("content"))
         except:
             analysis = ""
         try:
             date = data.find('div', {"class":"field field--name-published-at field--type-published-at field--label-inline clearfix"}).find('div', {"class":"field__item"}).get_text().replace('de','')
             date = translate(date)
             news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            # print(news_date)
         except:
             news_date = ""
 
@@ -193,13 +210,26 @@ try:
         news_weblink = i
         
         try:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            # print(announcement)
+            announcement = res.css(".layout--hiwc-full-1col-stacked").get()
+            replace_1 = res.css(".group-title").get()
+            try:
+                announcement = announcement.replace(replace_1, "")
+            except:
+                pass
+            return_data = parse_filtered_news(announcement)
+            announcement = translate(return_data['filteredBody'])
+            announcement = unicodedata.normalize("NFKD",announcement)
+            emr_essentail = translate(return_data['emrEssential'])
+            emr_executive = translate(return_data['emrExecutive'])
+            emr_lite = translate(return_data['emrLite'])
+            emr_html = return_data['emrHtmlText']
             
         except:
             announcement = ""
+            emr_essentail = ""
+            emr_executive = ""
+            emr_lite = ""
+            emr_html = ""
         
         date = datetime.now()
         # Creating a list of links already avilable in database
@@ -229,6 +259,10 @@ try:
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
+            company_news['emrExecutive'] = emr_executive
+            company_news['emrEssential'] = emr_essentail
+            company_news['emrLite'] = emr_lite
+            company_news['News_Html'] = emr_html
             try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1
@@ -290,4 +324,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'None'
 
-error_logs.insert_one(log)
+# error_logs.insert_one(log)

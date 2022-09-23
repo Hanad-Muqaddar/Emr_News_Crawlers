@@ -1,6 +1,4 @@
 # Packages to be imported
-from distutils.errors import LinkError
-from turtle import clear
 import requests
 
 import time

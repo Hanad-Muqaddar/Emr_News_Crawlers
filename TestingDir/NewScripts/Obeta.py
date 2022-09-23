@@ -130,10 +130,9 @@ try:
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
 
-    translator = Translator()
 
     def translate(Trans):
-        Trans_text = translator.translate(Trans,dest='en')
+        Trans_text = Translator.translate(Trans,dest='en')
         return Trans_text.text
     
     news_links = []

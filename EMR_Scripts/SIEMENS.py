@@ -44,8 +44,11 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
+
 from newspaper import fulltext
 
+from scrapy import Selector
+import unicodedata
 # ************************************************************************
 # defining variables
 
@@ -53,6 +56,7 @@ running_Sequence = []
 
 started_on = datetime.now()
 
+# c_name = 'SIEMENS_Testing' # Name of the Collection
 c_name = 'SIEMENS' # Name of the Collection
 
 total_crwalled_links = 0
@@ -113,6 +117,25 @@ else:
 
     Crwl_time = last_insertion['Date']
 
+def parse_filtered_news(announcement):
+    # api_url = "https://admin.dev.emr-online.com/api/history/filterbody"
+    api_url = "http://192.168.60.105:3000/api/history/filterbody"
+    payload = json.dumps({
+                            "originalBody": announcement
+                            })
+    headers = {
+                'Content-Type': 'application/json'
+                }
+    return_response = requests.request("POST", api_url, headers=headers, data=payload)
+    new_data = return_response.text
+    new_data = json.loads(new_data)
+    status = new_data['statusCode']
+    if status == 200:
+        return new_data
+    else:
+        new_data =  ""
+        return new_data
+
 # ****************************************************************************
 
 ####################################################
@@ -123,7 +146,7 @@ else:
 
 # *****************************************************************************
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'}
     Main_url = "https://press.siemens.com"
     Base_url = "https://press.siemens.com/global/en/press-search"
     result = requests.get(Base_url,headers=headers)
@@ -136,14 +159,11 @@ try:
         news_link = Main_url + link.find('div',{ "class" : "views-field views-field-title"}).find('a').get('href')
         if news_link not in news_links:
             news_links.append(news_link)
-
     # print(news_links)
-    # print(len(news_links))
-
-    for i in news_links:        
+    for i in news_links:
         response = requests.get(i, headers=headers)
         data = BeautifulSoup(response.content, 'lxml')
-
+        res = Selector(response)
         try:
             title = data.find('meta',attrs = {'name':'og:title'}).get('content')
             # print(title)
@@ -161,11 +181,13 @@ try:
 
         try:
             sub_category = data.find('meta', attrs = {"name":"og:type"}).get("content")
+            # print(sub_category)
         except:
             sub_category = ""
         
         try:
             analysis = data.find('meta', attrs = {"name":"og:description"}).get("content")
+            # print(analysis)
         except:
             analysis = ""
         try:            
@@ -179,14 +201,160 @@ try:
         page_source = "https://press.siemens.com/global/en/press-search"
         news_weblink = i
         
-        try:            
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            # print(announcement)
+        try:
+            annc = res.css(".c2-ct-press-release").get()
+            replace1 = res.css(".nts-notifications").get()
+            replace2 = res.xpath("//section[@class='MetaData Press Release container']").get()
+            replace3 = res.xpath("//h1").get()
+            replace4 = res.css(".mobile-summary").get()
+            replace5 = res.css(".mobile-Introtext").get()
+            replace6 = res.css(".MetaData").get()
+            replace7 = res.css(".nts-primary-teaser-slide-box-container").get()
+            replace8 = res.css(".addeventatc").get()
+            replace9 = res.css(".content .hidden-sm").get()
+            replace10 = res.css(".fsi-row-sm-level h1").get()
+            replace11 = res.xpath("//div[@class='col col-xs-12 col-sm-12 col-md-6']").get()
+            replace12 = res.css(".hasVideo").getall()
+            replace14 = res.css(".nts-notifications").get()
+            replace15 = res.css(".Contact").get()
+            replace16 = res.css(".slick-list").get()
+            replace17 = res.xpath('//section[contains(@class, "VisibleCols3")]//div[not (contains (@class, "noPic")) and contains(@class, "caption")]').getall()
+            replace18 = res.xpath('//section[contains(@class, "VisibleCols1")]//div[not (contains (@class, "noPic")) and contains(@class, "caption")]').getall()
+            replace30 = res.xpath('//section[contains(@class, "VisibleCols2")]//div[not (contains (@class, "noPic")) and contains(@class, "caption")]').getall()
+            replace19 = res.xpath('//section[@class="container Row"]//div[@class="col-md-12"]').get()
+            replace20 = res.css(".filterResults").get()
+            replace21 = res.css(".footer").get()
+            replace22 = res.css(".RelatedRow").get()
+            replace23 = res.css(".Boilerplate").getall()
             
-        except:
-            announcement = ""
+            for video in replace12:
+                try:
+                    annc = annc.replace(video, "")
+                except:
+                    pass
+            for caption in replace17:
+                try:
+                    annc = annc.replace(caption, "")
+                except:
+                    pass
+            for caption1 in replace18:
+                try:
+                    annc = annc.replace(caption1, "")
+                except:
+                    pass
+            for caption2 in replace30:
+                try:
+                    annc = annc.replace(caption2, "")
+                except:
+                    pass
+            for boiler in replace23:
+                try:
+                    annc = annc.replace(boiler, "")
+                except:
+                    pass
+                 
+            try:
+                annc = annc.replace(replace1,"")
+            except:
+                pass
+            try:
+                annc = annc.replace(replace2, "")
+            except:
+                pass
+            try:
+                annc = annc.replace(replace3,"")
+            except:
+                pass
+            try:
+                annc = annc.replace(replace4,"")
+            except:
+                pass
+            try:
+                annc = annc.replace(replace5,"")
+            except:
+                pass
+            try:
+                annc = annc.replace(replace6, "")
+            except:
+                pass
+            try:
+                annc = annc.replace(replace7, "")
+            except:
+                pass
+            try:
+                annc = annc.replace(replace8,"")
+            except:
+                pass
+            try:
+                annc = annc.replace(replace9,"")
+            except:
+                pass
+            try:
+                annc = annc.replace(replace10,"")
+            except:
+                pass
+            try:
+                annc = annc.replace(replace11,"")
+            except:
+                pass
+            try:
+                annc = annc.replace(replace12,"")
+            except:
+                pass
+            try:
+                annc = annc.replace(replace14,"")
+            except:
+                pass
+            try:
+                annc = annc.replace(replace15,"")
+            except:
+                pass
+            try:
+                annc = annc.replace(replace16,"")
+            except:
+                pass
+            # try:
+            #     annc = annc.replace(replace17,"")
+            # except:
+            #     pass
+            try:
+                annc = annc.replace(replace19,"")
+            except:
+                pass
+            try:
+                annc = annc.replace(replace20,"")
+            except:
+                pass
+            try:
+                annc = annc.replace(replace21,"")
+            except:
+                pass
+            try:
+                annc = annc.replace(replace22,"")
+            except:
+                pass
+            annc = annc.replace("<!--[isInTeaser: true][maxLength: 130][hasImage: true][shortenList:true]-->", "")
+            annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
+            annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
+            annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
+            annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
+            annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
+            annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
+            annc = annc.replace("<article xmlns:php=\"http://php.net/xsl\"><section data-partialxcmsid=\"\"><span><!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
+            
+            return_data = parse_filtered_news(annc)
+            annc = return_data['filteredBody']
+            emr_essentail = return_data['emrEssential']
+            emr_executive = return_data['emrExecutive']
+            emr_lite = return_data['emrLite']
+            emr_html = return_data['emrHtmlText']
+        except Exception as e:
+            print(e)
+            annc = ""
+            emr_essentail = ""
+            emr_executive = ""
+            emr_lite = ""
+            emr_html = ""
         
         date = datetime.now()
         # Creating a list of links already avilable in database
@@ -213,13 +381,18 @@ try:
             company_news['News_Weblink'] = news_weblink
             company_news['photo']= image
             company_news['videos']= ''
-            company_news['announcement']=announcement
+            company_news['announcement']=annc
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
+            company_news['emrExecutive'] = emr_executive
+            company_news['emrEssential'] = emr_essentail
+            company_news['emrLite'] = emr_lite
+            company_news['News_Html'] = emr_html
             try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
+                print(e)
                 running_Sequence.append(e)
     
     if Already_exist >= 1:
@@ -277,4 +450,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'None'
 
-error_logs.insert_one(log)
+# error_logs.insert_one(log)

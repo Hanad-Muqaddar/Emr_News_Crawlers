@@ -130,9 +130,8 @@ try:
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
 
-    translator = Translator()
     def translate(Trans):
-        Trans_text = translator.translate(Trans,dest='en')
+        Trans_text = Translator.translate(Trans,dest='en')
         return Trans_text.text
     
     news_links = []
@@ -163,7 +162,7 @@ try:
                 title = translate(title)
                 # print(title)
             except:
-                title = ""
+                title = data.find('div', {"class":"article"}).find('h1').get_text(strip=True)
             
             announcement_type = "News"
 

@@ -1,4 +1,5 @@
 from email import header
+from hashlib import new
 import requests
 import time
 import json
@@ -28,15 +29,19 @@ from datetime import datetime,date, timedelta
 from bson.objectid import ObjectId
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
+from scrapy import Selector
+
 running_Sequence = []
 started_on = datetime.now()
+# c_name = 'ABB_New_Testing'
 c_name = 'ABB'
 try:
     file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
     data = json.load(file)
     db_path = data[0]['Db_Path']
-    # client= MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin')
     client = MongoClient(db_path)
+    # client= MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin')
+    
     running_Sequence.append('Connected to DB Server')
 except:
     running_Sequence.append('Not Connected')
@@ -61,6 +66,7 @@ else:
     Crwl_time = last_insertion['Date']
 total_crwalled_links = 0
 Already_exist = 0
+
 headers = {"authority": "script.crazyegg.com",
 "method": "GET",
 "path": "/pages/data-scripts/0021/5198.json?t=1",
@@ -77,6 +83,26 @@ headers = {"authority": "script.crazyegg.com",
 "sec-fetch-mode": "cors",
 "sec-fetch-site": "cross-site",
 "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36"}
+
+def parse_filtered_news(announcement):
+    api_url = "https://dev.emr-online.com/api/history/filterbody"
+    # api_url = "http://192.168.60.105:3000/api/history/filterbody"
+    payload = json.dumps({
+                            "originalBody": announcement
+                            })
+    headers = {
+                'Content-Type': 'application/json'
+                }
+    return_response = requests.request("POST", api_url, headers=headers, data=payload)
+    new_data = return_response.text
+    new_data = json.loads(new_data)
+    status = new_data['statusCode']
+    if status == 200:
+        return new_data
+    else:
+        new_data =  ""
+        return new_data
+
 try:
     ################ NEWS Release #####################################
     api_date = datetime.now().isoformat().split('T')[0]
@@ -97,19 +123,49 @@ try:
             news['Date'] = dateparser.parse(j['publishedOn'])
             news['announcementType'] = j['newsType']
             news['Source'] = 'https://global.abb/group/en/media/releases/group'
-            news['News_Weblink'] = 'https://global.abb/'+j['path']
+            news['News_Weblink'] = 'https://global.abb/'+ j['path']
             news['title'] = j['title']
             news['photo'] = j['thumbnailImageUrl']
             try:
-                news['announcement'] = BeautifulSoup(requests.get(news['News_Weblink'], headers=headers, timeout=10).content,'lxml').find('div',attrs={'property':'articleBody'}).text.strip()
+                result = requests.get(news['News_Weblink'], headers=headers, timeout=10)
+                resp = Selector(result)
+                announcement = resp.css(".abb--reading-size--component-fix").get()
+                replace1 = resp.css(".oneabb-newsbank-news-Header-title").get()
+                replace2 = resp.css(".oneabb-newsbank-news-Header-subtitle").get()
+                try:
+                    announcement = announcement.replace(replace1,"")
+                except:
+                    pass
+                try:
+                    announcement = announcement.replace(replace2,"")
+                except:
+                    pass
+                return_data = parse_filtered_news(announcement)
+                announcement = return_data['filteredBody']
+                emr_essentail = return_data['emrEssential']
+                emr_executive = return_data['emrExecutive']
+                emr_lite = return_data['emrLite']
+                emr_html = return_data['emrHtmlText']
             except:
-                news['announcement'] = j['description']
+                announcement = ""
+                emr_essentail = ""
+                emr_executive = ""
+                emr_lite = ""
+                emr_html = ""
+            news['announcement'] = announcement
             news['Language'] =  'English'
             news['analysis'] = j['description']
             news['historySubCategory'] = ''
             news['Crawled_on'] = datetime.now()
+            news['emrExecutive'] = emr_executive
+            news['emrEssential'] = emr_essentail
+            news['emrLite'] = emr_lite
+            news['News_Html'] = emr_html
+
             total_crwalled_links +=1
             collection.insert_one(news)
+
+
 ########################### Stories #############################################################
 
     api_date = datetime.now().isoformat().split('T')[0]
@@ -134,13 +190,32 @@ try:
             news['title'] = j['title']
             news['photo'] = j['thumbnailImageUrl']
             try:
-                news['announcement'] = BeautifulSoup(requests.get(news['News_Weblink'], headers=headers, timeout=10).content,'lxml').find('div',attrs={'property':'articleBody'}).text.strip()
+                result = requests.get(news['News_Weblink'], headers=headers, timeout=10)
+                resp = Selector(result)
+                announcement = resp.css(".abb--reading-size--component-fix").get()
+                replace1 = resp.css(".oneabb-newsbank-news-Header").get()
+                announcement = announcement.replace(replace1,"")
+                return_data = parse_filtered_news(announcement)
+                announcement = return_data['filteredBody']
+                emr_essentail = return_data['emrEssential']
+                emr_executive = return_data['emrExecutive']
+                emr_lite = return_data['emrLite']
+                emr_html = return_data['emrHtmlText']
             except:
-                news['announcement'] = j['description']
+                announcement = ""
+                emr_essentail = ""
+                emr_executive = ""
+                emr_lite = ""
+                emr_html = ""
+            news['announcement'] = announcement
             news['Language'] =  'English'
             news['analysis'] = j['description']
             news['historySubCategory'] = ''
             news['Crawled_on'] = datetime.now()
+            news['emrExecutive'] = emr_executive
+            news['emrEssential'] = emr_essentail
+            news['emrLite'] = emr_lite
+            news['News_Html'] = emr_html
             total_crwalled_links +=1
             collection.insert_one(news)
     if Already_exist >=1:
@@ -174,4 +249,4 @@ log['Crawler_Runing Sequence'] = running_Sequence if running_Sequence else ''
 log['Links_Skipped'] = Already_exist
 log['Last_news_crawl_time'] = last_time
 log['Browser'] = 'None'
-error_logs.insert_one(log)
+# error_logs.insert_one(log)

@@ -53,7 +53,7 @@ running_Sequence = []
 
 started_on = datetime.now()
 
-c_name = 'Leviton' # Name of the Collection
+c_name = 'LEVITON' # Name of the Collection
 
 total_crwalled_links = 0
 
@@ -157,10 +157,10 @@ try:
 
             try:
                 title = data.find('div', attrs = {"class":"title--a"}).get_text(strip=True)
-                print(title)
+                # print(title)
             except:
                 title = data.find('title').text
-                print(title)
+                # print(title)
             
             announcement_type = "Press Release"
             language = "en-us"
@@ -177,7 +177,7 @@ try:
                 analysis = ""
             try:
                 news_date = dateparser.parse(d,  settings={'DATE_ORDER': 'YMD'} )
-                print(news_date)
+                # print(news_date)
             except:
                 news_date = ""
 
@@ -188,7 +188,7 @@ try:
                 html = requests.get(i).text
                 announcement = fulltext(html)
                 announcement = announcement.replace('\n','<br>')
-                print(announcement)
+                # print(announcement)
                 
             except:
                 announcement = ""

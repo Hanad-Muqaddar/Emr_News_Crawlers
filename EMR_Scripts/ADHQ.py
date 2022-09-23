@@ -25,15 +25,37 @@ from datetime import datetime,date, timedelta
 from bson.objectid import ObjectId
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
+from scrapy import Selector
+
+def parse_filtered_news(announcement):
+    api_url = "https://dev.emr-online.com/api/history/filterbody"
+    # api_url = "http://192.168.60.105:3000/api/history/filterbody"
+    payload = json.dumps({
+                            "originalBody": announcement
+                            })
+    headers = {
+                'Content-Type': 'application/json'
+                }
+    return_response = requests.request("POST", api_url, headers=headers, data=payload)
+    new_data = return_response.text
+    new_data = json.loads(new_data)
+    status = new_data['statusCode']
+    if status == 200:
+        return new_data
+    else:
+        new_data =  ""
+        return new_data
+
+
 running_Sequence = []
 started_on = datetime.now()
+# c_name = 'ADHQ_Testing_Now'
 c_name = 'ADHQ'
 try:
     file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)
-    # client= MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin')
     # client= MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin')
     running_Sequence.append('Connected to DB Server')
 except:
@@ -61,6 +83,7 @@ total_crwalled_links = 0
 Already_exist = 0
 try:
     # total_page = json.loads(requests.get('https://www.adhq.com/news/json/').text)['total_pages']
+    # print(total_page)
     for i in range(2):
         req_url = 'https://www.adhq.com/news/json/'+str(i+1)
         data = json.loads(requests.get(req_url).text)['articles']
@@ -83,9 +106,36 @@ try:
                 news['News_Weblink'] = 'https://www.adhq.com/about/ad-news/'+j['url_segment']
                 news['title'] = j['title']
                 news['photo'] = 'https://www.adhq.com/content/news/images/' + j['image']
-                news['announcement'] = j['description']
+                try:
+                    result = requests.get(news['News_Weblink'])
+                    resp = Selector(result)
+                    announcement = resp.css(".contain article").get()
+                    replace1 = resp.css(".news-byline").get()
+                    replace2 = resp.css(".legacy-news-header .title").get()
+                    announcement = announcement.replace(replace1,"")
+                    announcement = announcement.replace(replace2, "")
+                    announcement = announcement.replace('src="', 'src="https://www.adhq.com')
+                    return_data = parse_filtered_news(announcement)
+                    announcement = return_data['filteredBody']
+                    emr_essentail = return_data['emrEssential']
+                    emr_executive = return_data['emrExecutive']
+                    emr_lite = return_data['emrLite']
+                    emr_html = return_data['emrHtmlText']
+                except:
+                    announcement = ""
+                    emr_essentail = ""
+                    emr_executive = ""
+                    emr_lite = ""
+                    emr_html = ""
+
+                news['announcement'] = announcement
                 news['Language'] =  'English'
                 news['analysis'] = j['author']
+                news['emrExecutive'] = emr_executive
+                news['emrEssential'] = emr_essentail
+                news['emrLite'] = emr_lite
+                news['News_Html'] = emr_html
+
                 SC = []
                 for x in j['topic']:
                     SC.append(x['news_categories_name'])

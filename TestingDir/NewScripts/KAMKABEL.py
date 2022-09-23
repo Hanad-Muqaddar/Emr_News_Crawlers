@@ -130,10 +130,10 @@ try:
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
 
-    translator = Translator()
-
+    
     def translate(Trans):
-        Trans_text = translator.translate(Trans,dest='en')
+        trans_obj = Translator()
+        Trans_text = trans_obj.translate(Trans,dest='en')
         return Trans_text.text
     
     news_links = []
@@ -147,18 +147,19 @@ try:
     # print(news_links)
     # print(len(news_links))
 
-    for i in news_links:        
+    for i in news_links:
         response = requests.get(i, headers=headers)
         data = BeautifulSoup(response.content, 'lxml')
-
         try:
             title = data.find('section',attrs = {"class":"page-top"}).find('h1').get_text()
             title = translate(title)
-            # print(title)
+            print(title)
         except:
-            title = data.find('title').get_text()
-            title = translate(title)
-            # print(title)
+            try:
+                title = data.find('title').get_text()
+                title = translate(title)
+            except Exception as e:
+                title = data.find('title').get_text()
         
         announcement_type = "News"
         language = "en-us"

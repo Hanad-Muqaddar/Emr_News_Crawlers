@@ -128,9 +128,8 @@ try:
     Base_url = ["https://www.bbcgroup.com/en/news-bbc-group-schweiz/" , "https://electricalproducts.cellpack.com/en/news-and-current-affairs-from-bbc-cellpack-electrical-products/"]
     Main_url2 = "https://electricalproducts.cellpack.com"
     news_links = []
-    
     for url in Base_url:
-        result = requests.get(Base_url,headers=headers, verify=False)
+        result = requests.get(url, headers=headers, verify=False)
         soup = BeautifulSoup(result.content , 'lxml')
         links = soup.find_all('div',{ "class" : "news-list-item"})
         for link in links:
@@ -143,8 +142,8 @@ try:
                 if news_link not in news_links:
                     news_links.append(news_link)
 
-    print(news_links)
-    print(len(news_links))
+    # print(news_links)
+    # print(len(news_links))
 
     for i in news_links:        
         response = requests.get(i, headers=headers, verify=False)
@@ -152,20 +151,22 @@ try:
 
         try:
             title = data.find('div', {"class":"row news-single-item test"}).find('h1').get_text(strip=True)
-            print(title)
+            # print(title)
+            if title == None:
+                title = data.find('title').text
         except:
             title = data.find('title').text
-            print(title)
+            # print(title)
         
         announcement_type = "News"
         language = "en-us"
 
         try:
             image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-            print(image)
+            # print(image)
         except:
             image = ""
-            print(image)
+            # print(image)
 
         try:
             sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
@@ -179,9 +180,9 @@ try:
 
         try:
             date = data.find('div', {"class":"news-single-datetime"}).find(text=True, recursive=False)
-            print(date)
+            # print(date)
             news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'MDY'})
-            print(news_date)
+            # print(news_date)
         except:
             news_date = ""
 
@@ -192,7 +193,7 @@ try:
             html = requests.get(i).text
             announcement = fulltext(html)
             announcement = announcement.replace('\n','<br>')
-            print(announcement)
+            # print(announcement)
             
         except:
             announcement = ""
