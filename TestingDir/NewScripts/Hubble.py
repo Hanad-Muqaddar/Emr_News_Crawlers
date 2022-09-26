@@ -141,8 +141,8 @@ def parse_newspaper_data(url):
 
 
 try:
-    proxies = {'http': 'http://alihaider99:cheeta@de.proxymesh.com:31280',
-            'https': 'http://alihaider99:cheeta@de.proxymesh.com:31280'}
+    proxies = {'http': 'http://alihaider9:salma_walee@de.proxymesh.com:31280',
+            'https': 'http://alihaider9:salman_walee@de.proxymesh.com:31280'}
 
     result = requests.get("https://hubbell.gcs-web.com/rss/news-releases.xml")
     first_res = xmltodict.parse(result.text)

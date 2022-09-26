@@ -132,8 +132,8 @@ try:
 
     
     def translate(Trans):
-        trans_obj = Translator()
-        Trans_text = trans_obj.translate(Trans,dest='en')
+        translator = Translator()
+        Trans_text = translator.translate(Trans,dest='en')
         return Trans_text.text
     
     news_links = []

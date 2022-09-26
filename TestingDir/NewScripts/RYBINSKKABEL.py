@@ -130,9 +130,9 @@ try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     service = Service("/home/ubuntu/chrome_driver/chromedriver.exe")
     driver = webdriver.Chrome(service=service)
-    translator = Translator()
-
+    
     def translate(Trans):
+        translator = Translator()
         Trans_text = translator.translate(Trans,dest='en')
         return Trans_text.text
 

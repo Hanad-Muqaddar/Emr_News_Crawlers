@@ -129,8 +129,8 @@ try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://www.phoenixcontact.com"
     Base_url = "https://www.phoenixcontact.com/en-pc/events-and-news"
-    proxies = {'http': 'http://alihaider99:cheeta@ch.proxymesh.com:31280',
-            'https': 'http://alihaider99:cheeta@ch.proxymesh.com:31280'}
+    proxies = {'http': 'http://alihaider9:salman_walee@ch.proxymesh.com:31280',
+            'https': 'http://alihaider9:salman_walee@ch.proxymesh.com:31280'}
     print("First step done")
     try:
         result = requests.get(Base_url,headers=headers, proxies=proxies)

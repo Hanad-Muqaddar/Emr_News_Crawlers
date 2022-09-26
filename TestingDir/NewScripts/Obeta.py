@@ -132,7 +132,8 @@ try:
 
 
     def translate(Trans):
-        Trans_text = Translator.translate(Trans,dest='en')
+        translator = Translator()
+        Trans_text = translator.translate(Trans,dest='en')
         return Trans_text.text
     
     news_links = []
@@ -153,9 +154,10 @@ try:
         try:
             title = data.find('meta',attrs = {'property':'og:title'}).get('content')
             title = translate(title)
-            # print(title)
-        except:
+            print(title)
+        except Exception as e:
             title = data.find('meta',attrs = {'property':'og:title'}).get('content')
+            print(e)
         
         announcement_type = "News"
         language = "en-us"

@@ -132,8 +132,8 @@ try:
     news_links = []
     news_dates = [] 
 
-    translator = Translator()
     def translate(Trans):
+        translator = Translator()
         Trans_text = translator.translate(Trans,dest='en')
         return Trans_text.text
 

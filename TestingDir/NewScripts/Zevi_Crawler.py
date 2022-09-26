@@ -166,9 +166,8 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
 
-    translator = Translator()
-
     def translate(Trans):
+        translator = Translator()
         Trans_text = translator.translate(Trans,dest='en')
         return Trans_text.text
 

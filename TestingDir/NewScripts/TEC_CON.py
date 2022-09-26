@@ -131,9 +131,9 @@ try:
     soup = BeautifulSoup(result.content , 'lxml')
     
     news_links = []
-    translator = Translator()
-
+    
     def translate(Trans):
+        translator = Translator()
         Trans_text = translator.translate(Trans,dest='en')
         return Trans_text.text
 
