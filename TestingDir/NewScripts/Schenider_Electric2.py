@@ -47,6 +47,8 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from scrapy import Selector
+
+import unicodedata
 # ************************************************************************
 
 running_Sequence = []
@@ -125,7 +127,25 @@ else:
 ####################################################
 
 # *****************************************************************************
-
+def parse_filtered_news(announcement):
+    api_url = "https://admin.dev.emr-online.com/api/history/filterbody"
+    # api_url = "http://192.168.60.105:3000/api/history/filterbody"
+    payload = json.dumps({
+                            "originalBody": announcement
+                            })
+    headers = {
+                'Content-Type': 'application/json'
+                }
+    return_response = requests.request("POST", api_url, headers=headers, data=payload)
+    new_data = return_response.text
+    new_data = json.loads(new_data)
+    status = new_data['statusCode']
+    if status == 200:
+        return new_data
+    else:
+        new_data =  ""
+        return new_data
+    
 try:
     proxies = {'http': 'http://alihaider9:salman_walee@jp.proxymesh.com:31280',
             'https': 'http://alihaider9:salman_walee@jp.proxymesh.com:31280'}
@@ -181,9 +201,31 @@ try:
             except:
                 announcement_type = ""
             try:
-                announcement = response1.xpath("normalize-space(//div[@class='wiztopic-rich-text'])").get()
-            except:
+                announcement = response1.css(".sdl-wiztopic-press-release .sdl-component-wrap").get()
+                replace1 = response1.xpath("//div[@class='sdl-component-wrap']/div").get()
+                replace2 = response1.css(".sdl-wiztopic-press-release_download-pdf-button").get()
+                try:
+                    announcement = announcement.replace(replace1, "")
+                except:
+                    pass
+                try:
+                    announcement = announcement.replace(replace2, "")
+                except:
+                    pass
+                return_data = parse_filtered_news(announcement)
+                announcement = return_data['filteredBody']
+                announcement = unicodedata.normalize("NFKD",announcement)
+                emr_essentail = return_data['emrEssential']
+                emr_executive = return_data['emrExecutive']
+                emr_lite = return_data['emrLite']
+                emr_html = return_data['emrHtmlText']
+
+            except Exception as e:
                 announcement = ""
+                emr_essentail = ""
+                emr_executive = ""
+                emr_lite = ""
+                emr_html = ""
             language = "en"
             page_source = "https://www.se.com/us/en/about-us/newsroom/news/"
             crawled_date = datetime.datetime.now()
@@ -203,6 +245,10 @@ try:
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
+            company_news['emrExecutive'] = emr_executive
+            company_news['emrEssential'] = emr_essentail
+            company_news['emrLite'] = emr_lite
+            company_news['News_Html'] = emr_html
             try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1

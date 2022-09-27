@@ -195,15 +195,13 @@ if __name__ == "__main__":
     
     try:    
         # key='mongodb://localhost:27017/'
-        file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-        data = json.load(file)
-        db_path = data[0]['Db_Path']
-        key = db_path
-        # key='mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin'
+        # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+        # data = json.load(file)
+        # db_path = data[0]['Db_Path']
+        # key = db_path
+        key='mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin'
         dbName='TEMP_EMR_NEWS_Crawler_DB'
         collectionName='SIEMENS_ENERGY'
-    #         dbName='siemens_energy'
-    #         collectionName='news'
         url='https://press.siemens-energy.com/global/en/press-search?f%5B0%5D=content_type:c2_ct_press_release'
 
         Client=CreateDbConnection(key)

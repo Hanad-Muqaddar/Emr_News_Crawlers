@@ -1,4 +1,5 @@
 # Packages to be imported
+from ast import expr_context
 import requests
 
 import time
@@ -333,15 +334,20 @@ try:
                 annc = annc.replace(replace22,"")
             except:
                 pass
-            annc = annc.replace("<!--[isInTeaser: true][maxLength: 130][hasImage: true][shortenList:true]-->", "")
-            annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
-            annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
-            annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
-            annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
-            annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
-            annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
-            annc = annc.replace("<article xmlns:php=\"http://php.net/xsl\"><section data-partialxcmsid=\"\"><span><!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
-            
+            try:
+                annc = annc.replace("<!--[isInTeaser: true][maxLength: 130][hasImage: true][shortenList:true]-->", "")
+            except:
+                pass
+            try:
+                annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
+                annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
+                annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
+                annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
+                annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
+                annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
+                annc = annc.replace("<article xmlns:php=\"http://php.net/xsl\"><section data-partialxcmsid=\"\"><span><!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
+            except:
+                pass
             return_data = parse_filtered_news(annc)
             annc = return_data['filteredBody']
             emr_essentail = return_data['emrEssential']
