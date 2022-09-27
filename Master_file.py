@@ -189,7 +189,8 @@ def crawler_health_function(crawler_name, path, today_date):
         returning_id = MyCollection.insert_one(new_item)
         path = path + crawler_name + ".py"
         start_time = datetime.datetime.now()
-        exec(open(path).read())
+        # exec(open(path).read())
+        exec(compile(open(path, "rb").read(), path, 'exec'),globals(), locals())
         end_time = datetime.datetime.now()
         time_interval = calculate_time_interval(start_time, end_time)
         MyCollection2 = MyDatabase2[crawlerToCollectionMapping[crawler_name]]
