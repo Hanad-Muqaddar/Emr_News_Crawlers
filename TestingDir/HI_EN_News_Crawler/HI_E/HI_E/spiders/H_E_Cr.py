@@ -42,7 +42,7 @@ class MySpider(SitemapSpider):
                 item['photo'] = response.css(".cmp-container--full-width picture img::attr(href)").get()
             except:
                 item['photo'] = ""
-            announcement , emr_essentail, emr_lite, emr_executive= self.parse_announcement(response)
+            announcement , emr_essentail, emr_lite, emr_executive, emr_html = self.parse_announcement(response)
             item['announcement'] = announcement
             item['Language'] = 'English'
             item['analysis'] = self.parse_analysis(response)
@@ -50,6 +50,7 @@ class MySpider(SitemapSpider):
             item['emrExecutive'] = emr_executive
             item['emrEssential'] = emr_essentail
             item['emrLite'] = emr_lite
+            item['News_Html'] = emr_html
             return item
     
     def parse_news_date(self, response):
@@ -66,7 +67,7 @@ class MySpider(SitemapSpider):
         return title
     
     def parse_filtered_news(self, announcement):
-        api_url = "https://admin.new.emr-online.com/api/history/filterbody"
+        api_url = "https://admin.dev.emr-online.com/api/history/filterbody"
         payload = json.dumps({
                                 "originalBody": announcement
                                 })
@@ -119,7 +120,11 @@ class MySpider(SitemapSpider):
             emr_lite = return_data['emrLite']
         except:
             emr_lite = ""
-        return announcement , emr_essentail, emr_lite, emr_executive
+        try:
+            emr_html = return_data['emrHtmlText']
+        except:
+            emr_html = ""
+        return announcement , emr_essentail, emr_lite, emr_executive, emr_html
     
     def parse_analysis(self, response):
         analysis = response.xpath('//meta[@name="description"]/@content').get()
