@@ -9,27 +9,21 @@ from random import randint
 
 from bs4 import BeautifulSoup
 
-from pymongo import MongoClient
+from pymongo import MongoClient, response
 
 from bs4 import BeautifulSoup
 
 from selenium import webdriver
 
-# from webdriver_manager.chrome import ChromeDriver
-
 from selenium.webdriver.chrome.options import Options
 
 from selenium.webdriver.support.ui import WebDriverWait
-
-from selenium.webdriver.chrome.service import Service
 
 from selenium.webdriver.common.keys import Keys
 
 from selenium.webdriver.support import expected_conditions
 
 from selenium.webdriver.common.by import By
-
-from urllib.parse import urlparse
 
 import re
 
@@ -39,7 +33,7 @@ import urllib
 
 import dateparser
 
-from datetime import datetime
+import datetime
 
 from bson.objectid import ObjectId
 
@@ -47,14 +41,14 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
+from scrapy import Selector
+
 from newspaper import fulltext
-
+import json
 # ************************************************************************
-# defining variables
-
 running_Sequence = []
 
-started_on = datetime.now()
+started_on = datetime.datetime.now()
 
 c_name = 'Solar' # Name of the Collection
 
@@ -67,7 +61,10 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
     client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
@@ -104,9 +101,9 @@ except:
 
 if last_insertion == None:
 
-    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
 
-    Crwl_time = datetime.now()
+    Crwl_time = datetime.datetime.now()
 
 else:
 
@@ -125,95 +122,79 @@ else:
 ####################################################
 
 # *****************************************************************************
+
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    service = Service("/home/ubuntu/chrome_driver/chromedriver.exe")
-    driver = webdriver.Chrome(service=service)
-
-    driver.get("https://www.solar.eu/investor/news/")
-    time.sleep(5)
-
-    news_links = []
-    links = driver.find_elements(By.XPATH, '//ul[@class="articles-list"]/li')
-    for link in links:
-        news_link = link.find_element(By.XPATH, './/a[@class="title-link"]').get_attribute('href')
-        news_links.append(news_link)
-      
-    print(news_links)
-    print(len(news_links))
-     
-    for i in news_links:
-    # for i in news_links:
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-        try:
-            title = data.find('title').get_text(strip=True)
-            title = title.replace('| Solar','')
-            print(title)
-        except:
-            title = ""
-            print(title)       
-      
-        language = "en-us"        
-        image = ""                         
-        announcement_type = "News"
-
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-            print(sub_category)
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-            print(analysis)
-        except:
-            analysis = ""
-        try:
-            # dateparser.parse(L_date,settings={'DATE_ORDER': 'YMD'})
-            date = data.find('div',{"class":"container press-release-wrapper"}).find('div',{"class":"col-8"}).find('p').get_text().split("·", 1)[1].strip()
-            print(date)
-            news_date = dateparser.parse(date,settings={'DATE_ORDER': 'YMD'})
-            print(news_date)
-        except:
-            news_date = ""
-
-        page_source = ("https://www.solar.eu/investor/news/")
-        news_weblink = i
-                
-        try:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            print(announcement)            
-        except:
-            announcement = ""
-            print(announcement)
-                             
-        date = datetime.now()
-        # print(date)
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
-            total_crwalled_links += 1
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Connection': 'keep-alive',
+        'RequestVerificationToken': 'cPbhP_CGvvxpZXUeKlnZD6QM2Nf_nNWnnKqX1PU5rzv3nM7vtZFANlnueAATRex8lcoCxeru7qTJJIKbPMlzID3MKQ6HxVJhVp8gKw6GCQ01:F6jEoko5JSsDknXVyIi7NerSPgLnY35c5rxEay2p_WbtkDJmT0bmsAevBoptINtrhRGI7vT1wOP7liZggool-BkvOOydmkrnZjDqgJDBR9Q1',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
+        'Cookie': 'dtCookie=v_4_srv_4_sn_8C908CB5EE5E8CB6BF12AC3D14E0BD6D_perc_100000_ol_0_mul_1_app-3Aaf0660e728ed7fcc_1; .ASPXANONYMOUS=jiPB7dRoMwGOXU2oRVsooWNDrYaWae8lyhVizatyQRT2t0egv3Jp9KcIJrlwDb7hptVEzO8peSCfA9mHMH-YzTnEkJ1AK_vWb83tggFkzSVYPXKDfpUhb2ZPdJknAAoED0qzMEd8wbtJdJ5Z8rJtPw2; NSC_wt_qspe_qfqjxfc_iuuqt=ffffffff094e4c0345525d5f4f58455e445a4a42378b'
+        }
+    url = "https://www.solar.eu/api/news/"
+    to_date = datetime.datetime.now()
+    payload = json.dumps({
+            "Language": "en",
+            "FromDate": "2021-12-31T19:00:00.000Z",
+            # "ToDate": "2022-09-29T19:00:00.000Z"
+            "ToDate" : str(to_date)
+            })
+    response = requests.request("POST", url, headers=headers, data=payload)
+    data = json.loads(response.text)
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+    for i in data:
+        id = i['Id']
+        news_web_link = f"https://www.solar.eu/investor/news/news-page/?pressId={id}&lang=en"
+        if news_web_link in db_list:
             Already_exist += 1
+            total_crwalled_links += 1
             continue
         else:
+            result1 = requests.get(news_web_link)
+            response1 = Selector(result1)
+            try:
+                news_date = i['PublishedDateTime']
+                news_date = dateparser.parse(news_date)
+            except:
+                news_date = ""
+            try:
+                title = i['Headline']
+            except:
+                title = ""
+            try:
+                analysis = i['TeaserText']
+            except:
+                analysis = ""
+            try:
+                image = response1.xpath("//meta[@property='og:image']/@content").get()
+            except:
+                image = ""
+            sub_category = ""
+            try:
+                announcement = fulltext(result1.text)
+                announcement = announcement.replace('\n','<br>')
+            except:
+                announcement = ""
+            announcement_type = "News"
+            language = "en"
+            page_source = "https://www.solar.eu/investor/news/"
+            crawled_date = datetime.datetime.now()
+
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
             company_news['comment']=''
             company_news['Date']= news_date
-            company_news['Crawled_on']=date
+            company_news['Crawled_on']=crawled_date
             company_news['title']=title
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
+            company_news['News_Weblink'] = news_web_link
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement
@@ -228,19 +209,24 @@ try:
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
-
     else:
 
         tmp_txt = ''
 
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
-    ended_on = datetime.now()
-except:
-    Error_Time =  datetime.now()
+    ended_on = datetime.datetime.now()
+except Exception as e:
+    Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()
 
+    running_Sequence.append(e)
+
+
+# **************************************************************************
+
+# **************************************************************************
 
 # **************************************************************************
 rep = ''
@@ -258,7 +244,6 @@ except Exception as e:
     rep = traceback.format_exc()
 
     pass
-
 
 log = {}
 
@@ -278,6 +263,6 @@ log['Links_Skipped'] = Already_exist
 
 log['Last_news_crawl_time'] = last_time
 
-log['Browser'] = 'None'
+log['Browser'] = 'Chrome'
 
 error_logs.insert_one(log)

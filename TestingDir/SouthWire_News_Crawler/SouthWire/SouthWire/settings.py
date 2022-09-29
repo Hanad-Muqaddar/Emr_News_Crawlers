@@ -6,19 +6,19 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-import json
+# import json
 
-file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-data = json.load(file)
-db_path = data[0]['Db_Path']
+# file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+# data = json.load(file)
+# db_path = data[0]['Db_Path']
 
 BOT_NAME = 'SouthWire'
 
 SPIDER_MODULES = ['SouthWire.spiders']
 NEWSPIDER_MODULE = 'SouthWire.spiders'
 
-# MONGO_URI = "mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin"
-MONGO_URI = db_path
+MONGO_URI = "mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin"
+# MONGO_URI = db_path
 MONGO_DATABASE = "TEMP_EMR_NEWS_Crawler_DB"
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'SouthWire (+http://www.yourdomain.com)'

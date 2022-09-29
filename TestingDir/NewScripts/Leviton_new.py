@@ -124,12 +124,10 @@ else:
 # *****************************************************************************
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-
     Base_url = "https://www.leviton.com/sites/Satellite?pagename=LC/Utilities/GetAllPressReleases&d=Default&id=1469251297323"
     Main_url = "https://www.leviton.com"
     page = requests.get(Base_url)
     json_result = page.json()
-
     news_links = []
     news_dates = []
 
@@ -139,22 +137,21 @@ try:
 
         link = Main_url + data['assoc_link']
         news_links.append(link)
-
-
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+        
     for i,d in zip(news_links, news_dates):
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+        
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             continue
 
-        else:        
+        else:
             response = requests.get(i, headers=headers)
             data = BeautifulSoup(response.content, 'lxml')
-
             try:
                 title = data.find('div', attrs = {"class":"title--a"}).get_text(strip=True)
                 # print(title)
@@ -176,7 +173,7 @@ try:
             except:
                 analysis = ""
             try:
-                news_date = dateparser.parse(d,  settings={'DATE_ORDER': 'YMD'} )
+                news_date = dateparser.parse(d )
                 # print(news_date)
             except:
                 news_date = ""

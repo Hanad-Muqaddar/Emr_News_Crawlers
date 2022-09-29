@@ -161,7 +161,7 @@ try:
         try:
             title = data.find('title').text
             title = translate(title)
-            print(title)
+            # print(title)
         except:
             title = data.find('title').text
             # print(title)
@@ -184,13 +184,13 @@ try:
             analysis = ""
         try:
             news_date = dateparser.parse(N_Date,  settings={'DATE_ORDER': 'DMY'} )
-            print(news_date)
+            # print(news_date)
         except:
             news_date = ""
 
         page_source = "https://alexander-buerkle.com/de-de/magazin-news"
         news_weblink = i
-        
+        # print(news_weblink)
         try:
             announcement = data.find('div' , id="ab-root").text
             announcement = translate(announcement)
@@ -229,6 +229,7 @@ try:
             company_news['analysis'] = analysis
             try:
                 collection.insert_one(company_news)
+                print("insert")
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
