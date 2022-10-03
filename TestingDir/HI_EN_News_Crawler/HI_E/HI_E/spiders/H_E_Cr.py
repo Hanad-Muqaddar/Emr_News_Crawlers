@@ -24,7 +24,7 @@ class MySpider(SitemapSpider):
     name = "Hitachi"
     sitemap_urls = ['https://www.hitachienergy.com/news/sitemap.xml']
     sitemap_rules = [
-        ('/news/', 'parse_news'),
+        ('/news/press-releases/', 'parse_news'),
     ]
 
     def parse_news(self, response):

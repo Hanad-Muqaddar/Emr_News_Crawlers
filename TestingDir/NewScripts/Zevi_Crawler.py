@@ -64,12 +64,12 @@ opts.add_argument("disable-infobars")
 opts.add_argument("--lang=en")
 opts.add_argument("--enable-javascript")
 opts.add_argument("--enable-cookies")
-lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-prefs = {
-  "translate_whitelists": lang_dict,
-  "translate":{"enabled":"true"}
-}
-opts.add_experimental_option("prefs", prefs)
+# lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
+# prefs = {
+#   "translate_whitelists": lang_dict,
+#   "translate":{"enabled":"true"}
+# }
+# opts.add_experimental_option("prefs", prefs)
 
 opts.headless = True
 
@@ -88,12 +88,12 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
 
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -157,21 +157,16 @@ try:
     Base_url = "https://www.zvei.org/presse-medien/pressebereich"
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
-    
-    news_links = []
-
-    links = soup.find_all('div', { "class" : "content-list-element fade-in no-transition border-bottom month-6"})
-    for link in links:
-        news_link = Main_url + link.find('a').get('href')
-        if news_link not in news_links:
-            news_links.append(news_link)
-
+    response = Selector(result)
+    news_links = response.css(".content-list-element a ::attr(href)").getall()
+    final_links = ["https://www.zvei.org" + url for url in news_links]
+    # print(final_links)
     def translate(Trans):
         translator = Translator()
         Trans_text = translator.translate(Trans,dest='en')
         return Trans_text.text
 
-    for i in news_links:
+    for i in final_links[:5]:
         db_list = []
         mydoc = collection.find()
         for x in mydoc:

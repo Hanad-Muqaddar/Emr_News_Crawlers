@@ -16,7 +16,7 @@ MONGO_URI = "mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrwe
 MONGO_DATABASE = "TEMP_EMR_NEWS_Crawler_DB"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'HI_E (+http://www.yourdomain.com)'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36'
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
