@@ -85,7 +85,7 @@ headers = {"authority": "script.crazyegg.com",
 "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36"}
 
 def parse_filtered_news(announcement):
-    api_url = "https://admin.dev.emr-online.com/api/history/filterbody"
+    api_url = "https://admin.new.emr-online.com/api/history/filterbody"
     # api_url = "http://192.168.60.105:3000/api/history/filterbody"
     payload = json.dumps({
                             "originalBody": announcement

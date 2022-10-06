@@ -67,7 +67,7 @@ class MySpider(SitemapSpider):
         return title
     
     def parse_filtered_news(self, announcement):
-        api_url = "https://admin.dev.emr-online.com/api/history/filterbody"
+        api_url = "https://admin.new.emr-online.com/api/history/filterbody"
         payload = json.dumps({
                                 "originalBody": announcement
                                 })

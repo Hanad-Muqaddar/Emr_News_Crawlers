@@ -127,7 +127,7 @@ else:
 
 # *****************************************************************************
 def parse_filtered_news(announcement):
-    api_url = "https://admin.dev.emr-online.com/api/history/filterbody"
+    api_url = "https://admin.new.emr-online.com/api/history/filterbody"
     # api_url = "http://192.168.60.105:3000/api/history/filterbody"
     payload = json.dumps({
                             "originalBody": announcement
