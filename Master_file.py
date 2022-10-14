@@ -1,6 +1,7 @@
 import pymongo
 import datetime
 import copy
+import runpy
 
 myclient = pymongo.MongoClient("mongodb://su-du-ad:updatedSuperDuperAdmin@34.121.98.98:27017/emrweb?authSource=admin")
 myclient2 = pymongo.MongoClient("mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin")
@@ -190,7 +191,8 @@ def crawler_health_function(crawler_name, path, today_date):
         path = path + crawler_name + ".py"
         start_time = datetime.datetime.now()
         # exec(open(path).read())
-        exec(compile(open(path, "rb").read(), path, 'exec'),globals(), locals())
+        # exec(compile(open(path, "rb").read(), path, 'exec'),globals(), locals())
+        runpy.run_path(path)
         end_time = datetime.datetime.now()
         time_interval = calculate_time_interval(start_time, end_time)
         MyCollection2 = MyDatabase2[crawlerToCollectionMapping[crawler_name]]

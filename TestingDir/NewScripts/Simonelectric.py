@@ -1,292 +1,292 @@
-# Packages to be imported
-import requests
+# # Packages to be imported
+# import requests
 
-import time
+# import time
 
-import json
+# import json
 
-from random import randint
+# from random import randint
 
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 
-from pymongo import MongoClient
+# from pymongo import MongoClient
 
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 
-from selenium import webdriver
+# from selenium import webdriver
 
-# from webdriver_manager.chrome import ChromeDriver
+# # from webdriver_manager.chrome import ChromeDriver
 
-from selenium.webdriver.chrome.options import Options
+# from selenium.webdriver.chrome.options import Options
 
-from selenium.webdriver.support.ui import WebDriverWait
+# from selenium.webdriver.support.ui import WebDriverWait
 
-from selenium.webdriver.common.keys import Keys
+# from selenium.webdriver.common.keys import Keys
 
-from selenium.webdriver.support import expected_conditions
+# from selenium.webdriver.support import expected_conditions
 
-from selenium.webdriver.common.by import By
+# from selenium.webdriver.common.by import By
 
-from urllib.parse import urlparse
+# from urllib.parse import urlparse
 
-import re
+# import re
 
-import traceback
+# import traceback
 
-import urllib
+# import urllib
 
-import dateparser
+# import dateparser
 
-from datetime import datetime
+# from datetime import datetime
 
-from bson.objectid import ObjectId
+# from bson.objectid import ObjectId
 
-from urllib.error import HTTPError
+# from urllib.error import HTTPError
 
-from urllib.request import Request, urlopen
+# from urllib.request import Request, urlopen
 
-from newspaper import fulltext
+# from newspaper import fulltext
 
-from googletrans import Translator
-# ************************************************************************
-# defining variables
+# from googletrans import Translator
+# # ************************************************************************
+# # defining variables
 
-running_Sequence = []
+# running_Sequence = []
 
-started_on = datetime.now()
+# started_on = datetime.now()
 
-c_name = 'SIMONELECTRIC' # Name of the Collection
+# c_name = 'SIMONELECTRIC' # Name of the Collection
 
-total_crwalled_links = 0
+# total_crwalled_links = 0
 
-Already_exist = 0
+# Already_exist = 0
 
-# *************************************************************************
+# # *************************************************************************
 
-# trying to connect with mongodb
+# # trying to connect with mongodb
 
-try:
+# try:
 
-    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+#     client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
-    running_Sequence.append('Connected to DB Server')
+#     running_Sequence.append('Connected to DB Server')
 
-except:
+# except:
 
-    running_Sequence.append('Not Connected')
+#     running_Sequence.append('Not Connected')
 
-# *************************************************************************
+# # *************************************************************************
 
-client_name = 'TEMP_EMR_NEWS_Crawler_DB'
+# client_name = 'TEMP_EMR_NEWS_Crawler_DB'
 
-news =  client[client_name]
+# news =  client[client_name]
 
-collection = news[c_name]
+# collection = news[c_name]
 
-error_logs = client['Logs_DB']['Logs_TEMP_EMR_NEWS_Crawler_DB']
+# error_logs = client['Logs_DB']['Logs_TEMP_EMR_NEWS_Crawler_DB']
 
-last_insertion = None
+# last_insertion = None
 
-last_time = ''
+# last_time = ''
 
-# ****************************************************************************
+# # ****************************************************************************
 
-try:
+# try:
 
-    for l_i in collection.find().sort('Date', -1).limit(1):
+#     for l_i in collection.find().sort('Date', -1).limit(1):
 
-        last_insertion = l_i
+#         last_insertion = l_i
 
-except:
+# except:
 
-    last_insertion = None
+#     last_insertion = None
 
-if last_insertion == None:
+# if last_insertion == None:
 
-    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
+#     running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
 
-    Crwl_time = datetime.now()
+#     Crwl_time = datetime.now()
 
-else:
+# else:
 
-    last_time = last_insertion['Date']
+#     last_time = last_insertion['Date']
 
-    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+#     running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
 
-    Crwl_time = last_insertion['Date']
+#     Crwl_time = last_insertion['Date']
 
-# ****************************************************************************
+# # ****************************************************************************
 
-####################################################
+# ####################################################
 
-############# Every Company Logic Here #############
+# ############# Every Company Logic Here #############
 
-####################################################
+# ####################################################
 
-# *****************************************************************************
-try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    Main_url = "https://www.simonelectric.com"
-    Base_url = "https://www.simonelectric.com/intl/latest-releases"
-    result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
+# # *****************************************************************************
+# try:
+#     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+#     Main_url = "https://www.simonelectric.com"
+#     Base_url = "https://www.simonelectric.com/intl/latest-releases"
+#     result = requests.get(Base_url,headers=headers)
+#     soup = BeautifulSoup(result.content , 'lxml')
 
-    def translate(Trans):
-        translator = Translator()
-        Trans_text = translator.translate(Trans,dest='en')
-        return Trans_text.text
+#     def translate(Trans):
+#         translator = Translator()
+#         Trans_text = translator.translate(Trans,dest='en')
+#         return Trans_text.text
     
-    news_links = []
+#     news_links = []
 
-    links = soup.find_all('div',{ "class" : "views-row"})
-    for link in links:
-        news_link = Main_url + link.find('a',{ "class" : "internal-icon"}).get('href')
-        if news_link not in news_links:
-            news_links.append(news_link)
+#     links = soup.find_all('div',{ "class" : "views-row"})
+#     for link in links:
+#         news_link = Main_url + link.find('a',{ "class" : "internal-icon"}).get('href')
+#         if news_link not in news_links:
+#             news_links.append(news_link)
 
-    print(news_links)
-    print(len(news_links))
+#     print(news_links)
+#     print(len(news_links))
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+#     for i in news_links:        
+#         response = requests.get(i, headers=headers)
+#         data = BeautifulSoup(response.content, 'lxml')
 
-        try:
-            title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-            title = title.replace('| Latest releases SIMON','')
-            print(title)
-        except:
-            title = data.find('title').text
-            title = title.replace('| Latest releases SIMON','')
-            print(title)
+#         try:
+#             title = data.find('meta', attrs = {"property":"og:title"}).get("content")
+#             title = title.replace('| Latest releases SIMON','')
+#             print(title)
+#         except:
+#             title = data.find('title').text
+#             title = title.replace('| Latest releases SIMON','')
+#             print(title)
         
-        announcement_type = "Press Release"
+#         announcement_type = "Press Release"
 
-        language = "en-us"
+#         language = "en-us"
 
-        try:
-            image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-            print(image)
-        except:
-            image = ""
-            print(image)
+#         try:
+#             image = data.find('meta', attrs = {"property":"og:image"}).get("content")
+#             print(image)
+#         except:
+#             image = ""
+#             print(image)
 
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
+#         try:
+#             sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+#         except:
+#             sub_category = ""
         
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            date = data.find('div', {"class":"field field--name-published-at field--type-published-at field--label-inline clearfix"}).find('div', {"class":"field__item"}).get_text().replace('de','')
-            date = translate(date)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
-        except:
-            news_date = ""
+#         try:
+#             analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+#         except:
+#             analysis = ""
+#         try:
+#             date = data.find('div', {"class":"field field--name-published-at field--type-published-at field--label-inline clearfix"}).find('div', {"class":"field__item"}).get_text().replace('de','')
+#             date = translate(date)
+#             news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+#             print(news_date)
+#         except:
+#             news_date = ""
 
-        page_source = "https://www.simonelectric.com/intl/latest-releases"
-        news_weblink = i
+#         page_source = "https://www.simonelectric.com/intl/latest-releases"
+#         news_weblink = i
         
-        try:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            print(announcement)
+#         try:
+#             html = requests.get(i).text
+#             announcement = fulltext(html)
+#             announcement = announcement.replace('\n','<br>')
+#             print(announcement)
             
-        except:
-            announcement = ""
+#         except:
+#             announcement = ""
         
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
+#         date = datetime.now()
+#         # Creating a list of links already avilable in database
+#         links_list = []
+#         mydoc = collection.find()
+#         for x in mydoc:
+#             links_list.append(x['News_Weblink'])
 
-        if news_weblink in links_list:
-            total_crwalled_links += 1
-            Already_exist += 1
-            continue
-        else:
-            company_news = {}
-            company_news['companyId'] = ''
-            company_news['location']=''
-            company_news['comment']=''
-            company_news['Date']= news_date
-            company_news['Crawled_on']=date
-            company_news['title']=title
-            company_news['Language']= language
-            company_news['announcementType']= announcement_type
-            company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
-            company_news['photo']= image
-            company_news['videos']= ''
-            company_news['announcement']=announcement
-            company_news['historySubCategory']= sub_category
-            company_news['analysis'] = analysis
-            try:
-                collection.insert_one(company_news)
-                total_crwalled_links += 1
-            except Exception as e:
-                running_Sequence.append(e)
+#         if news_weblink in links_list:
+#             total_crwalled_links += 1
+#             Already_exist += 1
+#             continue
+#         else:
+#             company_news = {}
+#             company_news['companyId'] = ''
+#             company_news['location']=''
+#             company_news['comment']=''
+#             company_news['Date']= news_date
+#             company_news['Crawled_on']=date
+#             company_news['title']=title
+#             company_news['Language']= language
+#             company_news['announcementType']= announcement_type
+#             company_news['Source'] = page_source
+#             company_news['News_Weblink'] = news_weblink
+#             company_news['photo']= image
+#             company_news['videos']= ''
+#             company_news['announcement']=announcement
+#             company_news['historySubCategory']= sub_category
+#             company_news['analysis'] = analysis
+#             try:
+#                 collection.insert_one(company_news)
+#                 total_crwalled_links += 1
+#             except Exception as e:
+#                 running_Sequence.append(e)
     
-    if Already_exist >= 1:
+#     if Already_exist >= 1:
 
-        tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
+#         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
 
-    else:
+#     else:
 
-        tmp_txt = ''
+#         tmp_txt = ''
 
-    running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
+#     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
-    ended_on = datetime.now()
-except:
-    Error_Time =  datetime.now()
+#     ended_on = datetime.now()
+# except:
+#     Error_Time =  datetime.now()
 
-    Reported_Error = traceback.format_exc()
-
-
-# **************************************************************************
-rep = ''
-
-try:
-
-    Error = {}
-
-    Error['Error_Detail'] = Reported_Error
-
-    Error['Error_Time'] = Error_Time
-
-except Exception as e:
-
-    rep = traceback.format_exc()
-
-    pass
+#     Reported_Error = traceback.format_exc()
 
 
-log = {}
+# # **************************************************************************
+# rep = ''
 
-log['Crawler_name'] = c_name+'.py'
+# try:
 
-log['Crawler_type'] = c_name
+#     Error = {}
 
-log['Starting_time'] = started_on
+#     Error['Error_Detail'] = Reported_Error
 
-log['Ending_time'] = Error_Time if rep == '' else ended_on
+#     Error['Error_Time'] = Error_Time
 
-log['Error_Detail'] =  Error if rep == '' else ''
+# except Exception as e:
 
-log['Crawler_Runing Sequence'] = running_Sequence if running_Sequence else ''
+#     rep = traceback.format_exc()
 
-log['Links_Skipped'] = Already_exist
+#     pass
 
-log['Last_news_crawl_time'] = last_time
 
-log['Browser'] = 'None'
+# log = {}
 
-error_logs.insert_one(log)
+# log['Crawler_name'] = c_name+'.py'
+
+# log['Crawler_type'] = c_name
+
+# log['Starting_time'] = started_on
+
+# log['Ending_time'] = Error_Time if rep == '' else ended_on
+
+# log['Error_Detail'] =  Error if rep == '' else ''
+
+# log['Crawler_Runing Sequence'] = running_Sequence if running_Sequence else ''
+
+# log['Links_Skipped'] = Already_exist
+
+# log['Last_news_crawl_time'] = last_time
+
+# log['Browser'] = 'None'
+
+# error_logs.insert_one(log)
