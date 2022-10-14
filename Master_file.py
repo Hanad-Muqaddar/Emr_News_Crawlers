@@ -25,6 +25,8 @@ def calculate_time_interval(start_time, end_time):
 
 crawlerToCollectionMapping={
     # Crawler_name : Collection_name
+    "Grainger" : "GRAINGER",
+    "Hitachi_Energy" : "HITACHI_ABB",
     "ABB":"ABB",
     "ACOME":"ACOME",
     "Acquity_Brands_Investors":"Acquity_Brands",
@@ -352,7 +354,9 @@ Emr_News_Cralers_Dict = {
     "CHINT2": "/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "farnell":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Schenider_Electric":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
-    "Schenider_Electric2":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/"
+    "Schenider_Electric2":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
+    "Hitachi_Energy":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
+    "Grainger" : "/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     # "Glen_Dimplex":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     # "Ritto_GmbH":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
 }
