@@ -131,9 +131,9 @@ try:
     final_links = [Base_Link + link for link in links]
     for i in final_links:
         db_list = []
-        # mydoc = collection.find()
-        # for x in mydoc:
-        #     db_list.append(x['News_Weblink'])
+        mydoc = collection.find()
+        for x in mydoc:
+            db_list.append(x['News_Weblink'])
         
         if i in db_list:
             Already_exist += 1

@@ -126,7 +126,7 @@ try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://imelco.com" 
     Base_url = "https://imelco.com/publications/press-releases" 
-    result = requests.get(Base_url, verify=False)
+    result = requests.get(Base_url, verify=False, headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
     
     news_Titles = []
@@ -140,13 +140,13 @@ try:
     N_Dates = soup.find_all('div',attrs = {"style":"display:inline-block; font-style: italic; font-size: 0.75em; margin-right:0.25em; "})
     for N_Date in N_Dates:
         news_dates.append(N_Date.get_text(strip=True))
-
+    
     pdf = soup.find('div',attrs = { "id" : "wpv-view-layout-1088"}).find_all('a',attrs = { "target" : "_blank"})
     for p in pdf:
         p= p.get('href')
         pdfs.append(p)
 
-    pdf_set = set(pdfs)    
+    pdf_set = set(pdfs)
 
 
 

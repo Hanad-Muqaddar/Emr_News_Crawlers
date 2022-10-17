@@ -121,7 +121,8 @@ try:
                     emr_executive = return_data['emrExecutive']
                     emr_lite = return_data['emrLite']
                     emr_html = return_data['emrHtmlText']
-                except:
+                    e = ""
+                except Exception as e:
                     announcement = ""
                     emr_essentail = ""
                     emr_executive = ""
@@ -135,6 +136,7 @@ try:
                 news['emrEssential'] = emr_essentail
                 news['emrLite'] = emr_lite
                 news['News_Html'] = emr_html
+                news['Error'] = e
 
                 SC = []
                 for x in j['topic']:

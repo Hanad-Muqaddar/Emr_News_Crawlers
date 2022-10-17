@@ -137,10 +137,9 @@ try:
     payload = json.dumps({
             "Language": "en",
             "FromDate": "2021-12-31T19:00:00.000Z",
-            # "ToDate": "2022-09-29T19:00:00.000Z"
             "ToDate" : str(to_date)
             })
-    response = requests.request("POST", url, headers=headers, data=payload)
+    response = requests.request("POST", url, verify=False, headers=headers, data=payload)
     data = json.loads(response.text)
     db_list = []
     mydoc = collection.find()
