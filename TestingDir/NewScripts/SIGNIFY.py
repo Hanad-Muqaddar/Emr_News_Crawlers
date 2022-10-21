@@ -148,8 +148,8 @@ else:
 # *****************************************************************************
 try:
     proxies = {
-            'http': 'http://alihaider9:salman_walee@de.proxymesh.com:31280',
-            'https': 'http://alihaider9:salman_walee@de.proxymesh.com:31280'
+            'http': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280',
+            'https': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280'
           }
     response = requests.get("https://www.signify.com/content/signify/en_AA/our-company/news/n13-press-releases.feeds.json", proxies=proxies)
 

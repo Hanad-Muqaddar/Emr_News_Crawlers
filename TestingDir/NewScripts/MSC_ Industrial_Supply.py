@@ -125,8 +125,8 @@ else:
 # *****************************************************************************
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    proxies = {'http': 'http://alihaider9:salman_walee@de.proxymesh.com:31280',
-                'https': 'http://alihaider9:salman_walee@de.proxymesh.com:31280'}
+    proxies = {'http': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280',
+                'https': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280'}
     Main_url = "https://www.mscdirect.com" 
     Base_url = "https://www.mscdirect.com/corporate/press-releases" 
     result = requests.get(Base_url,headers=headers, proxies=proxies)
