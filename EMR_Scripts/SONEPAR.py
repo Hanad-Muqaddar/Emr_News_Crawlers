@@ -150,6 +150,7 @@ try:
     Base_Link = "https://www.sonepar.com"
     links = response.css(".title a ::attr(href)").getall()
     final_links = [Base_Link + link for link in links]
+    print(final_links)
     for i in final_links:
         db_list = []
         mydoc = collection.find()

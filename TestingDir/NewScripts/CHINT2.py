@@ -45,7 +45,7 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 from newspaper import fulltext
-
+from scrapy import Selector
 # ************************************************************************
 # defining variables
 
@@ -122,6 +122,25 @@ else:
 ####################################################
 
 # *****************************************************************************
+def parse_filtered_news(announcement):
+    api_url = "https://admin.new.emr-online.com/api/history/filterbody"
+    payload = json.dumps({
+                            "originalBody": announcement
+                            })
+    headers = {
+                'Content-Type': 'application/json'
+                }
+    return_response = requests.request("POST", api_url, headers=headers, data=payload)
+    new_data = return_response.text
+    new_data = json.loads(new_data)
+    status = new_data['statusCode']
+    if status == 200:
+        return new_data
+    else:
+        new_data =  ""
+        return new_data
+
+
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://chintglobal.com"
@@ -151,7 +170,7 @@ try:
         else:        
             response = requests.get(i, headers=headers)
             data = BeautifulSoup(response.content, 'lxml')
-
+            response1 = Selector(response)
             try:
                 title = data.find('h1', {'class':"elementor-heading-title elementor-size-default"}).get_text(strip=True)
                 # print(title)
@@ -192,11 +211,22 @@ try:
             news_weblink = i
             
             try:
-                html = requests.get(i).text
-                announcement = fulltext(html)
+                announcement = response1.xpath('//div[@data-id="201002e"]').get()
+                replace1 = response1.xpath('//div[@data-id="201002e"]//div[@data-id="b944641"]').get()
+                announcement = announcement.replace(replace1, "")
                 announcement = announcement.replace('\n','<br>')
+                return_data = parse_filtered_news(announcement)
+                announcement = return_data['filteredBody']
+                emr_essentail = return_data['emrEssential']
+                emr_executive = return_data['emrExecutive']
+                emr_lite = return_data['emrLite']
+                emr_html = return_data['emrHtmlText']
             except:
                 announcement = ""
+                emr_essentail = ""
+                emr_executive = ""
+                emr_lite = ""
+                emr_html = ""
             
             date = datetime.now()
             # Creating a list of links already avilable in database
@@ -217,6 +247,10 @@ try:
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
+            company_news['emrExecutive'] = emr_executive
+            company_news['emrEssential'] = emr_essentail
+            company_news['emrLite'] = emr_lite
+            company_news['News_Html'] = emr_html
             try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1

@@ -133,17 +133,6 @@ try:
     for i in data:
         news_weblink = i.find("a").get("href")
         links_list.append(news_weblink)
-    try:
-        while True:
-            next_page = soup.find("a", class_='next page-numbers').get('href')
-            res = requests.get(next_page)
-            soup = BeautifulSoup(res.content, 'lxml')
-            data = soup.find_all("div", class_='long-card col-12')
-            for i in data:
-                news_weblink = i.find("a").get("href")
-                links_list.append(news_weblink)
-    except Exception as e:
-        print(e)
         
     db_list = []
     mydoc = collection.find()
