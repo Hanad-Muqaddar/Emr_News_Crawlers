@@ -1,5 +1,4 @@
 # Packages to be imported
-from tkinter.tix import Select
 import requests
 
 import time

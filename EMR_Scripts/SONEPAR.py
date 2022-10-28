@@ -46,6 +46,8 @@ from scrapy import Selector
 
 from newspaper import fulltext
 
+import feedparser
+
 # ************************************************************************
 running_Sequence = []
 
@@ -145,49 +147,48 @@ def parse_filtered_news(announcement):
 # *****************************************************************************
 
 try:
-    result = requests.get("https://www.sonepar.com/news.html")
-    response = Selector(result)
-    Base_Link = "https://www.sonepar.com"
-    links = response.css(".title a ::attr(href)").getall()
-    final_links = [Base_Link + link for link in links]
-    print(final_links)
-    for i in final_links:
+    feed = feedparser.parse('https://www.sonepar.com/service/rss/en/7956/feed.rss')
+    for i in feed['entries']:
+        
         db_list = []
         mydoc = collection.find()
         for x in mydoc:
             db_list.append(x['News_Weblink'])
         
-        if i in db_list:
+        if i['link'] in db_list:
             Already_exist += 1
             print("Already Exists")
             total_crwalled_links += 1
             continue
         else:
-            result1 = requests.get(i)
+            result1 = requests.get(i['link'])
             response1 = Selector(result1)
             try:
-                news_date = response1.css(".date ::text").get()
+                news_date = i['published']
                 news_date = dateparser.parse(news_date, settings={"DATE_ORDER":"YMD"})
             except:
                 news_date = ""
             try:
-                title = response1.xpath("//meta[@property='og:title']/@content").get()
+                title = i['title']
             except:
                 title = ""
             try:
-                analysis = response1.xpath("//meta[@name='description']/@content").get()
+                analysis = i['description']
             except:
                 analysis = ""
             try:
-                image = response1.css(".main-picture img ::attr(src)").get()
-                if Base_Link not in image:
-                    image = Base_Link + response1.css(".main-picture img ::attr(src)").get()
+                image = i['media_content'][0]['url']
             except:
                 image = ""
             sub_category = ""
             try:
-                announcement = response1.css(".page-content").get()
-                announcement = announcement.replace('src="', 'src="https://www.sonepar.com')
+                announcement = response1.css(".news-article").get()
+                replace1 = response1.css(".news-article img ::attr(src)").get()
+                replace_2 = response1.css(".news-article .news-article__title").get()
+                replace_3 = response1.css(".news-article .newsblock__date").get()
+                announcement = announcement.replace(replace1, f"{i['media_content'][0]['url']}")
+                announcement = announcement.replace(replace_2, "")
+                announcement = announcement.replace(replace_3, "")
                 return_data = parse_filtered_news(announcement)
                 announcement = return_data['filteredBody']
                 emr_essentail = return_data['emrEssential']

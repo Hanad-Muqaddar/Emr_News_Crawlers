@@ -194,6 +194,11 @@ def parse_announcement(response):
         return announcement , emr_essentail, emr_lite, emr_executive, emr_html
 
 try:
+    proxies_list = ['us-wa','fr','jp','au','de']
+    import random
+    p = random.choice(proxies_list)
+    proxies = {'http': f"http://waleeProxy:Cheeta@1@{p}.proxymesh.com:31280",
+            'https': f"http://waleeProxy:Cheeta@1@{p}.proxymesh.com:31280"}
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     result = requests.get("https://www.hitachienergy.com/news/sitemap.xml", headers=headers)
     response = Selector(result)

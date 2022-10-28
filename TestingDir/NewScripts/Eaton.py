@@ -153,8 +153,11 @@ def parse_filtered_news(announcement):
 count_break = 0
 
 try:
-    proxies = {'http': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280',
-            'https': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280'}
+    proxies_list = ['us-wa','fr','jp','au','de']
+    import random
+    p = random.choice(proxies_list)
+    proxies = {'http': f"http://waleeProxy:Cheeta@1@{p}.proxymesh.com:31280",
+            'https': f"http://waleeProxy:Cheeta@1@{p}.proxymesh.com:31280"}
     headers = {"Connection": "keep-alive",
                 "sec-ch-ua":  'Not A;Brand";v="99", "Chromium";v="99", "Google Chrome";v="99"',
                 "sec-ch-ua-mobile": "?0",
@@ -169,7 +172,7 @@ try:
                 'Accept-Encoding': 'gzip, deflate, br',
                 'Accept-Language': 'en-US,en;q=0.9'
                 }
-    result = requests.get("https://www.eaton.com/us/en-us/company/news-insights/news-releases.html", headers=headers, proxies=proxies)
+    result = requests.get("https://www.eaton.com/us/en-us/company/news-insights/news-releases.html", headers=headers, proxies=proxies, timeout=10)
     # print(result)
     response = Selector(result)
     # print(response)

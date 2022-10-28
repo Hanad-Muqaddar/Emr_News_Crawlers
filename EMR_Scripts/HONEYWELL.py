@@ -144,8 +144,8 @@ def parse_filtered_news(announcement):
 try:
     result = requests.get("https://www.honeywell.com/us/en/press")
     response = Selector(result)
-    links = list(set(response.xpath('//ul[@data-max-items="0"]//li//a[@class="list-component__item-link"]/@href').getall()))
-    final_links = ["https://www.honeywell.com" + link if "https://www.honeywell.com" not in link else link for link in links]
+    links = response.xpath('//div[@class="list-component__item-headline"]/parent::a/@href').getall()
+    final_links = ["https://www.honeywell.com" + link if "https://www.honeywell.com" not in link else link for link in links[:10]]
     # print(final_links)
     db_list = []
     mydoc = collection.find()
@@ -165,7 +165,7 @@ try:
             except:
                 news_date = ""
             try:
-                title = response1.css(".headline h1 ::text").get()
+                title = response1.xpath("//title/@text()").get()
             except:
                 title = ""
             try:
