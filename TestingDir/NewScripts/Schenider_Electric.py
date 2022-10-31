@@ -190,7 +190,7 @@ try:
                 title = ""
             try:
                 news_date = date_get
-                news_date = dateparser.parse(news_date)
+                news_date = dateparser.parse(news_date, settings={'DATE_ORDER': 'YMD'})
             except:
                 news_date = ""
             try:

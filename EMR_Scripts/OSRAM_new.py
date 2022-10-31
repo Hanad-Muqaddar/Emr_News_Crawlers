@@ -1,3 +1,4 @@
+from tkinter.tix import Select
 import requests
 import time
 import json
@@ -7,13 +8,6 @@ from pymongo import MongoClient
 from bs4 import BeautifulSoup
 from requests import api
 from selenium import webdriver
-# from webdriver_manager.chrome import ChromeDriver
-# from selenium.webdriver.chrome.options import Options
-# from selenium.webdriver.support.ui import WebDriverWait
-# from selenium.webdriver.common.keys import Keys
-# from selenium.webdriver.support import expected_conditions
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.common.touch_actions import TouchActions
 from urllib.parse import urlparse
 import re
 import traceback   
@@ -24,18 +18,17 @@ import urllib
 import time
 import dateparser
 from datetime import datetime,date, timedelta
-# from bson.objectid import ObjectId
-# from urllib.error import HTTPError
-# from urllib.request import Request, urlopen
+from scrapy import Selector
+
 running_Sequence = []
 started_on = datetime.now()
 c_name = 'OSRAM'
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client= MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin')
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client= MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin')
     running_Sequence.append('Connected to DB Server')
 except:
     running_Sequence.append('Not Connected')
@@ -60,6 +53,25 @@ else:
     Crwl_time = last_insertion['Date']
 total_crwalled_links = 0
 Already_exist = 0
+
+def parse_filtered_news(announcement):
+    api_url = "https://admin.new.emr-online.com/api/history/filterbody"
+    payload = json.dumps({
+                            "originalBody": announcement
+                            })
+    headers = {
+                'Content-Type': 'application/json'
+                }
+    return_response = requests.request("POST", api_url, headers=headers, data=payload)
+    new_data = return_response.text
+    new_data = json.loads(new_data)
+    status = new_data['statusCode']
+    if status == 200:
+        return new_data
+    else:
+        new_data =  ""
+        return new_data
+
 try:
     ################ NEWS Release #####################################
     url = "https://9ps0m7duie-2.algolianet.com/1/indexes/*/queries?x-algolia-agent=Algolia%20for%20JavaScript%20(3.35.1)%3B%20Browser%20(lite)%3B%20react%20(16.12.0)%3B%20react-instantsearch%20(5.7.0)%3B%20JS%20Helper%20(2.28.0)&x-algolia-application-id=9PS0M7DUIE&x-algolia-api-key=321a182fe8706b78ee3234b41c7b58f7"
@@ -98,19 +110,43 @@ try:
             try:
                 resp = requests.get(j['link'])
                 sub_soup = BeautifulSoup(resp.content,'lxml')
+                response1 = Selector(resp)
                 date = date = sub_soup.find('div',class_='page-content').find('div',class_='text-wrapper').find('p',class_=False).text.strip().split('|')[0]
                 news['Date'] = dateparser.parse(date,settings={'DATE_ORDER': 'DMY'})
             except:
                 news['Date'] = datetime.now()
+            try:
+                announcement = response1.xpath('//div[@class="page-content"]//div[@class="container"]').get()
+                replace1 = response1.css(".font-headline-teaser").get()
+                replace2 = response1.xpath("(//div[@class='text-wrapper']//p)[1]").get()
+                announcement = announcement.replace(replace1, "")
+                announcement = announcement.replace(replace2, "")
+                return_data = parse_filtered_news(announcement)
+                announcement = return_data['filteredBody']
+                emr_essentail = return_data['emrEssential']
+                emr_executive = return_data['emrExecutive']
+                emr_lite = return_data['emrLite']
+                emr_html = return_data['emrHtmlText']
+            except:
+                announcement = ""
+                emr_essentail = ""
+                emr_executive = ""
+                emr_lite = ""
+                emr_html = ""
+            
             news['title'] = j['dp_headline']
             news['announcementType'] = j['dp_category']
-            news['announcement'] = j['content']
+            news['announcement'] = announcement
             news['photo'] = j['src1_picture_stored_only']
             news['Language'] =  'English'
             news['Crawled_on'] = datetime.now()
             news['Source'] = "https://www.osram.com/cb/news/index.jsp"
             news['News_Weblink'] = j['link']
             news['historySubCategory'] = j['dp_subheadline']
+            news['emrExecutive'] = emr_executive
+            news['emrEssential'] = emr_essentail
+            news['emrLite'] = emr_lite
+            news['News_Html'] = emr_html
             validation_obj = {}
             validation_obj['companyId'] = news["companyId"]
             validation_obj['Date'] = news['Date']
@@ -126,85 +162,85 @@ try:
             collection.insert_one(news)
 
     ################ Press Release #####################################
-    for i in range(211):
-        url = 'https://www.osram-group.de/en/media/press-releases?page='+str(i)
-        cookie = 'www-osram-group-de#lang=en; ASP.NET_SessionId=50yd5verhptjn1obsai3atlz; AWSALB=hGTE64M7vVwh8A8tlATVS11ULcaJMUUblFoT23lBq6xZn0JwNvrtlcbBQSfe7U2gtbHqfX0zLgY8sdvwvUOV+mm9d/a4QBBukMGDX91s/2Vw+/MO0UBrrnNHLACl; AWSALBCORS=hGTE64M7vVwh8A8tlATVS11ULcaJMUUblFoT23lBq6xZn0JwNvrtlcbBQSfe7U2gtbHqfX0zLgY8sdvwvUOV+mm9d/a4QBBukMGDX91s/2Vw+/MO0UBrrnNHLACl; __CookieConsentV200={"consent":{"necessaryCookie":true,"performanceCookies":true},"accepted":true,"euCheck":false}'
-        headers = {
-        'accept': 'text/html, */*; q=0.01',
-        'accept-encoding': 'gzip, deflate, br',
-        'accept-language': 'en-US,en;q=0.9',
-        'cookie': cookie,
-        'referer':'https://www.osram-group.de/en/media/press-releases',
-        'sec-ch-ua': '" Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36',
-        'x-requested-with': 'XMLHttpRequest'}
-        response = requests.request("GET", url, headers=headers)
-        soup = BeautifulSoup(response.content,'lxml').find('div',class_='prContainer').find_all('div',class_='prItemWrapper row')
-        skip_next = False
-        for x in soup:
-            link = "https://www.osram-group.de"+x.find('a').get('href')
-            l = False
-            for k in collection.find({ 'News_Weblink' : link }):
-                if k:
-                    l = True
-                    skip_next = True
-                    break
-                else:
-                    skip_next = False
-            if l:
+    # for i in range(211):
+    #     url = 'https://www.osram-group.de/en/media/press-releases?page='+str(i)
+    #     cookie = 'www-osram-group-de#lang=en; ASP.NET_SessionId=50yd5verhptjn1obsai3atlz; AWSALB=hGTE64M7vVwh8A8tlATVS11ULcaJMUUblFoT23lBq6xZn0JwNvrtlcbBQSfe7U2gtbHqfX0zLgY8sdvwvUOV+mm9d/a4QBBukMGDX91s/2Vw+/MO0UBrrnNHLACl; AWSALBCORS=hGTE64M7vVwh8A8tlATVS11ULcaJMUUblFoT23lBq6xZn0JwNvrtlcbBQSfe7U2gtbHqfX0zLgY8sdvwvUOV+mm9d/a4QBBukMGDX91s/2Vw+/MO0UBrrnNHLACl; __CookieConsentV200={"consent":{"necessaryCookie":true,"performanceCookies":true},"accepted":true,"euCheck":false}'
+    #     headers = {
+    #     'accept': 'text/html, */*; q=0.01',
+    #     'accept-encoding': 'gzip, deflate, br',
+    #     'accept-language': 'en-US,en;q=0.9',
+    #     'cookie': cookie,
+    #     'referer':'https://www.osram-group.de/en/media/press-releases',
+    #     'sec-ch-ua': '" Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"',
+    #     'sec-ch-ua-mobile': '?0',
+    #     'sec-fetch-dest': 'empty',
+    #     'sec-fetch-mode': 'cors',
+    #     'sec-fetch-site': 'same-origin',
+    #     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36',
+    #     'x-requested-with': 'XMLHttpRequest'}
+    #     response = requests.request("GET", url, headers=headers)
+    #     soup = BeautifulSoup(response.content,'lxml').find('div',class_='prContainer').find_all('div',class_='prItemWrapper row')
+    #     skip_next = False
+    #     for x in soup:
+    #         link = "https://www.osram-group.de"+x.find('a').get('href')
+    #         l = False
+    #         for k in collection.find({ 'News_Weblink' : link }):
+    #             if k:
+    #                 l = True
+    #                 skip_next = True
+    #                 break
+    #             else:
+    #                 skip_next = False
+    #         if l:
                 
-                total_crwalled_links +=1
-                Already_exist +=1       
-            else:
-                news = {}
-            news["companyId"] = ""
-            news["location"] = ""
-            try:
-                resp = requests.request("GET", link, headers=headers)
-                sub_soup = BeautifulSoup(resp.content,'lxml')
-            except:
-                sub_soup = None
-            if sub_soup:
-                try:
-                    ann = sub_soup.find('div',class_='prContent').text.strip()
-                except:
-                    ann = ''
-                try:
-                    image = sub_soup.find('meta',attrs={'property':'og:image'}).get('content')
-                except:
-                    image = ''
-                try:
-                    date_value = dateparser.parse(sub_soup.find('meta',attrs={'itemprop':'datePublished'}).get('content')) if sub_soup.find('meta',attrs={'itemprop':'datePublished'}).get('content')!= None else ''
-                except:
-                    date_value = ''
+    #             total_crwalled_links +=1
+    #             Already_exist +=1       
+    #         else:
+    #             news = {}
+    #         news["companyId"] = ""
+    #         news["location"] = ""
+    #         try:
+    #             resp = requests.request("GET", link, headers=headers)
+    #             sub_soup = BeautifulSoup(resp.content,'lxml')
+    #         except:
+    #             sub_soup = None
+    #         if sub_soup:
+    #             try:
+    #                 ann = sub_soup.find('div',class_='prContent').text.strip()
+    #             except:
+    #                 ann = ''
+    #             try:
+    #                 image = sub_soup.find('meta',attrs={'property':'og:image'}).get('content')
+    #             except:
+    #                 image = ''
+    #             try:
+    #                 date_value = dateparser.parse(sub_soup.find('meta',attrs={'itemprop':'datePublished'}).get('content')) if sub_soup.find('meta',attrs={'itemprop':'datePublished'}).get('content')!= None else ''
+    #             except:
+    #                 date_value = ''
 
-            news['Date'] = dateparser.parse(x.get('id').replace('pr-',''),settings={'DATE_ORDER': 'DMY'}) if date_value == '' else date_value
-            news['title'] = x.find(class_='titlePR').text.strip()
-            news['announcementType'] = "Press Release"
-            news['announcement'] = ann if ann != '' else x.find(class_='introPR').text[2:]
-            news['photo'] = image
-            news['Language'] =  'English'
-            news['Source'] = "https://www.osram.com/cb/news/index.jsp"
-            news['News_Weblink'] = link
-            news['analysis'] = x.find(class_='introPR').text[2:]
-            news['historySubCategory'] = ",".join([jj.text.strip() for jj in x.find_all('span',class_='addcomma')])
-            news['Crawled_on'] = datetime.now()
-            validation_obj = {}
-            validation_obj['companyId'] = news["companyId"]
-            validation_obj['Date'] = news['Date']
-            validation_obj['title'] = news['title']
-            validation_obj['announcement'] = news['announcement']
-            validation_obj['photo'] = news['photo']
-            validation_obj['analysis'] = news['analysis']
-            validation_obj['refrences'] = ''
-            validation_obj['historySubCategory'] = news['historySubCategory']
-            news['validatedObject'] = validation_obj
-        if skip_next == True:
-            break
+    #         news['Date'] = dateparser.parse(x.get('id').replace('pr-',''),settings={'DATE_ORDER': 'DMY'}) if date_value == '' else date_value
+    #         news['title'] = x.find(class_='titlePR').text.strip()
+    #         news['announcementType'] = "Press Release"
+    #         news['announcement'] = ann if ann != '' else x.find(class_='introPR').text[2:]
+    #         news['photo'] = image
+    #         news['Language'] =  'English'
+    #         news['Source'] = "https://www.osram.com/cb/news/index.jsp"
+    #         news['News_Weblink'] = link
+    #         news['analysis'] = x.find(class_='introPR').text[2:]
+    #         news['historySubCategory'] = ",".join([jj.text.strip() for jj in x.find_all('span',class_='addcomma')])
+    #         news['Crawled_on'] = datetime.now()
+    #         validation_obj = {}
+    #         validation_obj['companyId'] = news["companyId"]
+    #         validation_obj['Date'] = news['Date']
+    #         validation_obj['title'] = news['title']
+    #         validation_obj['announcement'] = news['announcement']
+    #         validation_obj['photo'] = news['photo']
+    #         validation_obj['analysis'] = news['analysis']
+    #         validation_obj['refrences'] = ''
+    #         validation_obj['historySubCategory'] = news['historySubCategory']
+    #         news['validatedObject'] = validation_obj
+    #     if skip_next == True:
+    #         break
 
     
 
