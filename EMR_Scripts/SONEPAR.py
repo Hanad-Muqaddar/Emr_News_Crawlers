@@ -217,7 +217,7 @@ try:
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = i
+            company_news['News_Weblink'] = i['link']
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement
