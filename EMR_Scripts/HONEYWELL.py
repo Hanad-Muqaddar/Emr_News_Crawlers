@@ -165,7 +165,7 @@ try:
             except:
                 news_date = ""
             try:
-                title = response1.xpath("//title/@text()").get()
+                title = response1.xpath("//meta[@property='og:title']/@content").get()
             except:
                 title = ""
             try:
