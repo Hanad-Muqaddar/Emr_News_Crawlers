@@ -1,4 +1,3 @@
-from tkinter.tix import Select
 import requests
 import time
 import json
@@ -12,9 +11,6 @@ from urllib.parse import urlparse
 import re
 import traceback   
 import pandas as pd
-import os
-import csv
-import urllib
 import time
 import dateparser
 from datetime import datetime,date, timedelta

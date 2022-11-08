@@ -127,8 +127,8 @@ try:
     proxies_list = ['us-wa','fr','jp','au','de']
     import random
     p = random.choice(proxies_list)
-    proxies = {'http': f"http://waleeProxy:Cheeta@1@{p}.proxymesh.com:31280",
-            'https': f"http://waleeProxy:Cheeta@1@{p}.proxymesh.com:31280"}
+    proxies = {'http': f"http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280",
+            'https': f"http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280"}
     headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -144,9 +144,9 @@ try:
             "FromDate": "2021-12-31T19:00:00.000Z",
             "ToDate" : str(to_date)
             })
-    response = requests.request("POST", url, verify=False, headers=headers, data=payload, proxies=proxies, timeout=10)
+    response = requests.request("POST", url, verify=False, headers=headers, data=payload, proxies=proxies, timeout=20)
     data = json.loads(response.text)
-    print(data)
+    # print(data)
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
