@@ -153,7 +153,7 @@ try:
     # print("idr sa guzar gya ha")
     res = Selector(result)
     data = res.css(".sdl-wiztopic-press-releases_wiztopic-card .wiztopic-content")
-    print(data)
+    # print(data)
     for i in data:
         try:
             news_weblink = "https://www.se.com" + i.css("a::attr(href)").get()

@@ -166,7 +166,7 @@ try:
             analysis = ""
         try:
             date = data.find('time').get_text(strip=True)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'MDY'})
             print(news_date)
         except:
             news_date = ""

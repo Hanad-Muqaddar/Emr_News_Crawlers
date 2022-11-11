@@ -129,22 +129,27 @@ try:
     response = Selector(result)
     Base_Link = "https://www.graybar.com"
     links = response.xpath('//td[@data-label="Title"]/a/@href').getall()
+    print(links)
     final_links = [Base_Link+link for link in links]
     dates = response.xpath('//td[@data-label="Date"]/text()').getall()
     announcement_type = response.xpath('//td[@data-label="Category"]/text()').getall()
     titles = response.xpath('//td[@data-label="Title"]/a/text()').getall()
-
+    db_list = []
     for i , j ,k , title in zip(final_links, dates, announcement_type, titles):
-        db_list = []
+        
+        
         mydoc = collection.find()
+        print(mydoc)
         for x in mydoc:
             db_list.append(x['News_Weblink'])
-        
+       
         if i in db_list:
+            print("if mein a gaya")
             Already_exist += 1
             total_crwalled_links += 1
             continue
         else:
+            print("a gaya")
             result1 = requests.get(i)
             response1 = Selector(result1)
             try:
@@ -153,8 +158,10 @@ try:
                 news_date = ""
             try:
                 title = title.strip()
+                print(title)
             except:
                 title = ""
+                print("title,....")
             try:
                 analysis = response1.xpath("//meta[@name='description']/@content").get()
             except:
@@ -163,12 +170,15 @@ try:
                 image = response1.css(".col-sm-9 img::attr(src)").get()
             except:
                 image = ""
+
             sub_category = ""
+
             try:
                 announcement = fulltext(result1.text)
                 announcement = announcement.replace('\n','<br>')
             except:
                 announcement = ""
+
             try:
                 announcement_type = k.strip()
             except:
@@ -199,6 +209,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
+       
     
     if Already_exist >= 1:
 

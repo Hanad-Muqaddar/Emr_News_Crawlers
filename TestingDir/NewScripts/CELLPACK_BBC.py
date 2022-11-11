@@ -181,7 +181,7 @@ try:
         try:
             date = data.find('div', {"class":"news-single-datetime"}).find(text=True, recursive=False)
             # print(date)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'MDY'})
+            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'DMY'})
             # print(news_date)
         except:
             news_date = ""
