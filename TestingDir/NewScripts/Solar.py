@@ -29,7 +29,7 @@ import re
 
 import traceback
 
-import urllib
+# import urllib
 
 import dateparser
 
@@ -39,7 +39,7 @@ from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
 
-from urllib.request import Request, urlopen
+# from urllib.request import Request, urlopen
 
 from scrapy import Selector
 
@@ -61,11 +61,11 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    # data = json.load(file)
-    # db_path = data[0]['Db_Path']
-    # client = MongoClient(db_path)
-    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    data = json.load(file)
+    db_path = data[0]['Db_Path']
+    client = MongoClient(db_path)
+    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -144,7 +144,9 @@ try:
             "FromDate": "2021-12-31T19:00:00.000Z",
             "ToDate" : str(to_date)
             })
-    response = requests.request("POST", url, verify=False, headers=headers, data=payload, proxies=proxies, timeout=20)
+    # response = requests.request("POST", url, verify=False, headers=headers, data=payload, proxies=proxies, timeout=20)
+    response = requests.request("POST", url, headers=headers, data=payload, proxies=proxies, timeout=20)
+
     data = json.loads(response.text)
     # print(data)
     db_list = []
