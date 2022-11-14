@@ -173,11 +173,12 @@ try:
                 'Accept-Language': 'en-US,en;q=0.9'
                 }
     result = requests.get("https://www.eaton.com/us/en-us/company/news-insights/news-releases.html", headers=headers, proxies=proxies, timeout=20)
+    # result = requests.get("https://www.eaton.com/us/en-us/company/news-insights/news-releases.html", headers=headers, timeout=20)
     # print(result)
     response = Selector(result)
     # print(response)
     data = response.css(".results-list-submodule .results-list-submodule__name-link ::attr(href)").getall()
-    # print(data)
+    print(data)
     for i in data:
         try:
             news_weblink = i
