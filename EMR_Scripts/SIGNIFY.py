@@ -35,6 +35,7 @@ try:
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)
+
     # client= MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin')
     running_Sequence.append('Connected to DB Server')
 except:
@@ -63,10 +64,10 @@ Already_exist = 0
 try:
     try:
         # total_page = json.loads(requests.get('https://www.signify.com/content/signify/en_AA/our-company/news/n13-press-releases.feeds.json').text)
-        proxies = {
-            'http': 'http://alihaider9:salman_walee@de.proxymesh.com:31280',
-            'https': 'http://alihaider9:salman_walee@de.proxymesh.com:31280'
-          }
+
+        proxies = {'http': f"http://waleeProxy:Cheeta@1@de.proxymesh.com:31280",
+            'https': f"http://waleeProxy:Cheeta@1@de.proxymesh.com:31280"}
+
         agent = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36", "Accept": "application/yang-data+json"}
         total_page = requests.get("https://www.signify.com/content/signify/en_AA/our-company/news/n13-press-releases.feeds.json", proxies=proxies)
         # headers=agent, verify=False

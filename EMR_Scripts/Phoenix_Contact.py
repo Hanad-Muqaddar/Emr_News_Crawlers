@@ -68,6 +68,7 @@ try:
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)
+
     # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
@@ -134,6 +135,7 @@ try:
     print("First step done")
     try:
         result = requests.get(Base_url,headers=headers, proxies=proxies)
+        # result = requests.get(Base_url,headers=headers)
     except Exception as e:
         print(e)
     print("Second step done")

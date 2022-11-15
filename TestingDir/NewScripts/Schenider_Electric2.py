@@ -66,11 +66,12 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    # data = json.load(file)
-    # db_path = data[0]['Db_Path']
-    # client = MongoClient(db_path)
-    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    data = json.load(file)
+    db_path = data[0]['Db_Path']
+    client = MongoClient(db_path)
+
+    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -149,6 +150,7 @@ def parse_filtered_news(announcement):
 try:
     proxies = {'http': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280',
             'https': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280'}
+
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     result = requests.get("https://www.se.com/us/en/about-us/newsroom/news/", headers=headers, proxies=proxies)
     res = Selector(result)
@@ -185,6 +187,7 @@ try:
                 analysis = ""
             try:
                 title = response1.xpath('//meta[@name="og:title"]/@content').get()
+                print(title)
             except:
                 title = ""
             try:

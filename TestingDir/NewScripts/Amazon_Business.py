@@ -76,6 +76,7 @@ try:
             news_link = Base_url + a['href']
             if news_link not in news_links:
                 news_links.append(news_link)
+                
     for i in news_links:
         response = requests.get(i, headers=headers, proxies=proxies)
         data = BeautifulSoup(response.content, 'lxml')

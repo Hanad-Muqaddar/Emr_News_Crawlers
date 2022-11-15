@@ -50,7 +50,7 @@ running_Sequence = []
 
 started_on = datetime.datetime.now()
 
-c_name = 'NEXANS_Testing' # Name of the Collection
+c_name = 'NEXANS' # Name of the Collection
 
 total_crwalled_links = 0
 
@@ -65,6 +65,7 @@ try:
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)
+
     # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
@@ -147,6 +148,7 @@ try:
     Base_Link = "https://www.nexans.com"
     final_links = [Base_Link + link for link in links]
     print(final_links)
+
     
     for i in final_links:
         db_list = []
@@ -155,6 +157,7 @@ try:
             db_list.append(x['News_Weblink'])
         
         if i in db_list:
+            print(i)
             Already_exist += 1
             total_crwalled_links += 1
             continue
@@ -168,6 +171,7 @@ try:
                 news_date = ""
             try:
                 title = response1.css(".news-page--cover__title ::text").get()
+                print(title)
                 # print(title)
             except:
                 title = ""
