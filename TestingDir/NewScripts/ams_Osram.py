@@ -155,6 +155,7 @@ try:
         news_link = link.text
         if "/news/press-releases/" in news_link and news_link not in news_links:
             news_links.append(news_link)
+            
     db_list = []
     mydoc = collection.find()
     for x in mydoc:

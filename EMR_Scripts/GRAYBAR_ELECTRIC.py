@@ -62,11 +62,12 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    # data = json.load(file)
-    # db_path = data[0]['Db_Path']
-    # client = MongoClient(db_path)
-    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    data = json.load(file)
+    db_path = data[0]['Db_Path']
+    client = MongoClient(db_path)
+    
+    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -129,7 +130,7 @@ try:
     response = Selector(result)
     Base_Link = "https://www.graybar.com"
     links = response.xpath('//td[@data-label="Title"]/a/@href').getall()
-    print(links)
+    # print(links)
     final_links = [Base_Link+link for link in links]
     dates = response.xpath('//td[@data-label="Date"]/text()').getall()
     announcement_type = response.xpath('//td[@data-label="Category"]/text()').getall()
@@ -137,7 +138,7 @@ try:
     db_list = []
     for i , j ,k , title in zip(final_links, dates, announcement_type, titles):
         
-        
+
         mydoc = collection.find()
         print(mydoc)
         for x in mydoc:

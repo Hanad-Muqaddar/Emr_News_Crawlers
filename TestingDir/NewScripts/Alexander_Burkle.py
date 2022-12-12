@@ -136,8 +136,11 @@ try:
         translator = Translator()
         Trans_text = translator.translate(Trans,dest='en')
         return Trans_text.text
+    
+    # links = soup.find_all('div',{ "class" : "newstilestyled__NewsTileWrapper-sc-94h61i-1 VhXTt"})
 
-    links = soup.find_all('div',{ "class" : "newstilestyled__NewsTileWrapper-sc-94h61i-1 VhXTt"})
+    links = soup.find_all("div", class_=lambda value: value and value.startswith("newstilestyled__NewsTileWrapper"))
+
     for link in links:
         news_link = Main_url + link.find('a').get('href')
         if news_link not in news_links:

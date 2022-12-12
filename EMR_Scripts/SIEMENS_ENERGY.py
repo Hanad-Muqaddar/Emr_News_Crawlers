@@ -50,7 +50,7 @@ def Parser(mainSource,localDb,localCollectionName):
         soup=BeautifulSoup(req.content)
         news_divs=soup.find('div',class_='view-content').find_all('div',class_='press-search-results-view-row content-type-c2-ct-press-release views-row')
         for one in news_divs:
-            links.append('https://press.siemens-energy.com/'+one.find('a').get('href'))
+            links.append('https://press.siemens-energy.com'+one.find('a').get('href'))
         if(soup.find('ul',class_='js-pager__items pager')):
             source= ('https://press.siemens-energy.com/global/en/press-search'+soup.find('ul',class_='js-pager__items pager').find('a').get('href'))
 #             print (source)
@@ -59,7 +59,7 @@ def Parser(mainSource,localDb,localCollectionName):
     source=mainSource
     for single_news_link in links:
         status=check_link_exists(single_news_link,localDb,collectionName)
-#         print (single_news_link)
+        print (single_news_link)
         if(status):
 #             print ('exist')
             break
@@ -149,6 +149,7 @@ def Parser(mainSource,localDb,localCollectionName):
                     images=[]
                 try:
                     title=mainDiv.find('h1').get_text()
+                    print(title)
                 except:
                     title=''
                 NewsData= {}

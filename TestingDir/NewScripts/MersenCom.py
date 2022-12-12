@@ -88,6 +88,7 @@ try:
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)
+
     # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
@@ -163,11 +164,11 @@ try:
             except:
                 title = ""
             try:
-                image = "https://www.mersen.com/" + j.css(".inner img::attr(data-src)").get()
+                image = "https://www.mersen.com" + j.css(".inner img::attr(data-src)").get()
             except:
                 image = ""
             try:
-                news_weblink = "https://www.mersen.com/" + j.css(".go-link ::attr(href)").get()
+                news_weblink = "https://www.mersen.com" + j.css(".go-link ::attr(href)").get()
             except:
                 news_weblink = ""
                 
