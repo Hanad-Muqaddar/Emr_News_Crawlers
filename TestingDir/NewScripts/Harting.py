@@ -164,8 +164,8 @@ try:
             language = "en-us"
 
             try:
-                image = data.find('div', {"class":"title-image__container"}).get('style')
-                f_img = image.split("url('")[1][:-2].strip()
+                img = data.find('div', {"class":"title-image__container"}).get('style')
+                image = img.split("url('")[1][:-2].strip()
                 # print(f_img)
             except:
                 image = ""
