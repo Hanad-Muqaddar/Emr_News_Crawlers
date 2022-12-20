@@ -172,6 +172,7 @@ try:
     'BECKHOFF' : ObjectId("637f23887498254fca079ef1"),
     'HARTING' : ObjectId("63806b387498254fca0a2668"),
     'WIELAND' : ObjectId("6385e2057498254fca103a77"),
+    'Bosch' : ObjectId("637ddc21fdef1ae80ee79c3d"),
     # '' : ObjectId(""),
     # '' : ObjectId(""),
     # '' : ObjectId(""),
