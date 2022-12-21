@@ -173,6 +173,7 @@ try:
     'HARTING' : ObjectId("63806b387498254fca0a2668"),
     'WIELAND' : ObjectId("6385e2057498254fca103a77"),
     'BOSCH' : ObjectId("637ddc21fdef1ae80ee79c3d"),
+    'WIELAND_ELECTRIC' : ObjectId("63a1b7537498254fca6437fd"),
     # '' : ObjectId(""),
     # '' : ObjectId(""),
     # '' : ObjectId(""),

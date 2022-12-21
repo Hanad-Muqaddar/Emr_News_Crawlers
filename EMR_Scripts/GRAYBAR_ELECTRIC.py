@@ -135,6 +135,7 @@ try:
     dates = response.xpath('//td[@data-label="Date"]/text()').getall()
     announcement_type = response.xpath('//td[@data-label="Category"]/text()').getall()
     titles = response.xpath('//td[@data-label="Title"]/a/text()').getall()
+
     db_list = []
     for i , j ,k , title in zip(final_links, dates, announcement_type, titles):
         
