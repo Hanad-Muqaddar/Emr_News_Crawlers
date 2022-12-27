@@ -124,6 +124,7 @@ try:
     temp['addedBy']=ObjectId("5f595240ec5a1207e4810528")
 
     companyMapping = {
+    'GGK_Gmbh' : ObjectId('61cd87c383206f95a9119c2b'),
     'Ritto_GmbH' : ObjectId('61dd600158d11ab9802d847f'),
     'RS_Components' : ObjectId("618bbcdd215e120cf9b6063c"),
     'RZB' : ObjectId("61cc49890e9e5244a6b493ed"),
@@ -191,7 +192,6 @@ try:
     'Farnell' : ObjectId('6183995f4ddd028ed14aaf2f'),
     'Finder' : ObjectId('61cd61bc83206f95a9117e03'),
     'Fulke' : ObjectId('61cc497f0e9e5244a6b493a3'),
-    'GGK_Gmbh' : ObjectId('61cd87c383206f95a9119c2b'),
     'Gira_Gmbh' : ObjectId('61cc365c0e9e5244a6b479e3'),
     'Glen_Dimplex' : ObjectId('61cd4f5183206f95a91146af'),
     'Hardy_Schmitz' : ObjectId('61cdacf383206f95a911ba2f'),

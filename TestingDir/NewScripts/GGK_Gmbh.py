@@ -132,10 +132,10 @@ try:
     result = requests.get(Base_url,headers=headers)
     response = Selector(text=result.content)
 
-    title_list = []
+    All_title_list = []
     mydoc = collection.find()
     for x in mydoc:
-        title_list.append(x['title'])
+        All_title_list.append(x['title'])
 
     image_list = []
     date_list = []
@@ -149,7 +149,7 @@ try:
         try:
             title = news.xpath('.//div[@class="subheadline-v2"]/text()').get()
             title_list.append(title)
-            print(title)
+            # print(title)
         except:
             title = 'None'
             title_list.append(title)
@@ -157,7 +157,7 @@ try:
         try:
             image = Base_url + news.xpath('.//img[@itemprop="image"]/@src').get()
             image_list.append(image)
-            print(image)
+            # print(image)
         except:
             image = 'None'
             image_list.append(image)
@@ -165,7 +165,7 @@ try:
         try: 
             date = news.xpath('./div[@class="newslist-timeline-date"]/text()').get()
             date_list.append(date)
-            print(date)
+            # print(date)
         except:
             date = ""
             date_list.append(date)
@@ -174,7 +174,7 @@ try:
         try:
             des = news.xpath('normalize-space(.//div[@itemprop="description"])').get()
             des_list.append(des)
-            print(des)
+            # print(des)
         except:
             des = ""
             des_list.append(des)
