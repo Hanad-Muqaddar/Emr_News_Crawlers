@@ -47,6 +47,8 @@ from urllib.request import Request, urlopen
 
 from newspaper import fulltext
 
+from scrapy.selector import Selector
+
 # ************************************************************************
 # defining variables
 
@@ -56,7 +58,7 @@ started_on = datetime.now()
 
 c_name = 'GGK_GmbH' # Name of the Collection
 
-total_crwalled_links = 0
+total_crwalled_titles = 0
 
 Already_exist = 0
 
@@ -128,76 +130,88 @@ try:
     Main_url = "https://www.ggk-online.com/"
     Base_url = "https://www.ggk-online.com/en/news/news-press.html"
     result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
-    
-    news_links = []
+    response = Selector(text=result.content)
 
-    links = soup.find_all("p",{ "class" : "ce_hyperlink more text-link"})
-    for link in links:
-        news_link = Main_url + link.find('a').get('href')
-        if news_link not in news_links:
-            news_links.append(news_link)
+    title_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        title_list.append(x['title'])
 
-    print(news_links)
+    image_list = []
+    date_list = []
+    des_list = []
+    title_list = []
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+    News_list = response.xpath('//div[@class="container"]//div[contains(@class,"newslist-timeline-both")]')
 
+    for news in News_list:
+        
         try:
-            title = data.find('h1', attrs = {"itemprop":"name"}).get_text(strip=True)
+            title = news.xpath('.//div[@class="subheadline-v2"]/text()').get()
+            title_list.append(title)
             print(title)
         except:
-            title = data.find('title').get_text(strip=True)
-
-        announcement_type = "News"
-        language = "en-us"
-
+            title = 'None'
+            title_list.append(title)
+            
         try:
-            image = Main_url +  data.find("figure", class_="image_container float_above").find("img").get('src')
+            image = Base_url + news.xpath('.//img[@itemprop="image"]/@src').get()
+            image_list.append(image)
             print(image)
         except:
-            image = ""
-
-        
-        sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-            print(analysis)
-        except:
-            analysis = ""
-        try:
-            date = data.find('time').get_text(strip=True)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
+            image = 'None'
+            image_list.append(image)
+            
+        try: 
+            date = news.xpath('./div[@class="newslist-timeline-date"]/text()').get()
+            date_list.append(date)
+            print(date)
         except:
             date = ""
-
-        page_source = "https://www.ggk-online.com/en/news/news-press.html"
-        news_weblink = i
-        
-        try:
+            date_list.append(date)
             
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            print(announcement)
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
 
-        if news_weblink in links_list:
-            total_crwalled_links += 1
+        try:
+            des = news.xpath('normalize-space(.//div[@itemprop="description"])').get()
+            des_list.append(des)
+            print(des)
+        except:
+            des = ""
+            des_list.append(des)
+
+    image_list = []
+    date_list = []
+    des_list = []
+    title_list = []
+
+    for N_title, img, dat, des in zip(title_list,image_list,date_list,des_list): 
+      
+        if N_title in title_list:
+            total_crwalled_titles += 1
             Already_exist += 1
             continue
         else:
+            
+            title = N_title
+            announcement_type = "News"
+            language = "en-us"
+            image = img
+            sub_category = ""
+            analysis = ""
+
+            try:
+                news_date = dateparser.parse(dat,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
+            except:
+                date = ""
+
+            page_source = "https://www.ggk-online.com/en/news/news-press.html"
+            
+            announcement = des
+            
+            date = datetime.now()
+            # Creating a list of links already avilable in database
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -208,7 +222,7 @@ try:
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
+            company_news['News_Weblink'] = page_source
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement
@@ -216,19 +230,19 @@ try:
             company_news['analysis'] = analysis
             try:
                 collection.insert_one(company_news)
-                total_crwalled_links += 1
+                total_crwalled_titles += 1
             except Exception as e:
                 running_Sequence.append(e)
     
     if Already_exist >= 1:
 
-        tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
+        tmp_txt = ' , from which '+str(Already_exist) +' Titles were Already Crawled '
 
     else:
 
         tmp_txt = ''
 
-    running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
+    running_Sequence.append(str(total_crwalled_titles) + ' Titles are crawled ' + tmp_txt)
 
     ended_on = datetime.now()
 except:
