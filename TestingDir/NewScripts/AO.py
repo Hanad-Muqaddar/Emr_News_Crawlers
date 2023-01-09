@@ -153,7 +153,7 @@ try:
                 news_date = ""
                 news_dates.append(news_date)
 
-    # print(news_links)
+    print(news_links)
     # print(news_dates)
     # print(len(news_links))
     # print(len(news_dates))
@@ -164,7 +164,7 @@ try:
         try:
             title = data.find('meta', attrs = {"property":"og:title"}).get("content")
             title = translate(title)
-            # print(title)
+            print(title)
         except:
             title = ""
             # print(title)
