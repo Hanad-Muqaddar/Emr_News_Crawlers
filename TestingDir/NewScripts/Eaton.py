@@ -206,7 +206,7 @@ try:
             # print("reach to point 2")
 
             try:
-                image = "https://www.eaton.com" + response1.xpath("//meta[@property='og:image']/@content").get()
+                image =  response1.xpath("//meta[@property='og:image']/@content").get()
             except:
                 image = ""
             try:
