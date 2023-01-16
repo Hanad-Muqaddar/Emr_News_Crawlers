@@ -45,7 +45,7 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 from newspaper import fulltext
-from googletrans import Translator
+
 # ************************************************************************
 # defining variables
 
@@ -53,7 +53,7 @@ running_Sequence = []
 
 started_on = datetime.now()
 
-c_name = 'QMG1'
+c_name = 'MERSEN'
 
 total_crwalled_links = 0
 
@@ -124,86 +124,68 @@ else:
 # *****************************************************************************
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    Main_url = "https://qmg.fi/artikkelit/"
-    Base_url = "https://qmg.fi/post-sitemap.xml"
+    Main_url = 'https://www.mersen.com'
+    Base_url = 'https://www.mersen.com/publications'
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
+
+    TAG_RE = re.compile(r'-[^>]+.')
+
+    def remove_tags(text):
+        return TAG_RE.sub('', text)
+
+    News_data = []
+
+    News = soup.find_all('div' , class_ ="views-row")
+    for new in News:
+        title = new.find('div', class_ ='des-title').find('a').text
+        date = remove_tags(new.find('div', class_ ='datetime').text)
+        News_data.append({'title':title, 'date':date})
     
-    def translate(Trans):
-        translator = Translator()
-        Trans_text = translator.translate(Trans,dest='en')
-        return Trans_text.text
+    print(News_data)
+    print(len(News_data))
+    
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
 
-    news_links = []
+    
+    All_title_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        All_title_list.append(x['title'])
 
-    links = soup.find_all("loc")
-    for link in links:
-        news_link = link.text
-        news_links.append(news_link)
-
-    print(len(news_links))
-
-    for i in news_links:
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
-
-        if i in db_list:
+    for i in News_data:
+        if i['title'] in All_title_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Available")
             continue
 
         else:        
-            response = requests.get(i, headers=headers)
-            data = BeautifulSoup(response.content, 'lxml')
 
             try:
-                N_title = data.find('div',{"class":"post-header"}).find('h1').get_text()
-                title = translate(N_title)
+                title = i['title']
                 print(title)
             except:
                 title = ""
             
             announcement_type = "News"
             language = "en-us"
-            
-            try:
-                image = data.find('div',{"class":"post-thumbnail"}).find('img').get('src')
-            except:
-                image = ""
 
             try:
-                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-            except:
-                sub_category = ""
-            
-            try:
-                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-            except:
-                analysis = ""
-            try:
-                N_date = data.find('div',{"class":"post-date"}).get_text()
-                F_date = N_date.split(":")[1].strip()
-                news_date = dateparser.parse(F_date,  settings={'DATE_ORDER': 'DMY'})
-                # print(news_date)
+                date = i['date']
+                print(date)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'DMY'})
+                print(news_date)
             except:
                 news_date = ""
 
-            
-            page_source = "https://qmg.fi/artikkelit"
+            page_source = 'https://www.mersen.com/publications'
             news_weblink = i
-            try:
-                # announcement = fulltext(response.content)
-                # announcement = announcement.replace('\n','<br>')
-                # announcement = translate(announcement)
-                # print(announcement)
-                print("announcement")
-            except Exception as e:
-                # announcement = soup.find('main',{"class":"entry-content"}).get_text()
-                # announcement = translate(announcement)
-                # print(announcement)
-                print(e)
+            print(news_weblink)
+            
             
             date = datetime.now()
             # Creating a list of links already avilable in database
@@ -219,17 +201,17 @@ try:
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
             company_news['News_Weblink'] = news_weblink
-            company_news['photo']= image
-            company_news['videos']= ""
-            company_news['announcement']=announcement
-            company_news['historySubCategory']= sub_category
-            company_news['analysis'] = analysis
+            company_news['photo']= ''
+            company_news['videos']= ''
+            company_news['announcement']=''
+            company_news['historySubCategory']= ''
+            company_news['analysis'] = ''
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-
+    
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
