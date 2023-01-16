@@ -145,12 +145,11 @@ try:
     for press in press_list:
 
         try:
-            link = press.xpath('.//a/@href').get()
+            link = Main_url + press.xpath('.//a/@href').get()
             news_links.append(link)
         except:
             link = ""
             news_links.append(link)
-
         try: 
             N_date = press.xpath('.//div[@class="content-body"]/div[2]/text()').get().strip()
             date_list.append(N_date)
@@ -158,7 +157,8 @@ try:
             N_date = ""
             date_list.append(N_date)
             
-        
+    print(news_links)
+    print(len(date_list))
 
     db_list = []
     mydoc = collection.find()
@@ -171,11 +171,15 @@ try:
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("already crawled")
             continue
 
-        else:        
-            resp = requests.get(i, headers=headers)
-            response2 = Selector(text=resp.content)
+        else:    
+            try:    
+                resp = requests.get(i, headers=headers)
+                response2 = Selector(text=resp.content)
+            except:
+                print("error")
 
             try:
                 title = response2.xpath('//meta[@property="og:title"]/@content').get()

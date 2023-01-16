@@ -145,7 +145,6 @@ try:
     News_list = response.xpath('//div[@class="container"]//div[contains(@class,"newslist-timeline-both")]')
 
     for news in News_list:
-        
         try:
             title = news.xpath('.//div[@class="subheadline-v2"]/text()').get()
             title_list.append(title)
@@ -169,7 +168,6 @@ try:
         except:
             date = ""
             date_list.append(date)
-            
 
         try:
             des = news.xpath('normalize-space(.//div[@itemprop="description"])').get()
@@ -179,16 +177,11 @@ try:
             des = ""
             des_list.append(des)
 
-    image_list = []
-    date_list = []
-    des_list = []
-    title_list = []
-
     for N_title, img, dat, des in zip(title_list,image_list,date_list,des_list): 
-      
-        if N_title in title_list:
+        if N_title in All_title_list:
             total_crwalled_titles += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
             

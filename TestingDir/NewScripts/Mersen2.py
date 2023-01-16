@@ -139,9 +139,13 @@ try:
     News = soup.find_all('div' , class_ ="views-row")
     for new in News:
         title = new.find('div', class_ ='des-title').find('a').text
+
         date = remove_tags(new.find('div', class_ ='datetime').text)
-        News_data.append({'title':title, 'date':date})
-    
+
+        n_link = Main_url + new.find('div', class_ ='des-title').find('a').get('href')
+
+        News_data.append({'link':n_link, 'title':title, 'date':date})
+        
     print(News_data)
     print(len(News_data))
     
@@ -151,13 +155,13 @@ try:
         db_list.append(x['News_Weblink'])
 
     
-    All_title_list = []
-    mydoc = collection.find()
-    for x in mydoc:
-        All_title_list.append(x['title'])
+    # All_title_list = []
+    # mydoc = collection.find()
+    # for x in mydoc:
+    #     All_title_list.append(x['title'])
 
     for i in News_data:
-        if i['title'] in All_title_list:
+        if i['link'] in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Available")
@@ -183,10 +187,9 @@ try:
                 news_date = ""
 
             page_source = 'https://www.mersen.com/publications'
-            news_weblink = i
+            news_weblink = i['link']
             print(news_weblink)
-            
-            
+
             date = datetime.now()
             # Creating a list of links already avilable in database
             

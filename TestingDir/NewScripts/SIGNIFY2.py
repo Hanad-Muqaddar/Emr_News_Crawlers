@@ -149,9 +149,10 @@ try:
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("already crawled")
             continue
 
-        else:        
+        else:  
             response = requests.get(i, headers=headers)
             data = BeautifulSoup(response.content, 'lxml')
 
