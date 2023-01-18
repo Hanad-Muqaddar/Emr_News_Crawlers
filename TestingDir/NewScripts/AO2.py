@@ -186,7 +186,7 @@ try:
                 title = translate(title)
                 # print(title)
             except:
-                title = ""
+                title = response2.xpath('//meta[@property="og:title"]/@content').get()
             
             announcement_type = "News"
             language = "en-us"
@@ -221,6 +221,8 @@ try:
                 announcement = translate(announcement)
                 print(announcement)
             except:
+                announcement = fulltext(resp.content)
+                announcement = announcement.replace('\n','<br>')
                 announcement = ""
             
             date = datetime.now()

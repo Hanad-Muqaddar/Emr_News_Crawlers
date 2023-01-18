@@ -62,12 +62,12 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
     
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -130,8 +130,8 @@ try:
     response = Selector(result)
     Base_Link = "https://www.graybar.com"
     links = response.xpath('//td[@data-label="Title"]/a/@href').getall()
-    # print(links)
-    final_links = [Base_Link+link for link in links]
+    f_links = ['/'+link if link[0] != '/' else link for link in links]
+    final_links = [Base_Link+link for link in f_links]
     dates = response.xpath('//td[@data-label="Date"]/text()').getall()
     announcement_type = response.xpath('//td[@data-label="Category"]/text()').getall()
     titles = response.xpath('//td[@data-label="Title"]/a/text()').getall()
@@ -146,9 +146,10 @@ try:
             db_list.append(x['News_Weblink'])
        
         if i in db_list:
-            print("if mein a gaya")
+            
             Already_exist += 1
             total_crwalled_links += 1
+            print("Already Crawled")
             continue
         else:
             print("a gaya")
