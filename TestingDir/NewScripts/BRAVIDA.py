@@ -131,27 +131,30 @@ try:
     
     years_news_links = []
     All_News_links = []
+    try:
 
-    links = soup.find('ul',{ "class" : "list list--bordered"}).find_all('li',{"class":"list__item"})
-    for link in links:
-        news_link = Main_url + link.find('a').get('href')
-        if news_link not in years_news_links:
-            years_news_links.append(news_link)
-
-    print(years_news_links)
-    print(len(years_news_links))
-
-    for Y_N_Link in years_news_links:  
-        response = requests.get(Y_N_Link, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-        N_links = data.find('ul',{ "class" : "list list--bordered js-list"}).find_all('li',{"class":"list__item"})
-        for l in N_links:
-            N_link = Main_url + l.find('a').get('href')
-            if N_link not in All_News_links:
-                All_News_links.append(N_link)
+        links = soup.find('ul',{ "class" : "js-resultlist row justify-content-center mt-8"}).find_all('li')
+        for link in links:
+            news_link = link.find('a').get('href')
+            if news_link not in years_news_links:
+                All_News_links.append(news_link)
+    except Exception as e:
+        print(e)
 
     print(All_News_links)
     print(len(All_News_links))
+
+    # for Y_N_Link in years_news_links:  
+    #     response = requests.get(Y_N_Link, headers=headers)
+    #     data = BeautifulSoup(response.content, 'lxml')
+    #     N_links = data.find('ul',{ "class" : "list list--bordered js-list"}).find_all('li')
+    #     for l in N_links:
+    #         N_link = Main_url + l.find('a').get('href')
+    #         if N_link not in All_News_links:
+    #             All_News_links.append(N_link)
+
+    # print(All_News_links)
+    # print(len(All_News_links))
 
     for i in All_News_links:
         response = requests.get(i, headers=headers)

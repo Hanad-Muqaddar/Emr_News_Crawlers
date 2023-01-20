@@ -35,6 +35,7 @@ import traceback
 
 import datetime
 
+
 from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
@@ -74,12 +75,12 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
 
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -151,7 +152,7 @@ try:
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Base_url = "https://www.wago.com/wagoapi/v2/global-wago/blog/Homepage/entries?lang=en_GG&articleTypes=ContentArticleInterviewPageTemplate,ContentArticleTopicPageTemplate,ContentArticleReferencePageTemplate,ContentArticleCompanyNewsPageTemplate,ContentArticlePracticalTipsPageTemplate,ContentArticleProductNewsPageTemplate&page=0"
-    Main_url = "https://www.wago.com"
+    Main_url = "https://www.wago.com/global"
     page = requests.get(Base_url)
     json_result = page.json()
     news_links = []
@@ -160,6 +161,8 @@ try:
         
         link = Main_url + data['url']
         news_links.append(link)
+
+    print(news_links)
 
     db_list = []
     mydoc = collection.find()
@@ -171,11 +174,13 @@ try:
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
+            
             response = requests.get(i, headers=headers)
             data = BeautifulSoup(response.content, 'lxml')
-
+    
             try:
                 title = data.find('h1', {"class":"wg-headline"}).find('div').next_sibling.strip()
                 print(title)
@@ -219,7 +224,7 @@ try:
             except:
                 announcement = ""
             
-            date = datetime.now()
+            date = datetime.datetime.now()
             # Creating a list of links already avilable in database
             
             company_news = {}
@@ -243,6 +248,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
+
             # try:
             #     date = i.find_element_by_class_name("wg-blog__tile-date").text
             # except:

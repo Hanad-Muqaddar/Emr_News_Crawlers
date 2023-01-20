@@ -148,6 +148,7 @@ try:
     result = requests.get("https://investors.nvent.com/rss/PressRelease.aspx?LanguageId=1&CategoryWorkflowId=1cb807d2-208f-4bc3-9133-6a9ad45ac3b0&tags=").content
     soup = BeautifulSoup(result, 'lxml')
     links = [ "https:" +item.text.split('https:')[1].split('.aspx')[0] +".aspx" for item in soup.find_all('item') ]
+    print(links)
     for j in links:
         news_weblink = j
         db_list = []
