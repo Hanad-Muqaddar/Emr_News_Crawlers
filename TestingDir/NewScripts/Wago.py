@@ -214,8 +214,11 @@ try:
                 news_date = ""
 
             page_source = "https://www.wago.com/global/blog"
-            news_weblink = data.find('meta', attrs = {"property":"og:url"}).get("content")
-            print(news_weblink)
+
+            news_weblink = i
+
+            # news_weblink = data.find('meta', attrs = {"property":"og:url"}).get("content")
+            # print(news_weblink)
             
             try:
                 announcement = fulltext(response.content)
@@ -249,61 +252,6 @@ try:
             except Exception as e:
                 running_Sequence.append(e)
 
-            # try:
-            #     date = i.find_element_by_class_name("wg-blog__tile-date").text
-            # except:
-            #     date = ""
-            # try:
-            #     announcement_type = i.find_element_by_class_name("wg-blog__tile-flag").text
-            # except:
-            #     announcement_type = ""
-            # try:
-            #     title = i.find_element_by_class_name("wg-blog__tile-head").text
-            # except:
-            #     title = ""
-            # try:
-            #     image = i.find_element_by_tag_name("img").get_attribute("src")
-            # except:
-            #     image = ""
-            # try:
-            #     announcement = i.find_element_by_class_name("wg-blog__tile-body").text
-            # except:
-            #     announcement = ""
-            # try:
-            #     news_weblink = i.find_element_by_tag_name("a").get_attribute("href")
-            # except:
-            #     news_weblink = ""
-            # db_list = []
-            # mydoc = collection.find()
-            # for x in mydoc:
-            #     db_list.append(x['News_Weblink'])
-            
-            # if news_weblink in db_list:
-            #     total_crwalled_links += 1
-            #     Already_exist += 1
-            #     continue
-            # crawled_on_date = datetime.datetime.now()
-            # url = "https://www.wago.com/global/blog"
-            # company_news = {}
-            # company_news['companyId'] = ''
-            # company_news['location']=''
-            # company_news['comment']=''
-            # company_news['Date']=date
-            # company_news['Crawled_on']=crawled_on_date
-            # company_news['title']= title
-            # company_news['Language']= 'English'
-            # company_news['announcementType']= announcement_type
-            # company_news['Source'] = url
-            # company_news['News_Weblink'] = news_weblink
-            # company_news['photo']= image
-            # company_news['videos']= ''
-            # company_news['announcement']= announcement
-            # company_news['historySubCategory']=''
-            # try:
-            #     collection.insert_one(company_news)
-            #     total_crwalled_links += 1
-            # except Exception as e:
-            #     running_Sequence.append(e)
     
     if Already_exist >= 1:
 
