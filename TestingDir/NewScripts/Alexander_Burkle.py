@@ -158,62 +158,65 @@ try:
     # print(len(news_links))
     # print(len(news_dates))
 
-    for i , N_Date in zip(news_links,news_dates):        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-        try:
-            title = data.find('title').text
-            title = translate(title)
-            # print(title)
-        except:
-            title = data.find('title').text
-            # print(title)
+     # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
+
+
+    for i , N_Date in zip(news_links,news_dates): 
        
-        announcement_type = "News"
-        language = "en-us"
-
-        image = ""
-            
-        try:
-            sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
-            sub_category = translate(sub_category)
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-            analysis = translate(analysis)
-        except:
-            analysis = ""
-        try:
-            news_date = dateparser.parse(N_Date,  settings={'DATE_ORDER': 'DMY'} )
-            # print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://alexander-buerkle.com/de-de/magazin-news"
-        news_weblink = i
-        # print(news_weblink)
-        try:
-            announcement = data.find('div' , id="ab-root").text
-            announcement = translate(announcement)
-            # print(announcement)
-            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             continue
-        else:
+        else:       
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+            try:
+                title = data.find('title').text
+                title = translate(title)
+                print(title)
+            except:
+                title = data.find('title').text
+                print(title)
+        
+            announcement_type = "News"
+            language = "en-us"
+
+            image = ""
+                
+            try:
+                sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
+                sub_category = translate(sub_category)
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"name":"description"}).get("content")
+                analysis = translate(analysis)
+            except:
+                analysis = ""
+            try:
+                news_date = dateparser.parse(N_Date,  settings={'DATE_ORDER': 'DMY'} )
+                # print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://alexander-buerkle.com/de-de/magazin-news"
+            news_weblink = i
+            # print(news_weblink)
+            try:
+                announcement = data.find('div' , id="ab-root").text
+                announcement = translate(announcement)
+                # print(announcement)
+                
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+       
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -231,7 +234,7 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                collection.insert_one(company_news)
+                # collection.insert_one(company_news)
                 print("insert")
                 total_crwalled_links += 1
             except Exception as e:

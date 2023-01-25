@@ -3,6 +3,7 @@ import datetime
 import copy
 import runpy
 
+ 
 myclient = pymongo.MongoClient("mongodb://su-du-ad:updatedSuperDuperAdmin@34.121.98.98:27017/emrweb?authSource=admin")
 myclient2 = pymongo.MongoClient("mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin")
 
@@ -10,6 +11,11 @@ MyDatabase = myclient["emrweb"]
 MyDatabase2 = myclient2['TEMP_EMR_NEWS_Crawler_DB']
 
 MyCollection = MyDatabase["crawler_status"]
+
+status_Database = MyDatabase["Master_And_Mapping_Script_Logs"]
+statusdict = { "name": "Master_Script", "runningDateTime": datetime.datetime.now() , "status": "Running" }
+
+status_Id = status_Database.insert_one(statusdict)
 
 
 
@@ -396,4 +402,6 @@ for key, value in Emr_News_Cralers_Dict.items():
     today_date = datetime.datetime.now()
     crawler_health_function(key, value, today_date)
 
-
+status_Database.update_one({"_id": status_Id.inserted_id , "name": "Master_Script"}, { "$set": { "status": "Script Completed" } })
+# update record
+# pick the record where status == "Running In progress"
