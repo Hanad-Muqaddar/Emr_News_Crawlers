@@ -13,6 +13,12 @@ from dateutil.parser import *
 from datetime import datetime
 import json
 
+myclient = MongoClient("mongodb://su-du-ad:updatedSuperDuperAdmin@34.121.98.98:27017/emrweb?authSource=admin")
+MyDatabase = myclient["emrweb"]
+status_Database = MyDatabase["Master_And_Mapping_Script_Logs"]
+statusdict = { "name": "Mapping_Script", "runningDateTime": datetime.now() , "status": "Running" }
+status_Id = status_Database.insert_one(statusdict)
+
 last_time = None
 runnung_sequence = []
 start_time = datetime.now()
@@ -20,15 +26,6 @@ start_CPU_Stat = str(psutil.cpu_percent())
 start_RAM_Stat = str(psutil.virtual_memory())
 today = datetime.now()
 try:
-    # myclient = MongoClient("mongodb://su-du-ad:updatedSuperDuperAdmin@34.121.98.98:27017/emrweb?authSource=admin")
-
-    # MyDatabase = myclient["emrweb"]
-    # MyCollection = MyDatabase["crawler_status"]
-
-    # status_Database = MyDatabase["Master_And_Mapping_Script_Logs"]
-    # statusdict = { "name": "Mapping_Script", "runningDateTime": datetime.datetime.now() , "status": "Running" }
-    # status_Id = status_Database.insert_one(statusdict)
-
     try:
         file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
         data = json.load(file)
@@ -346,7 +343,6 @@ try:
         #break
     runnung_sequence.append('Mapping Completed')
     end_time = datetime.now()
-    # status_Database.update_one({"_id": status_Id.inserted_id , "name": "Mapping_Script"}, { "$set": { "status": "Script Completed" } })
 except Exception as e:
     Error_Time =  datetime.now()
     Reported_Error = traceback.format_exc()
@@ -376,3 +372,4 @@ log['Total_RAM'] = str(psutil.virtual_memory().total)
 log['RAM_Usage'] = str(psutil.virtual_memory().percent)
 log['Avaiable_RAM_%'] = str(psutil.virtual_memory().available * 100 / psutil.virtual_memory().total)
 # error_logs.insert_one(log)
+status_Database.update_one({"_id": status_Id.inserted_id , "name": "Mapping_Script"}, { "$set": { "status": "Script Completed" } })
