@@ -2,7 +2,6 @@ import pymongo
 import datetime
 import copy
 import runpy
-
  
 myclient = pymongo.MongoClient("mongodb://su-du-ad:updatedSuperDuperAdmin@34.121.98.98:27017/emrweb?authSource=admin")
 myclient2 = pymongo.MongoClient("mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin")
@@ -16,8 +15,6 @@ status_Database = MyDatabase["Master_And_Mapping_Script_Logs"]
 statusdict = { "name": "Master_Script", "runningDateTime": datetime.datetime.now() , "status": "Running" }
 
 status_Id = status_Database.insert_one(statusdict)
-
-
 
 def calculate_time_interval(start_time, end_time):                   
     duration = end_time - start_time                        
@@ -193,20 +190,16 @@ crawlerToCollectionMapping={
     "Wieland_Electric" : "WIELAND_ELECTRIC",    
 }
 
-def annoucments_time(client,crawler_name,datefilter):
+def annoucments_time(client_Coll,crawler_name,datefilter):
     Times_Data  = []
-    result = client['TEMP_EMR_NEWS_Crawler_DB'][crawler_name].aggregate([
+    result = client_Coll['TEMP_EMR_NEWS_Crawler_DB'][crawler_name].aggregate([
     {
         '$match': {
             'Crawled_on': {
                 '$gte': datefilter
             }
         }
-    }, {
-        '$project': {
-            'Crawled_on': 1
-        }}])
-
+    }, {'$project': {'Crawled_on': 1 }}])
 
     for r in result:
         Times_Data.append(r['Crawled_on'])
@@ -227,6 +220,7 @@ def crawler_health_function(crawler_name, path, today_date):
     item['timeIntervalTakenToRun'] = ""
     item['AnnouncmentsTime'] = ""
     try:
+        
         MyCollection.update_many({"name":crawler_name, "isLatest":True},{"$set":{"isLatest":False}})
         new_item = copy.deepcopy(item)
         new_item['name'] = crawler_name
@@ -236,13 +230,17 @@ def crawler_health_function(crawler_name, path, today_date):
         start_time = datetime.datetime.now()
         # exec(open(path).read())
         # exec(compile(open(path, "rb").read(), path, 'exec'),globals(), locals())
-        runpy.run_path(path)
+
+        # runpy.run_path(path)
         end_time = datetime.datetime.now()
+        
         time_interval = calculate_time_interval(start_time, end_time)
         MyCollection2 = MyDatabase2[crawlerToCollectionMapping[crawler_name]]
 
-        # Announcment_Time_Array = annoucments_time(myclient2,crawler_name,date_to_query)
         date_to_query = datetime.datetime(today_date.year,today_date.month,today_date.day)
+        
+        Announcment_Time_Array = annoucments_time(myclient2,crawler_name,date_to_query)
+        
         documents_count = MyCollection2.count_documents({"Crawled_on":{"$gte": date_to_query}})
         if int(documents_count) == 0:
             MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"status":"Finished", "newsCount":documents_count, "timeIntervalTakenToRun":time_interval}})
@@ -250,8 +248,10 @@ def crawler_health_function(crawler_name, path, today_date):
             data =  list(MyCollection2.aggregate([{"$match":{"Crawled_on":{"$gte": date_to_query}}},{"$sort":{"Date":-1}}]))
             endDate = data[0]['Date']
             startDate = data[-1]['Date']
-            MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"status":"Finished", "newsCount":documents_count, "latestNewsDate":endDate, "lastNewsDate":startDate, "timeIntervalTakenToRun":time_interval}})
-            # MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"status":"Finished", "newsCount":documents_count, "latestNewsDate":endDate, "lastNewsDate":startDate, "timeIntervalTakenToRun":time_interval, 'AnnouncmentsTime': Announcment_Time_Array}})
+            # MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"status":"Finished", "newsCount":documents_count, "latestNewsDate":endDate, "lastNewsDate":startDate, "timeIntervalTakenToRun":time_interval}})
+            MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"status":"Finished", "newsCount":documents_count, "latestNewsDate":endDate, "lastNewsDate":startDate, "timeIntervalTakenToRun":time_interval, 'AnnouncmentsTime': Announcment_Time_Array}})
+       
+
     except Exception as e:
         end_time = datetime.datetime.now()
         time_interval = calculate_time_interval(start_time, end_time)
