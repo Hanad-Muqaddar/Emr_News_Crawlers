@@ -193,6 +193,26 @@ crawlerToCollectionMapping={
     "Wieland_Electric" : "WIELAND_ELECTRIC",    
 }
 
+def annoucments_time(client,crawler_name,datefilter):
+    Times_Data  = []
+    result = client['TEMP_EMR_NEWS_Crawler_DB'][crawler_name].aggregate([
+    {
+        '$match': {
+            'Crawled_on': {
+                '$gte': datefilter
+            }
+        }
+    }, {
+        '$project': {
+            'Crawled_on': 1
+        }}])
+
+
+    for r in result:
+        Times_Data.append(r['Crawled_on'])
+
+    return Times_Data
+
 def crawler_health_function(crawler_name, path, today_date):
     # print(count_c)
     item = {}
@@ -205,6 +225,7 @@ def crawler_health_function(crawler_name, path, today_date):
     item['errorType'] = ""
     item['isLatest'] = True
     item['timeIntervalTakenToRun'] = ""
+    item['AnnouncmentsTime'] = ""
     try:
         MyCollection.update_many({"name":crawler_name, "isLatest":True},{"$set":{"isLatest":False}})
         new_item = copy.deepcopy(item)
@@ -219,6 +240,8 @@ def crawler_health_function(crawler_name, path, today_date):
         end_time = datetime.datetime.now()
         time_interval = calculate_time_interval(start_time, end_time)
         MyCollection2 = MyDatabase2[crawlerToCollectionMapping[crawler_name]]
+
+        Announcment_Time_Array = annoucments_time(MyCollection2,crawler_name,date_to_query)
         date_to_query = datetime.datetime(today_date.year,today_date.month,today_date.day)
         documents_count = MyCollection2.count_documents({"Crawled_on":{"$gte": date_to_query}})
         if int(documents_count) == 0:
@@ -227,7 +250,7 @@ def crawler_health_function(crawler_name, path, today_date):
             data =  list(MyCollection2.aggregate([{"$match":{"Crawled_on":{"$gte": date_to_query}}},{"$sort":{"Date":-1}}]))
             endDate = data[0]['Date']
             startDate = data[-1]['Date']
-            MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"status":"Finished", "newsCount":documents_count, "latestNewsDate":endDate, "lastNewsDate":startDate, "timeIntervalTakenToRun":time_interval}})
+            MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"status":"Finished", "newsCount":documents_count, "latestNewsDate":endDate, "lastNewsDate":startDate, "timeIntervalTakenToRun":time_interval, 'AnnouncmentsTime': Announcment_Time_Array}})
     except Exception as e:
         end_time = datetime.datetime.now()
         time_interval = calculate_time_interval(start_time, end_time)
