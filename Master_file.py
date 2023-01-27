@@ -231,7 +231,7 @@ def crawler_health_function(crawler_name, path, today_date):
         # exec(open(path).read())
         # exec(compile(open(path, "rb").read(), path, 'exec'),globals(), locals())
 
-        # runpy.run_path(path)
+        runpy.run_path(path)
         end_time = datetime.datetime.now()
         
         time_interval = calculate_time_interval(start_time, end_time)
