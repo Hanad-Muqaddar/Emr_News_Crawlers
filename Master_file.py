@@ -241,7 +241,7 @@ def crawler_health_function(crawler_name, path, today_date):
         time_interval = calculate_time_interval(start_time, end_time)
         MyCollection2 = MyDatabase2[crawlerToCollectionMapping[crawler_name]]
 
-        Announcment_Time_Array = annoucments_time(myclient2,crawler_name,date_to_query)
+        # Announcment_Time_Array = annoucments_time(myclient2,crawler_name,date_to_query)
         date_to_query = datetime.datetime(today_date.year,today_date.month,today_date.day)
         documents_count = MyCollection2.count_documents({"Crawled_on":{"$gte": date_to_query}})
         if int(documents_count) == 0:
@@ -250,8 +250,8 @@ def crawler_health_function(crawler_name, path, today_date):
             data =  list(MyCollection2.aggregate([{"$match":{"Crawled_on":{"$gte": date_to_query}}},{"$sort":{"Date":-1}}]))
             endDate = data[0]['Date']
             startDate = data[-1]['Date']
-            # MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"status":"Finished", "newsCount":documents_count, "latestNewsDate":endDate, "lastNewsDate":startDate, "timeIntervalTakenToRun":time_interval}})
-            MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"status":"Finished", "newsCount":documents_count, "latestNewsDate":endDate, "lastNewsDate":startDate, "timeIntervalTakenToRun":time_interval, 'AnnouncmentsTime': Announcment_Time_Array}})
+            MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"status":"Finished", "newsCount":documents_count, "latestNewsDate":endDate, "lastNewsDate":startDate, "timeIntervalTakenToRun":time_interval}})
+            # MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"status":"Finished", "newsCount":documents_count, "latestNewsDate":endDate, "lastNewsDate":startDate, "timeIntervalTakenToRun":time_interval, 'AnnouncmentsTime': Announcment_Time_Array}})
     except Exception as e:
         end_time = datetime.datetime.now()
         time_interval = calculate_time_interval(start_time, end_time)
