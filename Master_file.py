@@ -37,6 +37,7 @@ crawlerToCollectionMapping={
     "ADHQ":"ADHQ",
     "Atkore_International":"Atkore_International",
     "Belden_International":"Belden_International",
+    "Belden2":"Belden_International",
     "CHINT":"CHINT",
     "Danfoss":"Danfoss",
     "EATON":"EATON",
@@ -100,6 +101,7 @@ crawlerToCollectionMapping={
     "EUROPACABLE":"EUROPA_CABLE",
     "EUROPE_FIRE_SAFETY_ALLIANCE":"EUROPE_FIRE_SAFETY",
     "farnell":"Farnell",
+    "Farnell2":"Farnell",
     "Finder":"Finder",
     "Fluke":"Fulke",
     "GGK_Gmbh":"GGK_GmbH",
@@ -408,6 +410,10 @@ Emr_News_Cralers_Dict = {
     "CHINT":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "CHINT2": "/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "farnell":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
+
+    "Farnell2":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
+    "Belden2":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
+
     "Beckhoff":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Harting":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Bosch":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
