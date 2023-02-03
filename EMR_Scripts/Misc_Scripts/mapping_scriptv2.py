@@ -324,9 +324,12 @@ try:
             print(f"\n, {N_Date} ******************************")
             print("Crawled Date")
             print(f"\n, {C_Date} ******************************")
-            if N_Date == "":
+            if N_Date:
+                print("if mein a gya hn ")
                 continue
+                
             else:
+                print("else mein a gya hn ")
                 historiesCollection.update_one({"references.link.value": n["references.link.value"] }, { "$set": { "Date.value": C_Date } })
 
         done.append(i)
