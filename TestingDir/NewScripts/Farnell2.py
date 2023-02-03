@@ -188,7 +188,7 @@ try:
             try:
                 N_date = driver.find_element(By.XPATH, "//div[@class='module_date-time']/span").text
                 print(N_date)
-                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
+                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'MDY'})
                 print(news_date)
             except:
                 news_date = ""

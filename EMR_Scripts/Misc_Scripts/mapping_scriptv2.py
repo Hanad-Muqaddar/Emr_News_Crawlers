@@ -270,6 +270,7 @@ try:
     }
     count=0
     done = []
+    new_News_Links = []
     for i in newsDb.collection_names():
         if i not in companyMapping or i in done:
             continue
@@ -311,8 +312,19 @@ try:
                 tempIndNews['thumbnailCreated'] = False
                 tempIndNews['photoCreated'] = False
                 tempIndNews['errorOnPhoto'] = False
-
+                
+                new_News_Links.append(j['News_Weblink'])
             historiesCollection.insert_one(tempIndNews)
+
+        New_News_List = historiesCollection.find({"references.link.value":{"$in":new_News_Links}})
+        for n in New_News_List:
+            N_Date = n["Date"]["value"]
+            C_Date = n["Date"]["created_at"]
+            if N_Date == "":
+                continue
+            else:
+                historiesCollection.update_one({"references.link.value": n["references.link.value"] }, { "$set": { "Date.value": C_Date } })
+
         done.append(i)
     runnung_sequence.append(str(count)+' documents updated')
     newsWithoutValidation = historiesCollection.find({'validatedObject':{'$exists':False}})
