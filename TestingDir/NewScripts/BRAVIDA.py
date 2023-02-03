@@ -188,7 +188,7 @@ try:
         except:
             analysis = ""
         try:
-            date = data.find('ul', {"class":"list list--horizontal my-7"}).find('time').get_text(strip=True)
+            date = data.find('tim', {"class":"mr-7 text-capitalize"}).get_text(strip=True)
             print(date)
             news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
             print(news_date)
@@ -202,7 +202,7 @@ try:
             html = requests.get(i).text
             announcement = fulltext(html)
             announcement = announcement.replace('\n','<br>')
-            print(announcement)
+            # print(announcement)
             
         except:
             announcement = ""
@@ -236,7 +236,7 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                collection.insert_one(company_news)
+                # collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

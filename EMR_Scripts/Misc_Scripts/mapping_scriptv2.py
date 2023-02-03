@@ -320,6 +320,10 @@ try:
         for n in New_News_List:
             N_Date = n["Date"]["value"]
             C_Date = n["Date"]["created_at"]
+            print("\n\n Crawled Date")
+            print(f"\n, {N_Date} ******************************")
+            print("Crawled Date")
+            print(f"\n, {C_Date} ******************************")
             if N_Date == "":
                 continue
             else:
