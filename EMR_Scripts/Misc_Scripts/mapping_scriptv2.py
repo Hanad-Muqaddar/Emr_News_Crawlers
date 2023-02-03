@@ -330,7 +330,7 @@ try:
                 
             else:
                 print("else mein a gya hn ")
-                historiesCollection.update_one({"references.link.value": n["references.link.value"] }, { "$set": { "Date.value": C_Date } })
+                historiesCollection.update_one({"references.link.value": n["references"]["link"]["value"] }, { "$set": { "Date.value": C_Date } })
 
         done.append(i)
     runnung_sequence.append(str(count)+' documents updated')
