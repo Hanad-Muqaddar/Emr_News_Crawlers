@@ -97,6 +97,7 @@ try:
                 date = date[len(date)-1].text.strip()
                 photo = i.find('figure').find('img').get('src')
                 title = i.find('figcaption').text.strip()
+                
                 analysis = i.find('div', attrs = {'class':'card-text','itemprop':'articleBody'}).text.strip()
                 analysis = analysis[:len(analysis)-1]
                 ann = ['']

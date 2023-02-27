@@ -199,6 +199,7 @@ try:
             links_list.append(x['News_Weblink'])
 
         if news_weblink in links_list:
+            print("Already Crawled")
             total_crwalled_links += 1
             Already_exist += 1
             continue

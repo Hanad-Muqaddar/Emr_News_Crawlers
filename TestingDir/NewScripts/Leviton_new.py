@@ -161,12 +161,13 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-        
+    print(news_links)
     for i,d in zip(news_links, news_dates):
         
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
 
         else:
@@ -175,7 +176,7 @@ try:
             response1 = Selector(response)
             try:
                 title = data.find('div', attrs = {"class":"title--a"}).get_text(strip=True)
-                # print(title)
+                print(title)
             except:
                 title = data.find('title').text
                 # print(title)

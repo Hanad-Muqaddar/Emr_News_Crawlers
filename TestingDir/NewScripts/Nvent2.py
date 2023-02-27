@@ -140,7 +140,7 @@ try:
          
     print(news_links)
     print(len(news_links))
-
+    
     db_list = []
     mydoc = collection.find()
     for x in mydoc:

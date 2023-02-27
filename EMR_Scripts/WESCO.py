@@ -69,11 +69,11 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
     running_Sequence.append('Connected to DB Server')
 
 except:
@@ -142,15 +142,16 @@ try:
             db_list.append(x['News_Weblink'])
         news_weblink = "https://investors.wesco.com" + i['LinkToDetailPage']
         if news_weblink in db_list:
-            # print("Link Already exists in database")
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
             res = requests.get(news_weblink)
             response = Selector(res)
             try:
                 title = i['Headline']
+                print(title)
             except:
                 title = ""
             try:

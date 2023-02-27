@@ -154,69 +154,72 @@ try:
                 news_dates.append(news_date)
 
     print(news_links)
-    # print(news_dates)
-    # print(len(news_links))
-    # print(len(news_dates))
+    print(news_dates)
+    print(len(news_links))
+    print(len(news_dates))
 
-    for i , N_Date in zip(news_links,news_dates):        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-        try:
-            title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-            title = translate(title)
-            print(title)
-        except:
-            title = ""
-            # print(title)
-       
-        announcement_type = "News"
-        language = "en-us"
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        image = ""
+    for i , N_Date in zip(news_links,news_dates):  
 
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-            sub_category = translate(sub_category)
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-            analysis = translate(analysis)
-        except:
-            analysis = ""
-        try:
-            date = translate(N_Date)
-            # print(date)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            # print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://ao.dk/om-ao/nyheder-og-presse/nyheder"
-        news_weblink = i
-
-        try:            
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            announcement = translate(announcement)
-            # print(announcement)
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
+        else:      
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+            try:
+                title = data.find('meta', attrs = {"property":"og:title"}).get("content")
+                title = translate(title)
+                print(title)
+            except:
+                title = ""
+                # print(title)
+        
+            announcement_type = "News"
+            language = "en-us"
+
+            image = ""
+
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+                sub_category = translate(sub_category)
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+                analysis = translate(analysis)
+            except:
+                analysis = ""
+            try:
+                date = translate(N_Date)
+                # print(date)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                # print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://ao.dk/om-ao/nyheder-og-presse/nyheder"
+            news_weblink = i
+
+            try:            
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')
+                announcement = translate(announcement)
+                # print(announcement)
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -238,7 +241,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    
+
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

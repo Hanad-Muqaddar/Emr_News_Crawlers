@@ -148,6 +148,7 @@ try:
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
 
         else:        
@@ -156,7 +157,7 @@ try:
 
             try:
                 title = data.find('div', {"class":"title-container"}).find('h1').get_text(strip=True)
-                # print(title)
+                print(title)
             except:
                 title = ""
             

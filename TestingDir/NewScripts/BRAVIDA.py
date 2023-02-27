@@ -156,90 +156,96 @@ try:
     # print(All_News_links)
     # print(len(All_News_links))
 
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
+
+
     for i in All_News_links:
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-
         try:
-            title = data.find('meta',attrs = {'property':'og:title'}).get('content')
-            title = title.replace('- Bravida','')
-            print(title)
-        except:
-            title = ""
-            print(title)
-        
-        announcement_type = "News"
-        language = "en-us"
-
-        try:
-            image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-            print(image)
-        except:
-            image = ""
-            print(image)
-
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            date = data.find('tim', {"class":"mr-7 text-capitalize"}).get_text(strip=True)
-            print(date)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://www.bravida.se/en/investors/financial-information/press-releases/" 
-        news_weblink = i
-        
-        try:            
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            # print(announcement)
-            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
-            total_crwalled_links += 1
-            Already_exist += 1
-            continue
-        else:
-            company_news = {}
-            company_news['companyId'] = ''
-            company_news['location']=''
-            company_news['comment']=''
-            company_news['Date']= news_date
-            company_news['Crawled_on']=date
-            company_news['title']=title
-            company_news['Language']= language
-            company_news['announcementType']= announcement_type
-            company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
-            company_news['photo']= image
-            company_news['videos']= ''
-            company_news['announcement']=announcement
-            company_news['historySubCategory']= sub_category
-            company_news['analysis'] = analysis
-            try:
-                # collection.insert_one(company_news)
+            if i in links_list:
+                print("Already Crawled")
                 total_crwalled_links += 1
-            except Exception as e:
-                running_Sequence.append(e)
+                Already_exist += 1
+                continue
+            else:
+                response = requests.get(i, headers=headers)
+                data = BeautifulSoup(response.content, 'lxml')
+
+                try:
+                    title = data.find('meta',attrs = {'property':'og:title'}).get('content')
+                    title = title.replace('- Bravida','')
+                    print(title)
+                except:
+                    title = ""
+                    print(title)
+                
+                announcement_type = "News"
+                language = "en-us"
+
+                try:
+                    image = data.find('meta', attrs = {"property":"og:image"}).get("content")
+                    print(image)
+                except:
+                    image = ""
+                    print(image)
+
+                try:
+                    sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+                except:
+                    sub_category = ""
+                
+                try:
+                    analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+                except:
+                    analysis = ""
+                try:
+                    date = data.find('tim', {"class":"mr-7 text-capitalize"}).get_text(strip=True)
+                    print(date)
+                    news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                    print(news_date)
+                except:
+                    news_date = ""
+
+                page_source = "https://www.bravida.se/en/investors/financial-information/press-releases/" 
+                news_weblink = i
+                
+                try:            
+                    html = requests.get(i).text
+                    announcement = fulltext(html)
+                    announcement = announcement.replace('\n','<br>')
+                    # print(announcement)
+                    
+                except:
+                    announcement = ""
+                
+                date = datetime.now()
+                
+                company_news = {}
+                company_news['companyId'] = ''
+                company_news['location']=''
+                company_news['comment']=''
+                company_news['Date']= news_date
+                company_news['Crawled_on']=date
+                company_news['title']=title
+                company_news['Language']= language
+                company_news['announcementType']= announcement_type
+                company_news['Source'] = page_source
+                company_news['News_Weblink'] = news_weblink
+                company_news['photo']= image
+                company_news['videos']= ''
+                company_news['announcement']=announcement
+                company_news['historySubCategory']= sub_category
+                company_news['analysis'] = analysis
+                try:
+                    collection.insert_one(company_news)
+                    total_crwalled_links += 1
+                except Exception as e:
+                    running_Sequence.append(e)
+        except Exception as e:
+            print(e)
     
     if Already_exist >= 1:
 

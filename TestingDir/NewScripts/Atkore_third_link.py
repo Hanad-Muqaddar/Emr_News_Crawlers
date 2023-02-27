@@ -125,7 +125,7 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://investors.atkore.com"
-    Base_url = "https://investors.atkore.com/feed/PressRelease.svc/GetPressReleaseList?apiKey=BF185719B0464B3CB809D23926182246&LanguageId=1&bodyType=0&pressReleaseDateFilter=3&categoryId=1cb807d2-208f-4bc3-9133-6a9ad45ac3b0&pageSize=-1&pageNumber=0&tagList=&includeTags=true&year=2022&excludeSelection=1"
+    Base_url = "https://investors.atkore.com/feed/PressRelease.svc/GetPressReleaseList?apiKey=BF185719B0464B3CB809D23926182246&LanguageId=1&bodyType=0&pressReleaseDateFilter=3&categoryId=1cb807d2-208f-4bc3-9133-6a9ad45ac3b0&pageSize=-1&pageNumber=0&tagList=&includeTags=true&year=2023&excludeSelection=1"
     result = requests.get(Base_url,headers=headers)
 
     news_links = []
@@ -144,12 +144,15 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-
+    
+    print(len(news_links))
+    print(news_links)
 
     for i in news_links:
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            # print("Already Crawled")
             continue
 
         else:        

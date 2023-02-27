@@ -211,69 +211,82 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
+
+    All_title_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        All_title_list.append(x['title'])
+
     for i in links:
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1
+            print('Already Crawled')
             continue
         else:
             result1 = requests.get(i, headers=headers)
             response1 = Selector(result1)
-            try:
-                news_date = parse_news_date(response1)
-            except:
-                news_date = ""
-            try:
-                title = response1.css("title ::text").get()
-            except:
-                title = ""
-            try:
-                analysis = response1.xpath('//meta[@name="description"]/@content').get()
-            except:
-                analysis = ""
-            try:
-                image = response1.css(".cmp-container--full-width picture img::attr(href)").get()
-            except:
-                image = ""
-            sub_category = ""
-            try:
-                announcement , emr_essentail, emr_lite, emr_executive, emr_html = parse_announcement(response1)
-            except:
-                announcement = ""
-                emr_essentail = ""
-                emr_lite = ""
-                emr_executive = ""
-                emr_html = ""
-            announcement_type = "Press Release"
-            language = "en-US"
-            page_source = "https://www.hitachienergy.com/media"
-            crawled_date = datetime.datetime.now()
 
-            company_news = {}
-            company_news['companyId'] = ''
-            company_news['location']=''
-            company_news['comment']=''
-            company_news['Date']= news_date
-            company_news['Crawled_on']=crawled_date
-            company_news['title']=title
-            company_news['Language']= language
-            company_news['announcementType']= announcement_type
-            company_news['Source'] = page_source
-            company_news['News_Weblink'] = i
-            company_news['photo']= image
-            company_news['videos']= ''
-            company_news['announcement']=announcement
-            company_news['historySubCategory']= sub_category
-            company_news['analysis'] = analysis
-            company_news['emrExecutive'] = emr_executive
-            company_news['emrEssential'] = emr_essentail
-            company_news['emrLite'] = emr_lite
-            company_news['News_Html'] = emr_html
-            try:
-                collection.insert_one(company_news)
+            title = response1.css("title ::text").get()
+            if title in All_title_list:
+                Already_exist += 1
                 total_crwalled_links += 1
-            except Exception as e:
-                running_Sequence.append(e)
+                print('Title Already Exist')
+                continue
+            
+            else:
+                try:
+                    news_date = parse_news_date(response1)
+                except:
+                    news_date = ""
+                
+                try:
+                    analysis = response1.xpath('//meta[@name="description"]/@content').get()
+                except:
+                    analysis = ""
+                try:
+                    image = response1.css(".cmp-container--full-width picture img::attr(href)").get()
+                except:
+                    image = ""
+                sub_category = ""
+                try:
+                    announcement , emr_essentail, emr_lite, emr_executive, emr_html = parse_announcement(response1)
+                except:
+                    announcement = ""
+                    emr_essentail = ""
+                    emr_lite = ""
+                    emr_executive = ""
+                    emr_html = ""
+                announcement_type = "Press Release"
+                language = "en-US"
+                page_source = "https://www.hitachienergy.com/media"
+                crawled_date = datetime.datetime.now()
+
+                company_news = {}
+                company_news['companyId'] = ''
+                company_news['location']=''
+                company_news['comment']=''
+                company_news['Date']= news_date
+                company_news['Crawled_on']=crawled_date
+                company_news['title']=title
+                company_news['Language']= language
+                company_news['announcementType']= announcement_type
+                company_news['Source'] = page_source
+                company_news['News_Weblink'] = i
+                company_news['photo']= image
+                company_news['videos']= ''
+                company_news['announcement']=announcement
+                company_news['historySubCategory']= sub_category
+                company_news['analysis'] = analysis
+                company_news['emrExecutive'] = emr_executive
+                company_news['emrEssential'] = emr_essentail
+                company_news['emrLite'] = emr_lite
+                company_news['News_Html'] = emr_html
+                try:
+                    collection.insert_one(company_news)
+                    total_crwalled_links += 1
+                except Exception as e:
+                    running_Sequence.append(e)
     
     if Already_exist >= 1:
 

@@ -142,7 +142,7 @@ try:
             response1 = Selector(result1)
             try:
                 news_date =  i['lastmod']
-                news_date = dateparser.parse(news_date,  settings={'DATE_ORDER': 'DMY'})
+                news_date = dateparser.parse(news_date,  settings={'DATE_ORDER': 'YMD'})
             except:
                 news_date = ""
             try:

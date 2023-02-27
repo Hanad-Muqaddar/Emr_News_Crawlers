@@ -160,14 +160,14 @@ try:
         news_link = Main_url + link.find('div',{ "class" : "views-field views-field-title"}).find('a').get('href')
         if news_link not in news_links:
             news_links.append(news_link)
-    # print(news_links)
+    print(news_links)
     for i in news_links:
         response = requests.get(i, headers=headers)
         data = BeautifulSoup(response.content, 'lxml')
         res = Selector(response)
         try:
             title = data.find('meta',attrs = {'name':'og:title'}).get('content')
-            # print(title)
+            print(title)
         except:
             title = ""
         

@@ -152,41 +152,47 @@ try:
 
     # print(news_Titles)
     # print(news_dates)
-    # print(len(news_Titles))
-    # print(len(news_dates))
+    # print(pdf_set)
 
-    for i , N_Date, p in zip(news_Titles,news_dates,pdf_set):     
-       
-        title = i 
-        # print(title)      
-        announcement_type = "News"
-        language = "en-us"        
-        image = ""        
-        sub_category = ""        
-        analysis = ""
-        try:
-            # print(N_Date)
-            news_date = dateparser.parse(N_Date,  settings={'DATE_ORDER': 'YMD'} )
-            # print(news_date)
-        except:
-            news_date = ""
+    print(len(news_Titles))
+    print(len(news_dates))
+    print(len(pdf_set))
 
-        page_source = "https://imelco.com/publications/press-releases" 
-        news_weblink = p      
-        announcement = ""
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
+
+    for i , N_Date, p in zip(news_Titles,news_dates,pdf_set):
         
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if p in links_list:
             total_crwalled_links += 1
             Already_exist += 1
-            continue
-        else:
+            print("Already Crawled")
+            continue    
+        else: 
+       
+            title = i 
+            print(title)      
+            announcement_type = "News"
+            language = "en-us"        
+            image = ""        
+            sub_category = ""        
+            analysis = ""
+            try:
+                # print(N_Date)
+                news_date = dateparser.parse(N_Date,  settings={'DATE_ORDER': 'YMD'} )
+                # print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://imelco.com/publications/press-releases" 
+            news_weblink = p      
+            announcement = ""
+            
+            date = datetime.now()
+            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
