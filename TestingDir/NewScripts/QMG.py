@@ -157,91 +157,107 @@ try:
     print(len(news_links))
     print(len(news_dates))
 
-    for i , N_Date in zip(news_links,news_dates):        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-        try:
-            title = data.find('title').get_text().replace('| qmg.fi','').strip()
-            title = translate(title)
-            print(title)
-        except:
-            title = ""
-            print(title)
-       
-        announcement_type = "News"
-        language = "en-us"
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            image = data.find('figure',{"class":"featured-thumbnail thumbnail large"}).find('img').get('data-src')
-            print(image)
-        except:
-            image = ""
-            print(image)
+    All_title_list = []
+    for x in mydoc:
+        All_title_list.append(x['title'])
 
-         
-        try:
-            sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
-            sub_category = translate(sub_category)
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-            analysis = translate(analysis)
-        except:
-            analysis = ""
-        try:
-            date = translate(N_Date)
-            print(date)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
-        except:
-            news_date = ""
+    for i , N_Date in zip(news_links,news_dates): 
 
-        page_source = "https://quattromikentigroup.fi/"
-        news_weblink = i
-        
-        try:
-            announcement = data.find("article").find('div',{"class":"post_content"}).get_text()
-            announcement = translate(announcement)
-            print(announcement)
-            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
-            company_news = {}
-            company_news['companyId'] = ''
-            company_news['location']=''
-            company_news['comment']=''
-            company_news['Date']= news_date
-            company_news['Crawled_on']=date
-            company_news['title']=title
-            company_news['Language']= language
-            company_news['announcementType']= announcement_type
-            company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
-            company_news['photo']= image
-            company_news['videos']= ''
-            company_news['announcement']=announcement
-            company_news['historySubCategory']= sub_category
-            company_news['analysis'] = analysis
+        else:       
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
             try:
-                collection.insert_one(company_news)
+                title = data.find('title').get_text().replace('| qmg.fi','').strip()
+                title = translate(title)
+                print(title)
+            except:
+                title = data.find('title').text
+                title = translate(title)
+                print(title)
+
+            if title in All_title_list:
+                Already_exist += 1
                 total_crwalled_links += 1
-            except Exception as e:
-                running_Sequence.append(e)
+                print('Title Already Exist')
+                continue
+            
+            else:
+            
+                announcement_type = "News"
+                language = "en-us"
+
+                try:
+                    image = data.find('figure',{"class":"featured-thumbnail thumbnail large"}).find('img').get('data-src')
+                    print(image)
+                except:
+                    image = ""
+                    print(image)
+
+                
+                try:
+                    sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
+                    sub_category = translate(sub_category)
+                except:
+                    sub_category = ""
+                
+                try:
+                    analysis = data.find('meta', attrs = {"name":"description"}).get("content")
+                    analysis = translate(analysis)
+                except:
+                    analysis = ""
+                try:
+                    date = translate(N_Date)
+                    print(date)
+                    news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                    print(news_date)
+                except:
+                    news_date = ""
+
+                page_source = "https://quattromikentigroup.fi/"
+                news_weblink = i
+                
+                try:
+                    announcement = data.find("article").find('div',{"class":"post_content"}).get_text()
+                    announcement = translate(announcement)
+                    print(announcement)
+                    
+                except:
+                    announcement = ""
+                
+                date = datetime.now()
+                # Creating a list of links already avilable in database
+            
+                company_news = {}
+                company_news['companyId'] = ''
+                company_news['location']=''
+                company_news['comment']=''
+                company_news['Date']= news_date
+                company_news['Crawled_on']=date
+                company_news['title']=title
+                company_news['Language']= language
+                company_news['announcementType']= announcement_type
+                company_news['Source'] = page_source
+                company_news['News_Weblink'] = news_weblink
+                company_news['photo']= image
+                company_news['videos']= ''
+                company_news['announcement']=announcement
+                company_news['historySubCategory']= sub_category
+                company_news['analysis'] = analysis
+                try:
+                    collection.insert_one(company_news)
+                    total_crwalled_links += 1
+                except Exception as e:
+                    running_Sequence.append(e)
     
     if Already_exist >= 1:
 

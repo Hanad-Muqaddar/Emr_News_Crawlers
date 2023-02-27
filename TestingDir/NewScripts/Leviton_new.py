@@ -162,6 +162,12 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
     print(news_links)
+
+    All_title_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        All_title_list.append(x['title'])
+
     for i,d in zip(news_links, news_dates):
         
         if i in db_list:
@@ -181,74 +187,82 @@ try:
                 title = data.find('title').text
                 # print(title)
             
-            announcement_type = "Press Release"
-            language = "en-us"
-            image = "" 
-
-            try:
-                sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
-            except:
-                sub_category = ""
-            
-            try:
-                analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-            except:
-                analysis = ""
-            try:
-                news_date = dateparser.parse(d )
-                # print(news_date)
-            except:
-                news_date = ""
-
-            page_source = "https://www.leviton.com/en/company/news-events/press-releases"
-            news_weblink = i
-            
-            try:
-                announcement = response1.xpath("//div[@class='ss-rg wrapper text__wrapper align-left__wrapper']").get()
-                replace1 = response1.xpath("//div[@class='ss-rg wrapper text__wrapper align-left__wrapper']//div[@class='title--a']").get()
-                announcement = announcement.replace(replace1, "")
-                announcement = announcement.replace('\n','<br>')
-                return_data = parse_filtered_news(announcement)
-                announcement = return_data['filteredBody']
-                emr_essentail = return_data['emrEssential']
-                emr_executive = return_data['emrExecutive']
-                emr_lite = return_data['emrLite']
-                emr_html = return_data['emrHtmlText']
-            except:
-                announcement = ""
-                emr_essentail = ""
-                emr_executive = ""
-                emr_lite = ""
-                emr_html = ""
-            
-            date = datetime.now()
-            # Creating a list of links already avilable in database
-            
-            company_news = {}
-            company_news['companyId'] = ''
-            company_news['location']=''
-            company_news['comment']=''
-            company_news['Date']= news_date
-            company_news['Crawled_on']=date
-            company_news['title']=title
-            company_news['Language']= language
-            company_news['announcementType']= announcement_type
-            company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
-            company_news['photo']= image
-            company_news['videos']= ''
-            company_news['announcement']=announcement
-            company_news['historySubCategory']= sub_category
-            company_news['analysis'] = analysis
-            company_news['emrExecutive'] = emr_executive
-            company_news['emrEssential'] = emr_essentail
-            company_news['emrLite'] = emr_lite
-            company_news['News_Html'] = emr_html
-            try:
-                collection.insert_one(company_news)
+            if title in All_title_list:
+                Already_exist += 1
                 total_crwalled_links += 1
-            except Exception as e:
-                running_Sequence.append(e)
+                print('Title Already Exist')
+                continue
+            
+            else:
+            
+                announcement_type = "Press Release"
+                language = "en-us"
+                image = "" 
+
+                try:
+                    sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
+                except:
+                    sub_category = ""
+                
+                try:
+                    analysis = data.find('meta', attrs = {"name":"description"}).get("content")
+                except:
+                    analysis = ""
+                try:
+                    news_date = dateparser.parse(d )
+                    # print(news_date)
+                except:
+                    news_date = ""
+
+                page_source = "https://www.leviton.com/en/company/news-events/press-releases"
+                news_weblink = i
+                
+                try:
+                    announcement = response1.xpath("//div[@class='ss-rg wrapper text__wrapper align-left__wrapper']").get()
+                    replace1 = response1.xpath("//div[@class='ss-rg wrapper text__wrapper align-left__wrapper']//div[@class='title--a']").get()
+                    announcement = announcement.replace(replace1, "")
+                    announcement = announcement.replace('\n','<br>')
+                    return_data = parse_filtered_news(announcement)
+                    announcement = return_data['filteredBody']
+                    emr_essentail = return_data['emrEssential']
+                    emr_executive = return_data['emrExecutive']
+                    emr_lite = return_data['emrLite']
+                    emr_html = return_data['emrHtmlText']
+                except:
+                    announcement = ""
+                    emr_essentail = ""
+                    emr_executive = ""
+                    emr_lite = ""
+                    emr_html = ""
+                
+                date = datetime.now()
+                # Creating a list of links already avilable in database
+                
+                company_news = {}
+                company_news['companyId'] = ''
+                company_news['location']=''
+                company_news['comment']=''
+                company_news['Date']= news_date
+                company_news['Crawled_on']=date
+                company_news['title']=title
+                company_news['Language']= language
+                company_news['announcementType']= announcement_type
+                company_news['Source'] = page_source
+                company_news['News_Weblink'] = news_weblink
+                company_news['photo']= image
+                company_news['videos']= ''
+                company_news['announcement']=announcement
+                company_news['historySubCategory']= sub_category
+                company_news['analysis'] = analysis
+                company_news['emrExecutive'] = emr_executive
+                company_news['emrEssential'] = emr_essentail
+                company_news['emrLite'] = emr_lite
+                company_news['News_Html'] = emr_html
+                try:
+                    collection.insert_one(company_news)
+                    total_crwalled_links += 1
+                except Exception as e:
+                    running_Sequence.append(e)
     
     if Already_exist >= 1:
 
