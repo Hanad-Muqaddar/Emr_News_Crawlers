@@ -143,6 +143,9 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
+    All_title_list = []
+    for x in mydoc:
+        All_title_list.append(x['title'])
 
     for i in news_links:
         if i in db_list:
@@ -160,68 +163,76 @@ try:
                 print(title)
             except:
                 title = ""
-            
-            announcement_type = "News"
-            language = "en-us"
 
-            try:
-                image = Main_url + data.find('picture').find('img').get('src')
-                # print(image)
-            except:
-                image = ""
-
-            try:
-                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-            except:
-                sub_category = ""
-            
-            try:
-                analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-            except:
-                analysis = ""
-            try:
-                date = data.find('p', {"class":"date"}).get_text(strip=True)
-                print(date)
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'DMY'})
-                print(news_date)
-            except:
-                news_date = ""
-
-            page_source = "https://www.beckhoff.com/en-en/company/news/"
-            news_weblink = i
-            print(news_weblink)
-            
-            try:
-                announcement = fulltext(response.content)
-                announcement = announcement.replace('\n','<br>')
-                print(announcement)
-            except:
-                announcement = ""
-            
-            date = datetime.now()
-            # Creating a list of links already avilable in database
-            
-            company_news = {}
-            company_news['companyId'] = ''
-            company_news['location']=''
-            company_news['comment']=''
-            company_news['Date']= news_date
-            company_news['Crawled_on']=date
-            company_news['title']=title
-            company_news['Language']= language
-            company_news['announcementType']= announcement_type
-            company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
-            company_news['photo']= image
-            company_news['videos']= ""
-            company_news['announcement']=announcement
-            company_news['historySubCategory']= sub_category
-            company_news['analysis'] = analysis
-            try:
-                collection.insert_one(company_news)
+            if title in All_title_list:
+                Already_exist += 1
                 total_crwalled_links += 1
-            except Exception as e:
-                running_Sequence.append(e)
+                print('Title Already Exist')
+                continue
+            
+            else:
+            
+                announcement_type = "News"
+                language = "en-us"
+
+                try:
+                    image = Main_url + data.find('picture').find('img').get('src')
+                    # print(image)
+                except:
+                    image = ""
+
+                try:
+                    sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+                except:
+                    sub_category = ""
+                
+                try:
+                    analysis = data.find('meta', attrs = {"name":"description"}).get("content")
+                except:
+                    analysis = ""
+                try:
+                    date = data.find('p', {"class":"date"}).get_text(strip=True)
+                    print(date)
+                    news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'DMY'})
+                    print(news_date)
+                except:
+                    news_date = ""
+
+                page_source = "https://www.beckhoff.com/en-en/company/news/"
+                news_weblink = i
+                print(news_weblink)
+                
+                try:
+                    announcement = fulltext(response.content)
+                    announcement = announcement.replace('\n','<br>')
+                    print(announcement)
+                except:
+                    announcement = ""
+                
+                date = datetime.now()
+                # Creating a list of links already avilable in database
+                
+                company_news = {}
+                company_news['companyId'] = ''
+                company_news['location']=''
+                company_news['comment']=''
+                company_news['Date']= news_date
+                company_news['Crawled_on']=date
+                company_news['title']=title
+                company_news['Language']= language
+                company_news['announcementType']= announcement_type
+                company_news['Source'] = page_source
+                company_news['News_Weblink'] = news_weblink
+                company_news['photo']= image
+                company_news['videos']= ""
+                company_news['announcement']=announcement
+                company_news['historySubCategory']= sub_category
+                company_news['analysis'] = analysis
+                try:
+                    collection.insert_one(company_news)
+                    total_crwalled_links += 1
+                except Exception as e:
+                    running_Sequence.append(e)
     
     if Already_exist >= 1:
 

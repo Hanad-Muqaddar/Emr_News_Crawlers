@@ -172,19 +172,21 @@ try:
             data = BeautifulSoup(response.content, 'lxml')
             response1 = Selector(response)
             try:
-                title = data.find('h1',attrs = {'class':'info-detail__title'}).find('span',attrs = {'class':'active'}).get_text(strip=True)
+                title = data.find('h1',attrs = {'class':'info-detail__title'}).get_text(strip=True)
                 # print(title)
             except:
                 try:
-                    title = data.find('h1',attrs = {'class':'info-detail__title'}).get_text(strip=True)
+                    title = data.find('title').get_text(strip=True)
                 except:
                     title = ""
                 # print(title)
             announcement_type = "News"
-
             language = "en-us"
 
-            image = ""
+            try:
+                image = data.find('meta', attrs = {"property":"og:image"}).get("content")
+            except:
+                image = ""
             
             try:
                 sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
@@ -194,13 +196,20 @@ try:
                 analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
             except:
                 analysis = ""
-            
+
             try:
-                date = data.find('p',{"class":"info-detail__left-date"}).get_text(strip=True)
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-                # print(news_date)
+                N_date = data.find('p',{"class":"info-detail__left-date"}).get_text(strip=True)
+                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
             except:
-                news_date = ""
+                try:
+                    N_date = data.find('div',{"class":"text-body"}).find('p').get_text(strip=True)
+                    f_date = N_date.split('--')[1].strip()
+                    news_date = dateparser.parse(f_date,  settings={'DATE_ORDER': 'YMD'} )
+                    print(news_date)
+                except:
+                    news_date = ""
+                    print(news_date)
 
             page_source = "https://ams-osram.com/news"
             

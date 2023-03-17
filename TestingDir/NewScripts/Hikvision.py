@@ -145,9 +145,15 @@ else:
 # *****************************************************************************
 
 try:
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     response = requests.get("https://www.hikvision.com/content/hikvision/en/newsroom/latest-news/jcr:content/root/responsivegrid/article_listing.news.json")
     data = json.loads(response.text)
     res = data['content']['data']['dataArray']
+
     for i in range(len(res)):
         try:
             news_weblink = "https://www.hikvision.com" + res[i]['targetPath']
@@ -156,10 +162,6 @@ try:
         if news_weblink == "":
             continue
             
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1

@@ -139,60 +139,64 @@ try:
 
     print(news_links)
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('title').text
-            title = title.replace('– RZB Lighting','')
-            # print(title)
-        except:
-            title = ""
-        
-        announcement_type = "News"
-        language = "en-us"
+    for i in news_links:  
 
-        try:
-            image = Main_url + data.find('figure', {"class":"news-images"}).find('img', {"class":"img-responsive"}).get("src")
-            # print(image)
-        except:
-            image = ""
-        
-        sub_category = ""
-        
-        analysis = ""
-        try:
-            n_date = data.find('article', {"class":"news news-single"}).find('time').get_text()
-            news_date = dateparser.parse(n_date,  settings={'DATE_ORDER': 'YMD'} )
-            # print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://www.rzb.de/en/media-centre/news"
-        news_weblink = i
-        
-        try:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            # print(announcement)
-            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
+
+        else:      
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('title').text
+                title = title.replace('– RZB Lighting','')
+                print(title)
+            except:
+                title = ""
+            
+            announcement_type = "News"
+            language = "en-us"
+
+            try:
+                image = Main_url + data.find('figure', {"class":"news-images"}).find('img', {"class":"img-responsive"}).get("src")
+                # print(image)
+            except:
+                image = ""
+            
+            sub_category = ""
+            
+            analysis = ""
+            try:
+                n_date = data.find('article', {"class":"news news-single"}).find('time').get_text()
+                news_date = dateparser.parse(n_date,  settings={'DATE_ORDER': 'YMD'} )
+                # print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://www.rzb.de/en/media-centre/news"
+            news_weblink = i
+            
+            try:
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')
+                # print(announcement)
+                
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -209,8 +213,9 @@ try:
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
+
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

@@ -137,16 +137,12 @@ try:
     titles = response.xpath('//td[@data-label="Title"]/a/text()').getall()
 
     db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
     for i , j ,k , title in zip(final_links, dates, announcement_type, titles):
         
-
-        mydoc = collection.find()
-        print(mydoc)
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
-       
         if i in db_list:
-            
             Already_exist += 1
             total_crwalled_links += 1
             print("Already Crawled")

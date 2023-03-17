@@ -135,11 +135,11 @@ try:
     result = requests.get(link)
     page_source = "https://investors.wesco.com/news-events/news/default.aspx"
     data = result.json()['GetPressReleaseListResult']
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
     for i in data:
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
         news_weblink = "https://investors.wesco.com" + i['LinkToDetailPage']
         if news_weblink in db_list:
             total_crwalled_links += 1
@@ -198,7 +198,7 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                collection.insert_one(company_news)
+                # collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
