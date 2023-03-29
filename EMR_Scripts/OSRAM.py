@@ -91,8 +91,9 @@ try:
     # print(len(newsData))
     for j in newsData:
         print(j['link'])
+        lowerTitle = j['title'].lower()
         l = False
-        for k in collection.find({'News_Weblink': j['link'] }):
+        for k in collection.find({'News_Weblink': j['link'] , 'title' : lowerTitle}):
             if k:
                 l = True
                 break

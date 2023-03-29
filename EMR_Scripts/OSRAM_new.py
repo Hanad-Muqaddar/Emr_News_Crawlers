@@ -90,8 +90,10 @@ try:
     resp = requests.request("POST", url, headers=headers, data=payload)
     newsData = resp.json()['results'][0]['hits']
     for j in newsData:
+        lowerTitle = j['dp_headline'].lower()
+
         l = False
-        for k in collection.find({ 'News_Weblink' : j['link'] }):
+        for k in collection.find({ 'News_Weblink' : j['link']  , 'title' : lowerTitle}):
             if k:
                 l = True
                 break

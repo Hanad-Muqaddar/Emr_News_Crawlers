@@ -194,7 +194,8 @@ crawlerToCollectionMapping={
 
 def annoucments_time(client_Coll,crawler_name,datefilter):
     Times_Data  = []
-    result = client_Coll['TEMP_EMR_NEWS_Crawler_DB'][crawler_name].aggregate([
+    collection_name = crawlerToCollectionMapping[crawler_name]
+    result = client_Coll['TEMP_EMR_NEWS_Crawler_DB'][collection_name].aggregate([
     {
         '$match': {
             'Crawled_on': {
@@ -205,7 +206,6 @@ def annoucments_time(client_Coll,crawler_name,datefilter):
 
     for r in result:
         Times_Data.append(r['Crawled_on'])
-
     return Times_Data
 
 def crawler_health_function(crawler_name, path, today_date):
