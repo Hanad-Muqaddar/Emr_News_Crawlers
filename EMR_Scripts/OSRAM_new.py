@@ -50,6 +50,11 @@ else:
 total_crwalled_links = 0
 Already_exist = 0
 
+All_title_list = []
+mydoc = collection.find()
+for x in mydoc:
+    All_title_list.append(x['title'].lower())
+
 def parse_filtered_news(announcement):
     api_url = "https://admin.new.emr-online.com/api/history/filterbody"
     payload = json.dumps({
@@ -90,74 +95,83 @@ try:
     resp = requests.request("POST", url, headers=headers, data=payload)
     newsData = resp.json()['results'][0]['hits']
     for j in newsData:
-        lowerTitle = j['dp_headline'].lower()
-
+        # lowerTitle = j['dp_headline'].lower()
+        
         l = False
-        for k in collection.find({ 'News_Weblink' : j['link']  , 'title' : lowerTitle}):
+        # for k in collection.find({ 'News_Weblink' : j['link']  , 'title' : lowerTitle}):
+        for k in collection.find({ 'News_Weblink' : j['link']}):
             if k:
                 l = True
                 break
         if l:
             total_crwalled_links +=1
             Already_exist +=1
+            print("Already Crawled")
             # print('\n'+news['Link']+'\nNews Already Exist in DB\n')        
         else:
-            news = {}
-            news["companyId"] = ""
-            news["location"] = ""
-            try:
-                resp = requests.get(j['link'])
-                sub_soup = BeautifulSoup(resp.content,'lxml')
-                response1 = Selector(resp)
-                date = date = sub_soup.find('div',class_='page-content').find('div',class_='text-wrapper').find('p',class_=False).text.strip().split('|')[0]
-                news['Date'] = dateparser.parse(date,settings={'DATE_ORDER': 'DMY'})
-            except:
-                news['Date'] = datetime.now()
-            try:
-                announcement = response1.xpath('//div[@class="page-content"]//div[@class="container"]').get()
-                replace1 = response1.css(".font-headline-teaser").get()
-                replace2 = response1.xpath("(//div[@class='text-wrapper']//p)[1]").get()
-                announcement = announcement.replace(replace1, "")
-                announcement = announcement.replace(replace2, "")
-                return_data = parse_filtered_news(announcement)
-                announcement = return_data['filteredBody']
-                emr_essentail = return_data['emrEssential']
-                emr_executive = return_data['emrExecutive']
-                emr_lite = return_data['emrLite']
-                emr_html = return_data['emrHtmlText']
-            except:
-                announcement = ""
-                emr_essentail = ""
-                emr_executive = ""
-                emr_lite = ""
-                emr_html = ""
+            if j['dp_headline'] in All_title_list:
+                Already_exist += 1
+                total_crwalled_links += 1
+                print('Title Already Exist')
+                continue
             
-            news['title'] = j['dp_headline']
-            news['announcementType'] = j['dp_category']
-            news['announcement'] = announcement
-            news['photo'] = j['src1_picture_stored_only']
-            news['Language'] =  'English'
-            news['Crawled_on'] = datetime.now()
-            news['Source'] = "https://www.osram.com/cb/news/index.jsp"
-            news['News_Weblink'] = j['link']
-            news['historySubCategory'] = j['dp_subheadline']
-            news['emrExecutive'] = emr_executive
-            news['emrEssential'] = emr_essentail
-            news['emrLite'] = emr_lite
-            news['News_Html'] = emr_html
-            validation_obj = {}
-            validation_obj['companyId'] = news["companyId"]
-            validation_obj['Date'] = news['Date']
-            validation_obj['title'] = news['title']
-            validation_obj['announcement'] = news['announcement']
-            validation_obj['photo'] = news['photo']
-            validation_obj['analysis'] = j['dp_text']
-            validation_obj['refrences'] = ''
-            validation_obj['historySubCategory'] = ''
-            news['validatedObject'] = validation_obj
-            
-            total_crwalled_links +=1
-            collection.insert_one(news)
+            else:
+                news = {}
+                news["companyId"] = ""
+                news["location"] = ""
+                try:
+                    resp = requests.get(j['link'])
+                    sub_soup = BeautifulSoup(resp.content,'lxml')
+                    response1 = Selector(resp)
+                    date = date = sub_soup.find('div',class_='page-content').find('div',class_='text-wrapper').find('p',class_=False).text.strip().split('|')[0]
+                    news['Date'] = dateparser.parse(date,settings={'DATE_ORDER': 'DMY'})
+                except:
+                    news['Date'] = datetime.now()
+                try:
+                    announcement = response1.xpath('//div[@class="page-content"]//div[@class="container"]').get()
+                    replace1 = response1.css(".font-headline-teaser").get()
+                    replace2 = response1.xpath("(//div[@class='text-wrapper']//p)[1]").get()
+                    announcement = announcement.replace(replace1, "")
+                    announcement = announcement.replace(replace2, "")
+                    return_data = parse_filtered_news(announcement)
+                    announcement = return_data['filteredBody']
+                    emr_essentail = return_data['emrEssential']
+                    emr_executive = return_data['emrExecutive']
+                    emr_lite = return_data['emrLite']
+                    emr_html = return_data['emrHtmlText']
+                except:
+                    announcement = ""
+                    emr_essentail = ""
+                    emr_executive = ""
+                    emr_lite = ""
+                    emr_html = ""
+                
+                news['title'] = j['dp_headline']
+                news['announcementType'] = j['dp_category']
+                news['announcement'] = announcement
+                news['photo'] = j['src1_picture_stored_only']
+                news['Language'] =  'English'
+                news['Crawled_on'] = datetime.now()
+                news['Source'] = "https://www.osram.com/cb/news/index.jsp"
+                news['News_Weblink'] = j['link']
+                news['historySubCategory'] = j['dp_subheadline']
+                news['emrExecutive'] = emr_executive
+                news['emrEssential'] = emr_essentail
+                news['emrLite'] = emr_lite
+                news['News_Html'] = emr_html
+                validation_obj = {}
+                validation_obj['companyId'] = news["companyId"]
+                validation_obj['Date'] = news['Date']
+                validation_obj['title'] = news['title']
+                validation_obj['announcement'] = news['announcement']
+                validation_obj['photo'] = news['photo']
+                validation_obj['analysis'] = j['dp_text']
+                validation_obj['refrences'] = ''
+                validation_obj['historySubCategory'] = ''
+                news['validatedObject'] = validation_obj
+                
+                total_crwalled_links +=1
+                collection.insert_one(news)
 
     ################ Press Release #####################################
     # for i in range(211):

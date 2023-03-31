@@ -126,8 +126,8 @@ else:
 # *****************************************************************************
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    Main_url = "https://saranskkabel.ru/"
-    Base_url = "https://saranskkabel.ru/press-czentr/novosti/"
+    Main_url = "https://saranskkabel.ru"
+    Base_url = "https://saranskkabel.ru/news"
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
 
@@ -137,26 +137,15 @@ try:
         return Trans_text.text
     
     news_links = []
-    news_dates = [] 
 
-    links = soup.find("div",{ "style":"margin-left: 30px"}).find_all("div",{ "style":"clear:both; display: table; width:100%;"})
+    links = soup.find_all("a",{ "class":"news-list__item-link"})
     for link in links:
-        news_link = Main_url + link.find("div",{ "class" : "thumb"}).find('a').get('href')
-        if news_link not in news_links:
-            news_links.append(news_link)
-            try:
-                news_date = link.find('h6').get_text(strip=True)
-                news_dates.append(news_date)
-            except:
-                news_date = ""
-                news_dates.append(news_date)
+        news_link = Main_url + link.get('href')
+        news_links.append(news_link)
 
     print(news_links)
-    print(news_dates)
-    print(len(news_links))
-    print(len(news_dates))
 
-    for i , N_Date in zip(news_links,news_dates):        
+    for i  in news_links:        
         response = requests.get(i, headers=headers)
         data = BeautifulSoup(response.content, 'lxml')
         try:
@@ -167,7 +156,7 @@ try:
             title = ""
             print(title)
        
-        announcement_type = "Press"
+        announcement_type = "News"
         language = "en-us"
 
         try:
@@ -187,16 +176,17 @@ try:
         except:
             analysis = ""
         try:
+            N_Date = data.find('div',{"class":"top-meta__date font_13 color_333"}).get_text(strip = True)
             news_date = dateparser.parse(N_Date,  settings={'DATE_ORDER': 'YMD'} )
             print(news_date)
         except:
             news_date = ""
 
-        page_source = "https://saranskkabel.ru/press-czentr/novosti/"
+        page_source = "https://saranskkabel.ru/news"
         news_weblink = i
         
         try:
-            announcement = data.find("div",{"class":"row"}).find('div',{"style":"margin-left: 30px"}).get_text()
+            announcement = data.find('div',{"itemprop":"description"}).get_text()
             announcement = translate(announcement)
             print(announcement)
             

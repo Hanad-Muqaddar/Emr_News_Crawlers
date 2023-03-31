@@ -161,11 +161,18 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
+    All_title_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        All_title_list.append(x['title'])
+
+
     for i in news_links:
-        
+        time.sleep(5)
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
             response = requests.get(i, headers=headers)
@@ -180,82 +187,90 @@ try:
                 except:
                     title = ""
                 # print(title)
-            announcement_type = "News"
-            language = "en-us"
 
-            try:
-                image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-            except:
-                image = ""
+            if title in All_title_list:
+                Already_exist += 1
+                total_crwalled_links += 1
+                print('Title Already Exist')
+                continue
             
-            try:
-                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-            except:
-                sub_category = ""
-            try:
-                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-            except:
-                analysis = ""
+            else:
+                announcement_type = "News"
+                language = "en-us"
 
-            try:
-                N_date = data.find('p',{"class":"info-detail__left-date"}).get_text(strip=True)
-                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'YMD'} )
-                print(news_date)
-            except:
                 try:
-                    N_date = data.find('div',{"class":"text-body"}).find('p').get_text(strip=True)
-                    f_date = N_date.split('--')[1].strip()
-                    news_date = dateparser.parse(f_date,  settings={'DATE_ORDER': 'YMD'} )
+                    image = data.find('meta', attrs = {"property":"og:image"}).get("content")
+                except:
+                    image = ""
+                
+                try:
+                    sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+                except:
+                    sub_category = ""
+                try:
+                    analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+                except:
+                    analysis = ""
+
+                try:
+                    N_date = data.find('p',{"class":"info-detail__left-date"}).get_text(strip=True)
+                    news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'YMD'} )
                     print(news_date)
                 except:
-                    news_date = ""
-                    print(news_date)
+                    try:
+                        N_date = data.find('div',{"class":"text-body"}).find('p').get_text(strip=True)
+                        f_date = N_date.split('--')[1].strip()
+                        news_date = dateparser.parse(f_date,  settings={'DATE_ORDER': 'YMD'} )
+                        print(news_date)
+                    except:
+                        news_date = ""
+                        print(news_date)
 
-            page_source = "https://ams-osram.com/news"
-            
-            try:
-                announcement = response1.css("#mainContent").get()
-                announcement = announcement.replace('\n','<br>')
-                return_data = parse_filtered_news(announcement)
-                announcement = return_data['filteredBody']
-                emr_essentail = return_data['emrEssential']
-                emr_executive = return_data['emrExecutive']
-                emr_lite = return_data['emrLite']
-                emr_html = return_data['emrHtmlText']
-            except:
-                announcement = ""
-                emr_essentail = ""
-                emr_executive = ""
-                emr_lite = ""
-                emr_html = ""
-            
-            date = datetime.now()
-            # Creating a list of links already avilable in database
-            company_news = {}
-            company_news['companyId'] = ''
-            company_news['location']=''
-            company_news['comment']=''
-            company_news['Date']= news_date
-            company_news['Crawled_on']=date
-            company_news['title']=title
-            company_news['Language']= language
-            company_news['announcementType']= announcement_type
-            company_news['Source'] = page_source
-            company_news['News_Weblink'] = i
-            company_news['photo']= image
-            company_news['videos']= ''
-            company_news['announcement']=announcement
-            company_news['historySubCategory']= sub_category
-            company_news['analysis'] = analysis
-            company_news['emrExecutive'] = emr_executive
-            company_news['emrEssential'] = emr_essentail
-            company_news['emrLite'] = emr_lite
-            company_news['News_Html'] = emr_html
-            try:
-                collection.insert_one(company_news)
-                total_crwalled_links += 1
-            except Exception as e:
-                running_Sequence.append(e)
+                page_source = "https://ams-osram.com/news"
+                
+                try:
+                    announcement = response1.css("#mainContent").get()
+                    announcement = announcement.replace('\n','<br>')
+                    return_data = parse_filtered_news(announcement)
+                    announcement = return_data['filteredBody']
+                    emr_essentail = return_data['emrEssential']
+                    emr_executive = return_data['emrExecutive']
+                    emr_lite = return_data['emrLite']
+                    emr_html = return_data['emrHtmlText']
+                except:
+                    announcement = ""
+                    emr_essentail = ""
+                    emr_executive = ""
+                    emr_lite = ""
+                    emr_html = ""
+                
+                date = datetime.now()
+                # Creating a list of links already avilable in database
+                company_news = {}
+                company_news['companyId'] = ''
+                company_news['location']=''
+                company_news['comment']=''
+                company_news['Date']= news_date
+                company_news['Crawled_on']=date
+                company_news['title']=title
+                company_news['Language']= language
+                company_news['announcementType']= announcement_type
+                company_news['Source'] = page_source
+                company_news['News_Weblink'] = i
+                company_news['photo']= image
+                company_news['videos']= ''
+                company_news['announcement']=announcement
+                company_news['historySubCategory']= sub_category
+                company_news['analysis'] = analysis
+                company_news['emrExecutive'] = emr_executive
+                company_news['emrEssential'] = emr_essentail
+                company_news['emrLite'] = emr_lite
+                company_news['News_Html'] = emr_html
+                try:
+                    collection.insert_one(company_news)
+                    total_crwalled_links += 1
+                except Exception as e:
+                    running_Sequence.append(e)  
     
     if Already_exist >= 1:
 

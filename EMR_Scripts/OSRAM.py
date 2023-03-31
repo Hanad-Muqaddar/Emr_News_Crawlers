@@ -61,6 +61,13 @@ else:
     Crwl_time = last_insertion['Date']
 total_crwalled_links = 0
 Already_exist = 0
+
+All_title_list = []
+mydoc = collection.find()
+for x in mydoc:
+    All_title_list.append(x['title'])
+
+
 try:
     ################ NEWS Release #####################################
     url = "https://9ps0m7duie-2.algolianet.com/1/indexes/*/queries?x-algolia-agent=Algolia%20for%20JavaScript%20(3.35.1)%3B%20Browser%20(lite)%3B%20react%20(16.12.0)%3B%20react-instantsearch%20(5.7.0)%3B%20JS%20Helper%20(2.28.0)&x-algolia-application-id=9PS0M7DUIE&x-algolia-api-key=321a182fe8706b78ee3234b41c7b58f7"
@@ -88,84 +95,90 @@ try:
     newsData = resp.json()['results'][0]['hits']
     # print(newsData)
     # print(type(newsData))
-    # print(len(newsData))
+    print(len(newsData))
     for j in newsData:
-        print(j['link'])
-        lowerTitle = j['title'].lower()
         l = False
-        for k in collection.find({'News_Weblink': j['link'] , 'title' : lowerTitle}):
+        for k in collection.find({'News_Weblink': j['link']}):
             if k:
                 l = True
                 break
         if l:
             total_crwalled_links +=1
             Already_exist +=1
+            print("Already Crawled")
             # print(j['link'])
             # print('\n'+news['Link']+'\nNews Already Exist in DB\n')        
         else:
-            news = {}
-            news["companyId"] = ""
-            news["location"] = ""
-            try:
-                newsdate = j['dp_release_date']
-                newsdate = str(newsdate)
-                news['Date'] = dateparser.parse(newsdate)
-            except Exception as e:
-                news['Date'] = datetime.now()
-            try:
-                news['title'] = j['title']
-            except:
-                news['title'] = ""
-            try:
-                news['announcementType'] = j['dp_applications']
-            except:
-                news['announcementType'] = ""
-            try:
-                news['announcement'] = j['content']
-            except:
-                news['announcement'] = ""
-            try:
-                news['photo'] = j['src1_picture_stored_only']
-            except:
-                news['photo'] = ""
-            try:
-                news['Language'] =  'English'
-            except:
-                news['Language'] = ""
-            try:
-                news['Crawled_on'] = datetime.now()
-            except:
-                news['Crawled_on'] = ""
-            news['Source'] = "https://www.osram.com/cb/news/index.jsp"
-            try:
-                news['News_Weblink'] = j['link']
-            except:
-                news['News_Weblink'] = ""
-            try:
-                news['historySubCategory'] = j['dp_subheadline']
-            except:
-                news['historySubCategory'] = ""
-            
-            try:
-                news['analysis'] = j['dp_summary']
-            except:
-                news['analysis'] = ""
-            validation_obj = {}
-            validation_obj['companyId'] = news["companyId"]
-            validation_obj['Date'] = news['Date']
-            validation_obj['title'] = news['title']
-            validation_obj['announcement'] = news['announcement']
-            validation_obj['photo'] = news['photo']
-            validation_obj['analysis'] = j['dp_summary']
-            validation_obj['refrences'] = ''
-            validation_obj['historySubCategory'] = ''
-            news['validatedObject'] = validation_obj
-            
-            total_crwalled_links +=1
-            collection.insert_one(news)
+            if j['title'] in All_title_list:
+                Already_exist += 1
+                total_crwalled_links += 1
+                print('Title Already Exist')
+                continue
+            else:
+                news = {}
+                news["companyId"] = ""
+                news["location"] = ""
+                try:
+                    newsdate = j['dp_release_date']
+                    newsdate = str(newsdate)
+                    news['Date'] = dateparser.parse(newsdate)
+                except Exception as e:
+                    news['Date'] = datetime.now()
+                try:
+                    news['title'] = j['title']
+                except:
+                    news['title'] = ""
+                try:
+                    news['announcementType'] = j['dp_applications']
+                except:
+                    news['announcementType'] = ""
+                try:
+                    news['announcement'] = j['content']
+                except:
+                    news['announcement'] = ""
+                try:
+                    news['photo'] = j['src1_picture_stored_only']
+                except:
+                    news['photo'] = ""
+                try:
+                    news['Language'] =  'English'
+                except:
+                    news['Language'] = ""
+                try:
+                    news['Crawled_on'] = datetime.now()
+                except:
+                    news['Crawled_on'] = ""
+                news['Source'] = "https://www.osram.com/cb/news/index.jsp"
+                try:
+                    news['News_Weblink'] = j['link']
+                except:
+                    news['News_Weblink'] = ""
+                try:
+                    news['historySubCategory'] = j['dp_subheadline']
+                except:
+                    news['historySubCategory'] = ""
+                
+                try:
+                    news['analysis'] = j['dp_summary']
+                except:
+                    news['analysis'] = ""
+                validation_obj = {}
+                validation_obj['companyId'] = news["companyId"]
+                validation_obj['Date'] = news['Date']
+                validation_obj['title'] = news['title']
+                validation_obj['announcement'] = news['announcement']
+                validation_obj['photo'] = news['photo']
+                validation_obj['analysis'] = j['dp_summary']
+                validation_obj['refrences'] = ''
+                validation_obj['historySubCategory'] = ''
+                news['validatedObject'] = validation_obj
+                
+                total_crwalled_links +=1
+                collection.insert_one(news)
 
     ################ Press Release #####################################
     # 211
+
     for i in range(5):
         url = 'https://www.osram-group.de/en/media/press-releases?page='+str(i)
         cookie = 'www-osram-group-de#lang=en; ASP.NET_SessionId=50yd5verhptjn1obsai3atlz; AWSALB=hGTE64M7vVwh8A8tlATVS11ULcaJMUUblFoT23lBq6xZn0JwNvrtlcbBQSfe7U2gtbHqfX0zLgY8sdvwvUOV+mm9d/a4QBBukMGDX91s/2Vw+/MO0UBrrnNHLACl; AWSALBCORS=hGTE64M7vVwh8A8tlATVS11ULcaJMUUblFoT23lBq6xZn0JwNvrtlcbBQSfe7U2gtbHqfX0zLgY8sdvwvUOV+mm9d/a4QBBukMGDX91s/2Vw+/MO0UBrrnNHLACl; __CookieConsentV200={"consent":{"necessaryCookie":true,"performanceCookies":true},"accepted":true,"euCheck":false}'
