@@ -128,8 +128,12 @@ else:
 try:
     print("Running..............")
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    
+    proxies = {'http': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280',
+            'https': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280'}
+
     url = "https://www.graybar.com/news"
-    result = requests.get(url,headers=headers)
+    result = requests.get(url, proxies=proxies, headers=headers)
     response = Selector(result)
     Base_Link = "https://www.graybar.com"
     links = response.xpath('//td[@data-label="Title"]/a/@href').getall()
