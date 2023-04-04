@@ -126,12 +126,14 @@ else:
 # *****************************************************************************
 
 try:
+    print("Running..............")
     result = requests.get("https://www.graybar.com/news")
     response = Selector(result)
     Base_Link = "https://www.graybar.com"
     links = response.xpath('//td[@data-label="Title"]/a/@href').getall()
     f_links = ['/'+link if link[0] != '/' else link for link in links]
     final_links = [Base_Link+link for link in f_links]
+    print(final_links)
     dates = response.xpath('//td[@data-label="Date"]/text()').getall()
     announcement_type = response.xpath('//td[@data-label="Category"]/text()').getall()
     titles = response.xpath('//td[@data-label="Title"]/a/text()').getall()
