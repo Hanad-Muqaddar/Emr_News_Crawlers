@@ -47,6 +47,8 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
+from newspaper import fulltext 
+
 # ************************************************************************
 # defining variables
 # opts = Options()
@@ -82,11 +84,12 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -150,57 +153,75 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    response = requests.get("https://www.hikvision.com/content/hikvision/en/newsroom/latest-news/jcr:content/root/responsivegrid/article_listing.news.json")
-    data = json.loads(response.text)
-    res = data['content']['data']['dataArray']
+    url = "https://www.hikvision.com/bin/hikvision/newsroomInfo.card.json"
+    params = {"resource": "/content/hikvision/en/newsroom/latest-news/jcr:content/root/responsivegrid/newsroom_card_list"}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    response = requests.get(url, params=params, headers=headers)
+    data = response.json()
 
-    for i in range(len(res)):
-        try:
-            news_weblink = "https://www.hikvision.com" + res[i]['targetPath']
-        except:
-            news_weblink = ""
-        if news_weblink == "":
-            continue
-            
-        if news_weblink in db_list:
+    news_links = [] 
+    for d in data:
+        url = "https://www.hikvision.com" + d['detailPath']
+        news_links.append(url) 
+    print(news_links)
+
+    for l in news_links:
+
+        if l in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
-            try:
-                image = "https://www.hikvision.com" + res[i]['image']
-            except:
-                image = ""
-            try:
-                analysis = res[i]['description']
-            except:
-                analysis = ""
-            try:
-                title = res[i]['title']
+
+            page = requests.get(l,headers=headers)
+            soup = BeautifulSoup(page.content, "html.parser")
+
+            print(l)   
+            
+            try: 
+                title = soup.find('meta',attrs = {'property':'og:title'}).get('content')
+                print(title)
             except:
                 title = ""
-            try:
-                news_date = res[i]['createdDate']
-                news_date = dateparser.parse(news_date)
+                print(title)
+                
+            try:   
+                image = soup.find('meta',attrs = {'property':'og:image'}).get('content')
+                print(image)    
+            except:
+                image = ""
+                
+            try: 
+                N_date = soup.find('div', {"class":"newsroom-socialshare-box-top-left-data"}).get_text(strip=True)
+                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
             except:
                 news_date = ""
-            try:
-                result = requests.get(news_weblink)
-                soup = BeautifulSoup(result.content, 'lxml')
-            except Exception as e:
-                running_Sequence.append(e)
+                
             try:
                 sub_category = soup.find("meta", attrs={"property":"og:type"}).get("content")
+                print(sub_category)
             except:
                 sub_category = ""
+
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+            except:
+                analysis = ""
+
             try:
                 announcement_type = soup.find("meta", attrs={"name":"template"}).get("content")
+                print(announcement_type)
             except:
                 announcement_type = ""
             try:
-                announcement = soup.find("div", class_="root responsivegrid").text.strip()
+                announcement = fulltext(page.text)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
             except:
                 announcement = ""
+
             language = "en"
             page_source = "https://www.hikvision.com/en/newsroom/latest-news/"
             crawled_date = datetime.datetime.now()
@@ -214,7 +235,7 @@ try:
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
+            company_news['News_Weblink'] = l
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement
