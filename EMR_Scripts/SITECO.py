@@ -53,7 +53,7 @@ def News_SinglePageParser(url,running_sequence):
     try: 
         NewsData['announcement'] = soup.find('div', class_ = 'textmedia__text' ).get_text()
     except :
-        NewsData['announcement'] = ''
+        NewsData['announcement'] = datetime.today()
         
     try:
         photo = 'https://www.siteco.com' + soup.find('img', class_ = 'slideshow__slide-image').get('src')
@@ -131,7 +131,7 @@ try:
     key = db_path
     # key='mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin'
     dbName='TEMP_EMR_NEWS_Crawler_DB'
-    c_name='SITECO'
+    c_name ='SITECO'
     url='https://www.siteco.com/en/company/news'
     
     Client=CreateDbConnection(key,running_sequence)
@@ -188,6 +188,7 @@ except Exception as e:
      
     rep = traceback.format_exc()
     pass
+c_name ='SITECO'
 log = {}
 log['Crawler_name'] = c_name+'.py'
 log['Crawler_type'] = c_name

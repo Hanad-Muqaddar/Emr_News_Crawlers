@@ -86,6 +86,7 @@ try:
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)
+
     # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
@@ -157,6 +158,11 @@ headers = {"authority": "px.ads.linkedin.com",
 "sec-fetch-mode": "no-cors",
 "sec-fetch-site": "cross-site",
 "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36"}
+
+db_list = []
+mydoc = collection.find()
+for x in mydoc:
+    db_list.append(x['News_Weblink'])
 try:
     for i in range(17):
         main_url = "https://www.opple.com/en/news?page={}".format(i)
@@ -168,13 +174,11 @@ try:
             break
         for j in links:
             news_weblink = "https://www.opple.com" + j.find("a").get('href')
-            db_list = []
-            mydoc = collection.find()
-            for x in mydoc:
-                db_list.append(x['News_Weblink'])
+            
             if news_weblink in db_list:
                 total_crwalled_links += 1
                 Already_exist += 1
+                print("Already Crawled")
                 continue
             else:
                 response = requests.get(news_weblink, headers=headers)

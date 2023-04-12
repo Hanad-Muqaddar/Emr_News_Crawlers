@@ -132,11 +132,12 @@ try:
     response = Selector(result)
     links = response.css(".text-video__buttons a::attr(href)").getall()
     final_links = [link for link in links if link != '']
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
     for link in final_links:
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+        
         if link in db_list:
             total_crwalled_links += 1
             Already_exist += 1

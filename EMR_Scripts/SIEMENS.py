@@ -161,219 +161,223 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
     print(news_links)
+
+     # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
+
     for i in news_links:
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-        res = Selector(response)
-        try:
-            title = data.find('meta',attrs = {'name':'og:title'}).get('content')
-            print(title)
-        except:
-            title = ""
-        
-        announcement_type = "Press Release"
-        language = "en-us"
-
-        try:
-            image = data.find('meta',attrs = {'name':'og:image'}).get('content')
-            # print(image)
-        except:
-            image = ""
-
-        try:
-            sub_category = data.find('meta', attrs = {"name":"og:type"}).get("content")
-            # print(sub_category)
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"name":"og:description"}).get("content")
-            # print(analysis)
-        except:
-            analysis = ""
-        try:            
-            date = data.find('span', {"class":"Date"}).get("data-original")
-            # print(date)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'MDY'} )
-            # print(news_date)            
-        except:
-            news_date = ""
-
-        page_source = "https://press.siemens.com/global/en/press-search"
-        news_weblink = i
-        
-        try:
-            annc = res.css(".c2-ct-press-release").get()
-            replace1 = res.css(".nts-notifications").get()
-            replace2 = res.xpath("//section[@class='MetaData Press Release container']").get()
-            replace3 = res.xpath("//h1").get()
-            replace4 = res.css(".mobile-summary").get()
-            replace5 = res.css(".mobile-Introtext").get()
-            replace6 = res.css(".MetaData").get()
-            replace7 = res.css(".nts-primary-teaser-slide-box-container").get()
-            replace8 = res.css(".addeventatc").get()
-            replace9 = res.css(".content .hidden-sm").get()
-            replace10 = res.css(".fsi-row-sm-level h1").get()
-            replace11 = res.xpath("//div[@class='col col-xs-12 col-sm-12 col-md-6']").get()
-            replace12 = res.css(".hasVideo").getall()
-            replace14 = res.css(".nts-notifications").get()
-            replace15 = res.css(".Contact").get()
-            replace16 = res.css(".slick-list").get()
-            replace17 = res.xpath('//section[contains(@class, "VisibleCols3")]//div[not (contains (@class, "noPic")) and contains(@class, "caption")]').getall()
-            replace18 = res.xpath('//section[contains(@class, "VisibleCols1")]//div[not (contains (@class, "noPic")) and contains(@class, "caption")]').getall()
-            replace30 = res.xpath('//section[contains(@class, "VisibleCols2")]//div[not (contains (@class, "noPic")) and contains(@class, "caption")]').getall()
-            replace19 = res.xpath('//section[@class="container Row"]//div[@class="col-md-12"]').get()
-            replace20 = res.css(".filterResults").get()
-            replace21 = res.css(".footer").get()
-            replace22 = res.css(".RelatedRow").get()
-            replace23 = res.css(".Boilerplate").getall()
-            
-            for video in replace12:
-                try:
-                    annc = annc.replace(video, "")
-                except:
-                    pass
-            for caption in replace17:
-                try:
-                    annc = annc.replace(caption, "")
-                except:
-                    pass
-            for caption1 in replace18:
-                try:
-                    annc = annc.replace(caption1, "")
-                except:
-                    pass
-            for caption2 in replace30:
-                try:
-                    annc = annc.replace(caption2, "")
-                except:
-                    pass
-            for boiler in replace23:
-                try:
-                    annc = annc.replace(boiler, "")
-                except:
-                    pass
-                 
-            try:
-                annc = annc.replace(replace1,"")
-            except:
-                pass
-            try:
-                annc = annc.replace(replace2, "")
-            except:
-                pass
-            try:
-                annc = annc.replace(replace3,"")
-            except:
-                pass
-            try:
-                annc = annc.replace(replace4,"")
-            except:
-                pass
-            try:
-                annc = annc.replace(replace5,"")
-            except:
-                pass
-            try:
-                annc = annc.replace(replace6, "")
-            except:
-                pass
-            try:
-                annc = annc.replace(replace7, "")
-            except:
-                pass
-            try:
-                annc = annc.replace(replace8,"")
-            except:
-                pass
-            try:
-                annc = annc.replace(replace9,"")
-            except:
-                pass
-            try:
-                annc = annc.replace(replace10,"")
-            except:
-                pass
-            try:
-                annc = annc.replace(replace11,"")
-            except:
-                pass
-            try:
-                annc = annc.replace(replace12,"")
-            except:
-                pass
-            try:
-                annc = annc.replace(replace14,"")
-            except:
-                pass
-            try:
-                annc = annc.replace(replace15,"")
-            except:
-                pass
-            try:
-                annc = annc.replace(replace16,"")
-            except:
-                pass
-            # try:
-            #     annc = annc.replace(replace17,"")
-            # except:
-            #     pass
-            try:
-                annc = annc.replace(replace19,"")
-            except:
-                pass
-            try:
-                annc = annc.replace(replace20,"")
-            except:
-                pass
-            try:
-                annc = annc.replace(replace21,"")
-            except:
-                pass
-            try:
-                annc = annc.replace(replace22,"")
-            except:
-                pass
-            try:
-                annc = annc.replace("<!--[isInTeaser: true][maxLength: 130][hasImage: true][shortenList:true]-->", "")
-            except:
-                pass
-            try:
-                annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
-                annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
-                annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
-                annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
-                annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
-                annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
-                annc = annc.replace("<article xmlns:php=\"http://php.net/xsl\"><section data-partialxcmsid=\"\"><span><!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
-            except:
-                pass
-            return_data = parse_filtered_news(annc)
-            annc = return_data['filteredBody']
-            emr_essentail = return_data['emrEssential']
-            emr_executive = return_data['emrExecutive']
-            emr_lite = return_data['emrLite']
-            emr_html = return_data['emrHtmlText']
-        except Exception as e:
-            print(e)
-            annc = ""
-            emr_essentail = ""
-            emr_executive = ""
-            emr_lite = ""
-            emr_html = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
+                
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+            res = Selector(response)
+            try:
+                title = data.find('meta',attrs = {'name':'og:title'}).get('content')
+                print(title)
+            except:
+                title = ""
+            
+            announcement_type = "Press Release"
+            language = "en-us"
+
+            try:
+                image = data.find('meta',attrs = {'name':'og:image'}).get('content')
+                # print(image)
+            except:
+                image = ""
+
+            try:
+                sub_category = data.find('meta', attrs = {"name":"og:type"}).get("content")
+                # print(sub_category)
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"name":"og:description"}).get("content")
+                # print(analysis)
+            except:
+                analysis = ""
+            try:            
+                date = data.find('span', {"class":"Date"}).get("data-original")
+                # print(date)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'MDY'} )
+                # print(news_date)            
+            except:
+                news_date = ""
+
+            page_source = "https://press.siemens.com/global/en/press-search"
+            news_weblink = i
+            
+            try:
+                annc = res.css(".c2-ct-press-release").get()
+                replace1 = res.css(".nts-notifications").get()
+                replace2 = res.xpath("//section[@class='MetaData Press Release container']").get()
+                replace3 = res.xpath("//h1").get()
+                replace4 = res.css(".mobile-summary").get()
+                replace5 = res.css(".mobile-Introtext").get()
+                replace6 = res.css(".MetaData").get()
+                replace7 = res.css(".nts-primary-teaser-slide-box-container").get()
+                replace8 = res.css(".addeventatc").get()
+                replace9 = res.css(".content .hidden-sm").get()
+                replace10 = res.css(".fsi-row-sm-level h1").get()
+                replace11 = res.xpath("//div[@class='col col-xs-12 col-sm-12 col-md-6']").get()
+                replace12 = res.css(".hasVideo").getall()
+                replace14 = res.css(".nts-notifications").get()
+                replace15 = res.css(".Contact").get()
+                replace16 = res.css(".slick-list").get()
+                replace17 = res.xpath('//section[contains(@class, "VisibleCols3")]//div[not (contains (@class, "noPic")) and contains(@class, "caption")]').getall()
+                replace18 = res.xpath('//section[contains(@class, "VisibleCols1")]//div[not (contains (@class, "noPic")) and contains(@class, "caption")]').getall()
+                replace30 = res.xpath('//section[contains(@class, "VisibleCols2")]//div[not (contains (@class, "noPic")) and contains(@class, "caption")]').getall()
+                replace19 = res.xpath('//section[@class="container Row"]//div[@class="col-md-12"]').get()
+                replace20 = res.css(".filterResults").get()
+                replace21 = res.css(".footer").get()
+                replace22 = res.css(".RelatedRow").get()
+                replace23 = res.css(".Boilerplate").getall()
+                
+                for video in replace12:
+                    try:
+                        annc = annc.replace(video, "")
+                    except:
+                        pass
+                for caption in replace17:
+                    try:
+                        annc = annc.replace(caption, "")
+                    except:
+                        pass
+                for caption1 in replace18:
+                    try:
+                        annc = annc.replace(caption1, "")
+                    except:
+                        pass
+                for caption2 in replace30:
+                    try:
+                        annc = annc.replace(caption2, "")
+                    except:
+                        pass
+                for boiler in replace23:
+                    try:
+                        annc = annc.replace(boiler, "")
+                    except:
+                        pass
+                    
+                try:
+                    annc = annc.replace(replace1,"")
+                except:
+                    pass
+                try:
+                    annc = annc.replace(replace2, "")
+                except:
+                    pass
+                try:
+                    annc = annc.replace(replace3,"")
+                except:
+                    pass
+                try:
+                    annc = annc.replace(replace4,"")
+                except:
+                    pass
+                try:
+                    annc = annc.replace(replace5,"")
+                except:
+                    pass
+                try:
+                    annc = annc.replace(replace6, "")
+                except:
+                    pass
+                try:
+                    annc = annc.replace(replace7, "")
+                except:
+                    pass
+                try:
+                    annc = annc.replace(replace8,"")
+                except:
+                    pass
+                try:
+                    annc = annc.replace(replace9,"")
+                except:
+                    pass
+                try:
+                    annc = annc.replace(replace10,"")
+                except:
+                    pass
+                try:
+                    annc = annc.replace(replace11,"")
+                except:
+                    pass
+                try:
+                    annc = annc.replace(replace12,"")
+                except:
+                    pass
+                try:
+                    annc = annc.replace(replace14,"")
+                except:
+                    pass
+                try:
+                    annc = annc.replace(replace15,"")
+                except:
+                    pass
+                try:
+                    annc = annc.replace(replace16,"")
+                except:
+                    pass
+                # try:
+                #     annc = annc.replace(replace17,"")
+                # except:
+                #     pass
+                try:
+                    annc = annc.replace(replace19,"")
+                except:
+                    pass
+                try:
+                    annc = annc.replace(replace20,"")
+                except:
+                    pass
+                try:
+                    annc = annc.replace(replace21,"")
+                except:
+                    pass
+                try:
+                    annc = annc.replace(replace22,"")
+                except:
+                    pass
+                try:
+                    annc = annc.replace("<!--[isInTeaser: true][maxLength: 130][hasImage: true][shortenList:true]-->", "")
+                except:
+                    pass
+                try:
+                    annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
+                    annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
+                    annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
+                    annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
+                    annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
+                    annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
+                    annc = annc.replace("<article xmlns:php=\"http://php.net/xsl\"><section data-partialxcmsid=\"\"><span><!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
+                except:
+                    pass
+                return_data = parse_filtered_news(annc)
+                annc = return_data['filteredBody']
+                emr_essentail = return_data['emrEssential']
+                emr_executive = return_data['emrExecutive']
+                emr_lite = return_data['emrLite']
+                emr_html = return_data['emrHtmlText']
+            except Exception as e:
+                print(e)
+                annc = ""
+                emr_essentail = ""
+                emr_executive = ""
+                emr_lite = ""
+                emr_html = ""
+            
+            date = datetime.now()
+            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -395,7 +399,7 @@ try:
             company_news['emrLite'] = emr_lite
             company_news['News_Html'] = emr_html
             try:
-                collection.insert_one(company_news)
+                # collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 print(e)

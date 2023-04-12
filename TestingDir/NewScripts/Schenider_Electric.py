@@ -65,12 +65,12 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
 
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -129,6 +129,7 @@ else:
 # *****************************************************************************
 def parse_filtered_news(announcement):
     api_url = "https://admin.new.emr-online.com/api/history/filterbody"
+    # api_url = "https://admin.dev.emr-online.com/api/history/filterbody"
     # api_url = "http://192.168.60.105:3000/api/history/filterbody"
     payload = json.dumps({
                             "originalBody": announcement
@@ -136,6 +137,7 @@ def parse_filtered_news(announcement):
     headers = {
                 'Content-Type': 'application/json'
                 }
+    options={'timeout':60000}
     return_response = requests.request("POST", api_url, headers=headers, data=payload)
     new_data = return_response.text
     new_data = json.loads(new_data)
@@ -166,8 +168,8 @@ try:
             
         db_list = []
         mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+        # for x in mydoc:
+        #     db_list.append(x['News_Weblink'])
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -203,7 +205,7 @@ try:
             except:
                 announcement_type = ""
             try:
-                announcement = response1.css(".sdl-wiztopic-press-release .sdl-component-wrap").get()
+                announcement = response1.css("article.sdl-wiztopic-press-release .sdl-component-wrap").get()
                 replace1 = response1.xpath("//div[@class='sdl-component-wrap']/div").get()
                 replace2 = response1.css(".sdl-wiztopic-press-release_download-pdf-button").get()
                 try:
@@ -223,6 +225,7 @@ try:
                 emr_html = return_data['emrHtmlText']
 
             except Exception as e:
+                print(e)
                 announcement = ""
                 emr_essentail = ""
                 emr_executive = ""
@@ -252,7 +255,7 @@ try:
             company_news['emrLite'] = emr_lite
             company_news['News_Html'] = emr_html
             try:
-                collection.insert_one(company_news)
+                # collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

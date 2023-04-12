@@ -47,7 +47,7 @@ def Parser(mainSource,localDb,localCollectionName):
     flag=True
     while(flag):
         req=requests.get(source)
-        soup=BeautifulSoup(req.content)
+        soup=BeautifulSoup(req.content, 'lxml')
         news_divs=soup.find('div',class_='view-content').find_all('div',class_='press-search-results-view-row content-type-c2-ct-press-release views-row')
         for one in news_divs:
             links.append('https://press.siemens-energy.com'+one.find('a').get('href'))

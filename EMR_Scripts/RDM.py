@@ -127,12 +127,15 @@ else:
 # *****************************************************************************
 try:
     links_list = []
-    result = requests.get("https://www.rdm.com/news/page/1/?rdm_news_cat%5B0%5D=353")
+    result = requests.get("https://www.rdm.com/news")
+    # result = requests.get("https://www.rdm.com/news/page/1/?rdm_news_cat%5B0%5D=353")
     soup = BeautifulSoup(result.content, 'lxml')
     data = soup.find_all("div", class_='long-card col-12')
     for i in data:
         news_weblink = i.find("a").get("href")
         links_list.append(news_weblink)
+
+    print(links_list)
         
     db_list = []
     mydoc = collection.find()
@@ -141,9 +144,10 @@ try:
         
     for j in links_list:
         if j in db_list:
-            print("News weblink already in exists.")
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already exists.")
+            continue
         else:
             news_weblink = j
             res = requests.get(news_weblink)
@@ -154,6 +158,7 @@ try:
                 sub_category = ""
             try:
                 title = soup.find("meta", attrs={"property":"og:title"}).get("content")
+                print(title)
             except:
                 title = ""
             try:
@@ -174,7 +179,7 @@ try:
             except:
                 announcement = ""
             language = "en-US"
-            page_source = "https://www.rdm.com/news/page/1/?rdm_news_cat%5B0%5D=353"
+            page_source = "https://www.rdm.com/news"
             try:
                 analysis = soup.find("meta", attrs={"property":"og:description"}).get("content")
             except:

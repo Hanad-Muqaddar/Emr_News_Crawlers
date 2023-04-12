@@ -45,6 +45,7 @@ try:
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)
+
     # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
@@ -111,12 +112,12 @@ try:
     final_links = [Base_Link + link for link in links if "https" not in link]
     dates = response.css(".teaser-title ::text").getall()
 
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     for i, date in zip(final_links, dates):
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
-        
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1

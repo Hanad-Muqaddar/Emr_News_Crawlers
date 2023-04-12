@@ -134,7 +134,7 @@ try:
 
     links = soup.find_all('div',{ "class" : "resources-list__item resources-list__item--double"})
     for link in links:
-        news_link = Main_url + link.find('p',{ "class" : "resource-preview__title"}).find('a').get('href')
+        news_link = link.find('p',{ "class" : "resource-preview__title"}).find('a').get('href')
         if news_link not in news_links:
             news_links.append(news_link)
             try:
@@ -149,66 +149,69 @@ try:
     print(len(news_links))
     print(len(news_dates))
 
-    for i , N_Date in zip(news_links,news_dates):        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-        try:
-            title = data.find('div', {"class":"hero-content hero-content--top"}).find('h1').get_text(strip=True)
-            # print(title)
-        except:
-            title = data.find('title').text
-            title = title.replace('| Unite','').strip()
-            print(title)
-       
-        announcement_type = "Press"
-        language = "en-us"
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            image = Main_url + data.find('div', {"class":"hero-media hero-media--image"}).find('img').get('src')
-            # print(image)
-        except:
-            image = ""
-            print(image)
 
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
+    for i , N_Date in zip(news_links,news_dates):    
         
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            news_date = dateparser.parse(N_Date,  settings={'DATE_ORDER': 'DMY'} )
-            print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://unite.eu/en-de/resources/press-and-coverage"
-        news_weblink = i
-        
-        try:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            # print(announcement)
-            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
+        else:    
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+            try:
+                title = data.find('div', {"class":"hero-content hero-content--top"}).find('h1').get_text(strip=True)
+                print(title)
+            except:
+                title = data.find('title').text
+                title = title.replace('| Unite','').strip()
+                print(title)
+        
+            announcement_type = "Press"
+            language = "en-us"
+
+            try:
+                image = Main_url + data.find('div', {"class":"hero-media hero-media--image"}).find('img').get('src')
+                # print(image)
+            except:
+                image = ""
+                print(image)
+
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                news_date = dateparser.parse(N_Date,  settings={'DATE_ORDER': 'DMY'} )
+                print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://unite.eu/en-de/resources/press-and-coverage"
+            news_weblink = i
+            
+            try:
+                announcement = fulltext(response.text)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
+                
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

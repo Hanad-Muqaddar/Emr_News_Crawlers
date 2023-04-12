@@ -46,6 +46,7 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from newspaper import fulltext
+from scrapy import Selector
 
 # ************************************************************************
 # defining variables
@@ -126,79 +127,87 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://www.jung.de"
-    Base_url = "https://www.jung.de/en/593/press/"
+    Base_url = "https://www.jung-group.com/en-DE/The-company/Press/"
     result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
-    
+    response = Selector(result)
     news_links = []
-
-    links = soup.find("div",{ "class" : "clean cleaner child-listing-2 items"}).find_all("div",{ "class" : "float-box w6 conditionally"})
+    news_dates = []
+    links = response.xpath('//div[@class="container press-category"][1]//div[@class="staple-teaser__content"]')
     for link in links:
-        news_link = Main_url + link.find('a',{ "class" : "image-text-teaser"}).get('href')
-        if news_link not in news_links:
-            news_links.append(news_link)
+        link = link.xpath('.//div[@class="staple-staple-teaser__image-container"]/a/@href').get()
+        news_links.append(link)
+        try:
+            new_date = response.xpath('//div[@class="staple-teaser__date"]/text()').get()
+            news_dates.append(new_date)
+        except:
+            new_date = ""
+            news_dates.append(new_date)
 
     print(news_links)
+    print(news_dates)
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('title').get_text(strip=True)
-            title = title.replace('JUNG -','').strip()
-            print(title)
-        except:
-            title = ""
-        
-        language = "en-us"
-        
-        try:
-            image = Main_url + data.find('header',{ "id" : "header"}).find('div').find('img').get('src')
-            print(image)
-        except:
-            image = ""
 
-        announcement_type = "News"
+    for i,d in zip(news_links,news_dates):   
         
-        sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-            print(analysis)
-        except:
-            analysis = ""
-        try:
-            news_date = datetime.now()
-            print(news_date)
-        except:
-            news_date = ''
-
-        page_source = "https://www.jung.de/en/593/press/"
-        news_weblink = i
-        
-        
-        try:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            print(announcement)
-            
-        except:
-            announcement = data.find('div',{"class": "wrapper text-weight-small"}).text
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
+        else:     
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('div', {"class":"press-details"}).find('div', {"class":"col"}).find('h1').get_text(strip=True)
+                print(title)
+            except:
+                title = ""
+            
+            language = "en-us"
+            
+            try:
+                image = data.find('meta', attrs = {"property":"og:image"}).get("content")
+                print(image)
+            except:
+                image = ""
+
+            announcement_type = "News"
+            
+            sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+                print(analysis)
+            except:
+                analysis = ""
+            try:
+                N_date = d
+                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
+                print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://www.jung-group.com/en-DE/The-company/Press/"
+            news_weblink = i
+            
+            
+            try:
+                announcement = fulltext(response.text)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
+                
+            except:
+                announcement = data.find('div',{"class": "wrapper text-weight-small"}).text
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

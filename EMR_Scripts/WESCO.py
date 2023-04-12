@@ -131,26 +131,32 @@ else:
 # *****************************************************************************
 
 try:
-    link ="https://investors.wesco.com/feed/PressRelease.svc/GetPressReleaseList?LanguageId=1&bodyType=0&pressReleaseDateFilter=3&categoryId=1cb807d2-208f-4bc3-9133-6a9ad45ac3b0&pageSize=-1&pageNumber=0&tagList=&includeTags=true&year=2022&excludeSelection=1"
-    result = requests.get(link)
-    page_source = "https://investors.wesco.com/news-events/news/default.aspx"
-    data = result.json()['GetPressReleaseListResult']
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    Bas_url = "https://investors.wesco.com/news-events/news-releases"
+    main_url = "https://investors.wesco.com"
+    page = requests.get(Bas_url,headers=headers)
+    response = scrapy.Selector(page)
+    links = response.xpath('//article[@role="article"]//div[@class="nir-widget--field nir-widget--news--headline"]//a/@href').getall()
+    f_links = [main_url+l for l in links]
+    print(f_links)
+    page_source = "https://investors.wesco.com/news-events/news-releases"
+   
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-    for i in data:
-        news_weblink = "https://investors.wesco.com" + i['LinkToDetailPage']
-        if news_weblink in db_list:
+
+    for i in f_links:
+        if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
         else:
-            res = requests.get(news_weblink)
-            response = Selector(res)
+            res = requests.get(i,headers=headers)
+            response1 = scrapy.Selector(res)
             try:
-                title = i['Headline']
+                title = response1.xpath('//article[@role="article"]//div[@class="field field--name-field-nir-news-title field--type-string field--label-hidden"]/div[@class="field__item"]/text()').get()
                 print(title)
             except:
                 title = ""
@@ -159,25 +165,30 @@ try:
             except:
                 sub_category = ""
             try:
-                analysis = response.xpath("//meta[@name='twitter:description']/@content").get()
+                analysis = response1.xpath("//meta[@property='og:description']/@content").get()
             except:
                 analysis = ""
+            
+            image = ""
+            
             try:
-                image = i['MediaCollection'][0]
-            except:
-                image = ""
-            try:
-                news_date = dateparser.parse(i['PressReleaseDate'])
+                n_date = response1.xpath('//article[@role="article"]//div[@class="field field--name-field-nir-news-date field--type-datetimezone field--label-hidden ndq-date"]/div[@class="field__item"]/text()').get()
+                news_date = dateparser.parse(n_date,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
             except:
                 news_date = ""
             try:
-                announcement = fulltext(res.text)
+                announcement = response1.xpath('normalize-space(//article[@role="article"]//div[@class="full-release-body"])').get()
+                print(announcement)
+
             except:
                 announcement = ""
+
             try:
                 announcement_type = "Press Release"
             except:
                 announcement_type = ""
+
             language = "en-US"
             crawled_date = datetime.datetime.now()
             
@@ -191,14 +202,14 @@ try:
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
+            company_news['News_Weblink'] = i
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
