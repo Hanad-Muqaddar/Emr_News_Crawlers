@@ -111,11 +111,13 @@ try:
     Base_Link = "https://www.rittal.com"
     final_links = [Base_Link + link for link in links if "https" not in link]
     print(final_links)
+
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+        
     for i in final_links:
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
         
         if i in db_list:
             Already_exist += 1
@@ -173,7 +175,7 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

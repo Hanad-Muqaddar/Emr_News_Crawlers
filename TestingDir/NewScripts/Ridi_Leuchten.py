@@ -136,6 +136,7 @@ try:
         return Trans_text.text
     
     news_links = []
+    news_date = []
 
     links = soup.find_all('div',{ "class" : "article listArticle articletype-1 topnews"})
     for link in links:
@@ -144,16 +145,29 @@ try:
         if '/news' in news_link and news_link not in news_links:
             news_links.append(Main_url + news_link)
 
+            try:
+                n_date = link.find('span',{ "class" : "news-list-date"}).text
+                f_date = n_date.replace('\n','').strip()
+                news_date.append(f_date)
+            except:
+                n_date = ""
+                news_date.append(n_date)
+        else:
+            print("not a news link")
+
+
     print(news_links)
+    print(news_date)
+    print(len(news_date))
     print(len(news_links))
 
-     # Creating a list of links already avilable in database
+    # Creating a list of links already avilable in database
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    for i in news_links:  
+    for i,d in zip(news_links,news_date):  
 
         if i in links_list:
             total_crwalled_links += 1
@@ -196,9 +210,10 @@ try:
             except:
                 analysis = ""
             try:
-                date = data.find('meta', attrs = {"name":"DCTERMS.modified"}).get('content')
-                print(date)
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                # date = data.find('meta', attrs = {"name":"DCTERMS.modified"}).get('content')
+                # print(date)
+
+                news_date = dateparser.parse(d,  settings={'DATE_ORDER': 'YMD'} )
                 print(news_date)
             except:
                 news_date = ""
@@ -207,8 +222,7 @@ try:
             news_weblink = i
             
             try:
-                html = requests.get(i).text
-                announcement = fulltext(html)
+                announcement = fulltext(data.text)
                 announcement = announcement.replace('\n','<br>')
                 announcement = translate(announcement) 
                 print(announcement)            
@@ -234,7 +248,7 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                collection.insert_one(company_news)
+                # collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

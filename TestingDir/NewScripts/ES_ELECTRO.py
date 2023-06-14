@@ -154,69 +154,73 @@ try:
                 news_date = ""
                 news_dates.append(news_date)
 
+    
 
-    for i , N_Date in zip(news_links,news_dates):        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-        try:
-            title = data.find('title').get_text().replace('| itsme Nederland','').strip()
-            title = translate(title)
-        except:
-            title = ""
-       
-        announcement_type = "News"
-        language = "en-us"
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            image = data.find('div', {"class" : "content"}).find('img').get('src')
-        except:
-            image = ""
-
-        try: 
-            video = soup.find('iframe').get('src')        
-        except:
-            video = ""
-            
-        try:
-            sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
-            sub_category = translate(sub_category)
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-            analysis = translate(analysis)
-        except:
-            analysis = ""
-        try:
-            date = translate(N_Date)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-        except:
-            news_date = ""
-
-        page_source = "https://nl.itsme.eu/itsme/nl/EUR/content/news/list"
-        news_weblink = i
-        
-        try:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            announcement = translate(announcement)  
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+    for i , N_Date in zip(news_links,news_dates):    
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
+        else:    
+            print(i)
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+            try:
+                title = data.find('title').get_text().replace('| itsme Nederland','').strip()
+                title = translate(title)
+            except:
+                title = ""
+        
+            announcement_type = "News"
+            language = "en-us"
+
+            try:
+                image = data.find('div', {"class" : "content"}).find('img').get('src')
+            except:
+                image = ""
+
+            try: 
+                video = soup.find('iframe').get('src')        
+            except:
+                video = ""
+                
+            try:
+                sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
+                sub_category = translate(sub_category)
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"name":"description"}).get("content")
+                analysis = translate(analysis)
+            except:
+                analysis = ""
+            try:
+                date = translate(N_Date)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+            except:
+                news_date = ""
+
+            page_source = "https://nl.itsme.eu/itsme/nl/EUR/content/news/list"
+            news_weblink = i
+            
+            try:
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')
+                announcement = translate(announcement)  
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

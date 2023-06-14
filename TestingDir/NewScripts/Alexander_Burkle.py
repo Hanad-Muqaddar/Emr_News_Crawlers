@@ -147,7 +147,7 @@ try:
             news_links.append(news_link)
             try:
                 # news_date = link.find('div',{"class":"styled__ABText-sc-131boho-0 fYzUUn newstilestyled__ArticleDate-sc-1ahky7f-6 gaIKhp"}).get_text(strip=True)
-                news_date = link.find('div', attrs = {"type":"buttonBlack"}).get_text(strip=True)                
+                news_date = link.find('div', attrs = {"type":"overline"}).find_next('div', attrs = {"type":"overline"}).get_text(strip=True)                
                 news_dates.append(news_date)
             except:
                 news_date = ""
@@ -170,6 +170,7 @@ try:
         if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:       
             response = requests.get(i, headers=headers)

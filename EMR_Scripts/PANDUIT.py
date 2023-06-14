@@ -49,7 +49,6 @@ from urllib.request import Request, urlopen
 
 from scrapy import Selector
 
-import datefinder
 
 # ************************************************************************
 

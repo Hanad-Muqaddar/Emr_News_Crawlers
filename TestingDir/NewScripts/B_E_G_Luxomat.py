@@ -161,16 +161,18 @@ try:
                 continue
             else:
                 purified_links.append(link)
+
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     for k in purified_links:
         news_weblink = k
-        
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
             response = requests.get(news_weblink)

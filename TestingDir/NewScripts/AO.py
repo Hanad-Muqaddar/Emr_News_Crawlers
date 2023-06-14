@@ -132,7 +132,6 @@ try:
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
 
-
     def translate(Trans):
         translator = Translator()
         Trans_text = translator.translate(Trans,dest='en')

@@ -130,68 +130,71 @@ try:
     
     news_links = []
 
-    links = soup.find_all('div',{ "class" : "col-md-6 text-left teaserContentRight--content my-auto order-md-2"})
+    links = soup.find_all('div',{ "class" : "news-item-container"})
     for link in links:
-        news_link = Main_url + link.find('a',{ "class" : "result__link"}).get('href')
+        news_link = Main_url + link.find('a',{ "class" : "read-more"}).get('href')
         if news_link not in news_links:
             news_links.append(news_link)
 
     print(news_links)
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-        except:
-            title = ""
-
-        announcement_type = "News"
-        language = "en-us"
-
-        try:
-            image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-        except:
-            image = ""
-
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            date = data.find('time').get_text(strip=True)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'MDY'})
-            print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://www.bachmann.com/en/experience-bachmann/news-events/news"
-        news_weblink = i
-        
-        try:
-            announcement = data.find("div", class_="textMolecule mx-auto").get_text(strip=True)
-
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+    for i in news_links:  
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
+        else:      
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('meta', attrs = {"property":"og:title"}).get("content")
+                print(title)
+            except:
+                title = ""
+
+            announcement_type = "News"
+            language = "en-us"
+
+            try:
+                image = data.find('meta', attrs = {"property":"og:image"}).get("content")
+            except:
+                image = ""
+
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                date = data.find('time').get_text(strip=True)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'MDY'})
+                print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://www.bachmann.com/en/experience-bachmann/news-events/news"
+            news_weblink = i
+            
+            try:
+                announcement = data.find("div", class_="textDescription container mx-auto").get_text(strip=True)
+                print(announcement)
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

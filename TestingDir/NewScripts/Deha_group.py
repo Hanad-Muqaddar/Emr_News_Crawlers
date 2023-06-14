@@ -147,75 +147,78 @@ try:
     print(news_links)
     print(len(news_links))
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+     # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('title').text
-            title = title.replace('– DEHA Gruppe','').strip()
-            title = translate(title)
-            print(title)
-        except:
-            title =""
-            print(title)
+
+    for i in news_links:   
         
-        announcement_type = "News"
-
-        language = "en-us"
-
-        try:
-            try:
-                image = Main_url + data.find('div', attrs = {"class":"deha-pic-container"}).get("style").split('url(')[1][:-1]
-            except:
-                image = Main_url + data.find('figure', attrs = {"class":"deha-image"}).find('img', attrs = {"class":"img-fluid"}).get("src")
-        except:
-            image = ""
-            print(image)
-
-        try:
-            sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
-            sub_category = translate(sub_category)
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-            analysis = translate(analysis)
-        except:
-            analysis = ""
-        try:
-            date = data.find('div', attrs = {"class":"deha-news-detail-date"}).get_text().split('–')[1].strip()
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://www.deha.de/newsroom"
-        news_weblink = i
-        
-        try:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            announcement = translate(announcement)
-            print(announcement)
-            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             continue
-        else:
+        else:     
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('title').text
+                title = title.replace('– DEHA Gruppe','').strip()
+                title = translate(title)
+                print(title)
+            except:
+                title =""
+                print(title)
+            
+            announcement_type = "News"
+
+            language = "en-us"
+
+            try:
+                try:
+                    image = Main_url + data.find('div', attrs = {"class":"deha-pic-container"}).get("style").split('url(')[1][:-1]
+                except:
+                    image = Main_url + data.find('figure', attrs = {"class":"deha-image"}).find('img', attrs = {"class":"img-fluid"}).get("src")
+            except:
+                image = ""
+                print(image)
+
+            try:
+                sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
+                sub_category = translate(sub_category)
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"name":"description"}).get("content")
+                analysis = translate(analysis)
+            except:
+                analysis = ""
+            try:
+                date = data.find('div', attrs = {"class":"deha-news-detail-date"}).get_text().split('–')[1].strip()
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://www.deha.de/newsroom"
+            news_weblink = i
+            
+            try:
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')
+                announcement = translate(announcement)
+                print(announcement)
+                
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+       
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

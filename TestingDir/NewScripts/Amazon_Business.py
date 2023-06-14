@@ -65,7 +65,7 @@ try:
     proxies = {'http': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280',
             'https': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280'}
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    Base_url = "https://press.aboutamazon.com"
+    Base_url = "https://press.aboutamazon.com/press-release-archive"
     result = requests.get(Base_url,headers=headers, proxies=proxies)
     
     # print(result.text)
@@ -76,52 +76,59 @@ try:
             news_link = Base_url + a['href']
             if news_link not in news_links:
                 news_links.append(news_link)
-                
+    
+    print(news_links)
+    print(len(news_links))
+
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
+
     for i in news_links:
-        response = requests.get(i, headers=headers, proxies=proxies)
-        data = BeautifulSoup(response.content, 'lxml')
-        try:
-            title = data.find('div', attrs = {"class":"field field--name-field-nir-news-title field--type-string field--label-hidden"}).find('div', attrs = {"class":"field__item"}).get_text(strip=True)
-        except:
-            title = ""
-        language = "en-us"
-        image = ""
-        try:
-             announcement_type = data.find('h1', attrs = {"class":"ArticlePage-headline"}).get_text(strip=True)
-        except:
-             announcement_type = "News"
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            date = data.find('div', attrs = {"class":"field field--name-field-nir-news-date field--type-datetimezone field--label-hidden"}).find('div', attrs = {"class":"field__item"}).get_text(strip=True)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            # print(news_date)
-        except:
-            news_date = ""
-        page_source = "https://press.aboutamazon.com/"
-        news_weblink = i
-        try:
-            announcement = data.find("div", class_="node__content").get_text(strip=True)
-            announcement = announcement.replace('ShareFacebookGoogle+LinkedInTwitterRSS FeedsEmail PageClose','')
-        except:
-            announcement = ""
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-        if news_weblink in links_list:
+        
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
+            response = requests.get(i, headers=headers, proxies=proxies)
+            data = BeautifulSoup(response.content, 'lxml')
+            try:
+                title = data.find('div', attrs = {"class":"field field--name-field-nir-news-title field--type-string field--label-hidden"}).find('div', attrs = {"class":"field__item"}).get_text(strip=True)
+            except:
+                title = ""
+            language = "en-us"
+            image = ""
+            try:
+                announcement_type = data.find('h1', attrs = {"class":"ArticlePage-headline"}).get_text(strip=True)
+            except:
+                announcement_type = "News"
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            except:
+                sub_category = ""
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                date = data.find('div', attrs = {"class":"field field--name-field-nir-news-date field--type-datetimezone field--label-hidden"}).find('div', attrs = {"class":"field__item"}).get_text(strip=True)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                # print(news_date)
+            except:
+                news_date = ""
+            page_source = "https://press.aboutamazon.com/"
+            news_weblink = i
+            try:
+                announcement = data.find("div", class_="node__content").get_text(strip=True)
+                announcement = announcement.replace('ShareFacebookGoogle+LinkedInTwitterRSS FeedsEmail PageClose','')
+            except:
+                announcement = ""
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -139,7 +146,7 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                collection.insert_one(company_news)
+                # collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

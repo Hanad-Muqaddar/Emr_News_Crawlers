@@ -67,6 +67,7 @@ try:
     # data = json.load(file)
     # db_path = data[0]['Db_Path']
     # client = MongoClient(db_path)
+    
     client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
@@ -129,7 +130,10 @@ try:
     # This is for Press Release
 
     feed = feedparser.parse("https://ir.rockwellautomation.com/rss/PressRelease.aspx")
+    print(feed)
     for i in feed['entries']:
+        print(i)
+        print(i['link'])
         db_list = []
         mydoc = collection.find()
         for x in mydoc:
@@ -138,6 +142,7 @@ try:
         if i['link'] in db_list:
             Already_exist += 1
             total_crwalled_links += 1
+            print("Already Crawled")
             continue
         else:
             result1 = requests.get(i['link'])
@@ -151,6 +156,7 @@ try:
                 title = i['title']
             except:
                 title = ""
+            print(title)
             try:
                 analysis = response1.xpath("//meta[@name='description']/@content").get()
             except:

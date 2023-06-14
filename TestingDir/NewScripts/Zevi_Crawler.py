@@ -160,23 +160,25 @@ try:
     response = Selector(result)
     news_links = response.css(".content-list-element a ::attr(href)").getall()
     final_links = ["https://www.zvei.org" + url for url in news_links]
-    # print(final_links)
+    print(final_links)
     def translate(Trans):
         translator = Translator()
         Trans_text = translator.translate(Trans,dest='en')
         return Trans_text.text
+    
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
 
     for i in final_links[:5]:
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
-        news_link = i
-        if news_link == "":
+    
+        if i == "":
             continue
-        if news_link in db_list:
+        if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1
+            print("Already cralwed")
             continue
         else:
             response = requests.get(i, headers=headers)
@@ -226,7 +228,7 @@ try:
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_link
+            company_news['News_Weblink'] = i
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement

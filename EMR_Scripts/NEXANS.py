@@ -157,9 +157,9 @@ try:
             db_list.append(x['News_Weblink'])
         
         if i in db_list:
-            print(i)
             Already_exist += 1
             total_crwalled_links += 1
+            print("Already Crawled")
             continue
         else:
             result1 = requests.get(i)

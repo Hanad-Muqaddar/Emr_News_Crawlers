@@ -126,7 +126,7 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://ao.dk"
-    Base_url = "https://ao.dk/om-ao/nyheder-og-presse/nyheder"
+    Base_url = "https://ao.dk/om-ao/nyheder-og-presse/pressemeddelelser"
     result = requests.get(Base_url,headers=headers)
 
     translator = Translator()

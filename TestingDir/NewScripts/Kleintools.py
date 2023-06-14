@@ -82,11 +82,11 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -148,16 +148,18 @@ try:
     response = requests.get("https://www.kleintools.com/press-releases")
     soup = BeautifulSoup(response.content, 'lxml')
     data = soup.find_all("td", class_='views-field views-field-title')
-    for i in data:
-        news_weblink = "https://www.kleintools.com" + i.find("a").get("href")
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
         
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+    for i in data:
+        news_weblink = i.find("a").get("href")
+        
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already crawled")
             continue
         else:
             result = requests.get(news_weblink)
@@ -166,6 +168,7 @@ try:
                 title = soup.find("title").text
             except:
                 title = ""
+            print(title)
             try:
                 analysis = soup.find("meta", attrs={"name":"description"}).get("content")
             except:

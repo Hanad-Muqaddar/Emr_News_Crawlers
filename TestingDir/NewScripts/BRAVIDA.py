@@ -144,19 +144,6 @@ try:
     print(All_News_links)
     print(len(All_News_links))
 
-    # for Y_N_Link in years_news_links:  
-    #     response = requests.get(Y_N_Link, headers=headers)
-    #     data = BeautifulSoup(response.content, 'lxml')
-    #     N_links = data.find('ul',{ "class" : "list list--bordered js-list"}).find_all('li')
-    #     for l in N_links:
-    #         N_link = Main_url + l.find('a').get('href')
-    #         if N_link not in All_News_links:
-    #             All_News_links.append(N_link)
-
-    # print(All_News_links)
-    # print(len(All_News_links))
-
-    # Creating a list of links already avilable in database
     links_list = []
     mydoc = collection.find()
     for x in mydoc:

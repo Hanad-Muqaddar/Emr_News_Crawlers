@@ -162,65 +162,68 @@ try:
     # print(news_dates)
     # print(len(news_dates))
 
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
+
     for i, L_date in zip(news_links, news_dates):
-    # for i in news_links:
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-        try:
-            title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-            title = title.replace('- Finder' , '')
-            print(title)
-        except:
-            title = ""
-      
-        language = "en-us"        
-        announcement_type = "News"
-
-        img = ""
-
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-            # print(sub_category)
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"name":"og:description"}).get("content")
-            # print(analysis)
-        except:
-            analysis = ""
-        try:
-            news_date = dateparser.parse(L_date,settings={'DATE_ORDER': 'YMD'})
-            # print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://www.findernet.com/en/worldwide/news/"
-        news_weblink = i
-
-        try:        
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            # print(announcement)
-                
-        except:
-            announcement = ""
-    
-        
-        date = datetime.now()
-        # print(date)
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+         
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled...")
             continue
         else:
+        # for i in news_links:
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+            try:
+                title = data.find('meta', attrs = {"property":"og:title"}).get("content")
+                title = title.replace('- Finder' , '')
+                print(title)
+            except:
+                title = ""
+        
+            language = "en-us"        
+            announcement_type = "News"
+
+            img = ""
+
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+                # print(sub_category)
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"name":"og:description"}).get("content")
+                # print(analysis)
+            except:
+                analysis = ""
+            try:
+                news_date = dateparser.parse(L_date,settings={'DATE_ORDER': 'YMD'})
+                # print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://www.findernet.com/en/worldwide/news/"
+            news_weblink = i
+
+            try:        
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')
+                # print(announcement)
+                    
+            except:
+                announcement = ""
+        
+            
+            date = datetime.now()
+            # print(date)
+       
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

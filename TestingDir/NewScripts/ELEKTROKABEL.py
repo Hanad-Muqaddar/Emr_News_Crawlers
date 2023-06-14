@@ -130,8 +130,7 @@ try:
     Base_url = "https://elektrokable.ru/news/"
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
-
-    
+   
 
     def translate(Trans):
         translator = Translator()
@@ -149,65 +148,69 @@ try:
     # print(news_links)
     # print(len(news_links))
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        my_exception = ""
+    for i in news_links:      
         
-        try:
-            title = data.find('h1',attrs = {'id':'pagetitle'}).get_text(strip=True)
-            title = translate(title)
-        except Exception as e:
-            my_exception = e
-            title = data.find('h1',attrs = {'id':'pagetitle'}).get_text(strip=True)
-        
-        announcement_type = "News"
-        language = "en-us"
-
-        try:            
-            image = Main_url + data.find('img',{'class':'detail_picture'}).get('src')
-        except:
-            image = ""
-
-        try:
-            sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
-            sub_category = translate(sub_category)
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta',attrs = {'name':'description'}).get("content")
-            analysis = translate(analysis)
-        except:
-            analysis = ""
-        try:
-            date = data.find('div',{'class':'news-date'}).get_text()
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-        except:
-            news_date = ""
-
-        page_source = "https://elektrokable.ru/news/"
-        news_weblink = i
-        
-        try:
-            announcement = data.find('div',{'class':'news-detail'}).get_text(strip=True)
-            announcement = translate(announcement)           
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
+        else:  
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            my_exception = ""
+            
+            try:
+                title = data.find('h1',attrs = {'id':'pagetitle'}).get_text(strip=True)
+                title = translate(title)
+                print(title)
+            except Exception as e:
+                my_exception = e
+                title = data.find('h1',attrs = {'id':'pagetitle'}).get_text(strip=True)
+            
+            announcement_type = "News"
+            language = "en-us"
+
+            try:            
+                image = Main_url + data.find('img',{'class':'detail_picture'}).get('src')
+            except:
+                image = ""
+
+            try:
+                sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
+                sub_category = translate(sub_category)
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta',attrs = {'name':'description'}).get("content")
+                analysis = translate(analysis)
+            except:
+                analysis = ""
+            try:
+                date = data.find('div',{'class':'news-date'}).get_text()
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+            except:
+                news_date = ""
+
+            page_source = "https://elektrokable.ru/news/"
+            news_weblink = i
+            
+            try:
+                announcement = data.find('div',{'class':'news-detail'}).get_text(strip=True)
+                announcement = translate(announcement)           
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+      
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

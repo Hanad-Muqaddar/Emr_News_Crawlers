@@ -110,6 +110,7 @@ try:
     links = response.css(".teaser-headline a ::attr(href)").getall()
     Base_Link = "https://www.rittal.com"
     final_links = [Base_Link + link for link in links if "https" not in link]
+    print(final_links)
     dates = response.css(".teaser-title ::text").getall()
 
     db_list = []
@@ -121,6 +122,7 @@ try:
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1
+            print("Already Crawled")
             continue
         else:
             result1 = requests.get(i)

@@ -138,68 +138,71 @@ try:
 
     print(news_links)
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-        except:
-            title = ""
-
-        language = "en-us"
-
-        try:
-            img = data.find("div", class_ = re.compile(r'story-banner__content')).get('data-bgset')
-            img = img.split("2000w,", 1)
-            image = img[0]
-        except:
-            image = ""
-
-        try:
-             announcement_type = data.find("h3", class_="title heading-3").get_text(strip=True)
-        except:
-             announcement_type = "News"
-
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            date = data.find("p", class_="date-component__text").get_text(strip=True)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://www.cooperlighting.com/global/resources/press-releases"
-        news_weblink = i
-        
-        try:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-
-        except:
-            announcement = ""
-
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+    for i in news_links: 
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
+
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('meta', attrs = {"property":"og:title"}).get("content")
+            except:
+                title = ""
+
+            language = "en-us"
+
+            try:
+                img = data.find("div", class_ = re.compile(r'story-banner__content')).get('data-bgset')
+                img = img.split("2000w,", 1)
+                image = img[0]
+            except:
+                image = ""
+
+            try:
+                announcement_type = data.find("h3", class_="title heading-3").get_text(strip=True)
+            except:
+                announcement_type = "News"
+
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                date = data.find("p", class_="date-component__text").get_text(strip=True)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://www.cooperlighting.com/global/resources/press-releases"
+            news_weblink = i
+            
+            try:
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')
+
+            except:
+                announcement = ""
+
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

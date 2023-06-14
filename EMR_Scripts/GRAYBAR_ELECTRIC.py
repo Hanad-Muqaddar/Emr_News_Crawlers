@@ -46,6 +46,9 @@ from scrapy import Selector
 
 from newspaper import fulltext
 
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
+
 # ************************************************************************
 running_Sequence = []
 
@@ -62,12 +65,12 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
     
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -126,20 +129,42 @@ else:
 # *****************************************************************************
 
 try:
-    print("Running..............")
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    # print("Running..............")
+    # headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     
-    proxies = {'http': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280',
-            'https': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280'}
+    # proxies = {'http': 'http://waleeProxy:Cheeta@1@sg.proxymesh.com:31280',
+    #         'https': 'http://waleeProxy:Cheeta@1@sg.proxymesh.com:31280'}
 
-    url = "https://www.graybar.com/news"
-    result = requests.get(url, proxies=proxies, headers=headers)
-    response = Selector(result)
+    # url = "https://www.graybar.com/news"
+    # result = requests.get(url, proxies=proxies, headers=headers, timeout=20)
+
+
+     # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = False
+
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+    driver.get("https://www.graybar.com/news")
+    time.sleep(10)
+
+    page_source = driver.page_source
+        # print(page_source)
+    response = Selector(text=page_source)
+
     Base_Link = "https://www.graybar.com"
     links = response.xpath('//td[@data-label="Title"]/a/@href').getall()
     f_links = ['/'+link if link[0] != '/' else link for link in links]
     final_links = [Base_Link+link for link in f_links]
-    print(final_links)
     dates = response.xpath('//td[@data-label="Date"]/text()').getall()
     announcement_type = response.xpath('//td[@data-label="Category"]/text()').getall()
     titles = response.xpath('//td[@data-label="Title"]/a/text()').getall()
@@ -148,6 +173,7 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
+
     for i , j ,k , title in zip(final_links, dates, announcement_type, titles):
         
         if i in db_list:

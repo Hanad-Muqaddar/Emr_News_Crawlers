@@ -139,71 +139,75 @@ try:
 
     print(news_links)
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-            title = title.replace('- Draka Comteq Germany - Data cables','')
-        except:
-            title = data.find('title').get_text(strip=True)  
-        try:
-            language = data.find('meta', attrs = {"property":"og:locale"}).get("content")
-        except:
-            language = "en-us"
-        
-        try:
-            image = data.find('meta', attrs = {"property":"og:image"}).get("content")            
-        except:
-            image = data.find('div', attrs = {"class":"featured-image page-header-image-single grid-container grid-parent"}).find("img").get('src')
-
-        
-        announcement_type = "News"
-
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            date = data.find('time', attrs = {"class":"entry-date published"}).get_text(strip=True)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            # print(news_date)
-        except:
-            date = data.find('meta', attrs = {"property":"article:published_time"}).get("content")
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            # print(news_date)
-
-        page_source = "https://www.draka-cable.com/"
-        news_weblink = i
-        
-        
-        try:
-            announcement = data.find("div", class_="entry-content").get_text(strip=True)
-
-        except:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+    for i in news_links: 
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
+
         else:
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('meta', attrs = {"property":"og:title"}).get("content")
+                title = title.replace('- Draka Comteq Germany - Data cables','')
+            except:
+                title = data.find('title').get_text(strip=True)  
+            print(title)
+            try:
+                language = data.find('meta', attrs = {"property":"og:locale"}).get("content")
+            except:
+                language = "en-us"
+            
+            try:
+                image = data.find('meta', attrs = {"property":"og:image"}).get("content")            
+            except:
+                image = data.find('div', attrs = {"class":"featured-image page-header-image-single grid-container grid-parent"}).find("img").get('src')
+
+            
+            announcement_type = "News"
+
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                date = data.find('time', attrs = {"class":"entry-date published"}).get_text(strip=True)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                # print(news_date)
+            except:
+                date = data.find('meta', attrs = {"property":"article:published_time"}).get("content")
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                # print(news_date)
+
+            page_source = "https://www.draka-cable.com/"
+            news_weblink = i
+            
+            
+            try:
+                announcement = data.find("div", class_="entry-content").get_text(strip=True)
+
+            except:
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')
+
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

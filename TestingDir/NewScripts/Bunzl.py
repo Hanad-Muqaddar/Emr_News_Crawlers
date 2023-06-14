@@ -140,62 +140,64 @@ try:
 
     print(news_links)
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+     # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('title').get_text(strip=True)
-        except:
-            title = ""
-
-        announcement_type = "News"
-        language = "en-us"
-
-        try:
-            image = Main_url + data.find('div', {"class":"container"}).find('img', {"class":"cover w-100"}).get('src')
-        except:
-            image = ""
-
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            date = data.find('div', {"class":"article-header"}).find('div', {"class":"col-4 col-md-3 col-lg-2"}).get_text(strip=True)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://www.bunzl.com/newsroom/"
-        news_weblink = i
-        
-        try:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+    for i in news_links:    
+       
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             continue
         else:
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('title').get_text(strip=True)
+            except:
+                title = ""
+
+            announcement_type = "News"
+            language = "en-us"
+
+            try:
+                image = Main_url + data.find('div', {"class":"container"}).find('img', {"class":"cover w-100"}).get('src')
+            except:
+                image = ""
+
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                date = data.find('div', {"class":"article-header"}).find('div', {"class":"col-4 col-md-3 col-lg-2"}).get_text(strip=True)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://www.bunzl.com/newsroom/"
+            news_weblink = i
+            
+            try:
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')
+                
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

@@ -157,16 +157,18 @@ try:
         if news_link not in news_links:
             news_links.append( news_link) 
 
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     for i in news_links:
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+        
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-
         else:        
             response = requests.get(i, headers=headers)
             data = BeautifulSoup(response.content, 'lxml')

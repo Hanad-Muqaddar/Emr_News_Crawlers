@@ -148,17 +148,18 @@ try:
         links_list.append(x['News_Weblink'])
 
     for j in links:
-
         if j in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
         else:
+            print(j)
             response = requests.get(j)
             soup = BeautifulSoup(response.content, 'lxml')
             try:
                 title = soup.find("title").text
+                print(title)
             except:
                 title = ""
             try:

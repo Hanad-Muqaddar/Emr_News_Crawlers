@@ -9,11 +9,13 @@ from random import randint
 
 from bs4 import BeautifulSoup
 
-from pymongo import MongoClient, response
+from pymongo import MongoClient
 
 from bs4 import BeautifulSoup
 
 from selenium import webdriver
+
+# from webdriver_manager.chrome import ChromeDriver
 
 from selenium.webdriver.chrome.options import Options
 
@@ -25,6 +27,8 @@ from selenium.webdriver.support import expected_conditions
 
 from selenium.webdriver.common.by import By
 
+from urllib.parse import urlparse
+
 import re
 
 import traceback
@@ -33,7 +37,7 @@ import urllib
 
 import dateparser
 
-import datetime
+from datetime import datetime
 
 from bson.objectid import ObjectId
 
@@ -41,14 +45,17 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
-from scrapy import Selector
-
 from newspaper import fulltext
 
+from googletrans import Translator
+
+from scrapy import Selector
 # ************************************************************************
+# defining variables
+
 running_Sequence = []
 
-started_on = datetime.datetime.now()
+started_on = datetime.now()
 
 c_name = 'CHINT' # Name of the Collection
 
@@ -61,15 +68,13 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    # data = json.load(file)
-    # db_path = data[0]['Db_Path']
-    # client = MongoClient(db_path)
+
     client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
 except:
+
     running_Sequence.append('Not Connected')
 
 # *************************************************************************
@@ -100,15 +105,15 @@ except:
 
 if last_insertion == None:
 
-    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
 
-    Crwl_time = datetime.datetime.now()
+    Crwl_time = datetime.now()
 
 else:
 
     last_time = last_insertion['Date']
 
-    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+    # running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
 
     Crwl_time = last_insertion['Date']
 
@@ -121,20 +126,22 @@ else:
 ####################################################
 
 # *****************************************************************************
-
 try:
     result = requests.get("https://chintglobal.com/news-center-14")
     response = Selector(result)
     links = response.css(".chint-news-item-title a ::attr(href)").getall()
+    print(links)
+
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     for i in links:
-        db_list = []
-        # mydoc = collection.find()
-        # for x in mydoc:
-        #     db_list.append(x['News_Weblink'])
-        
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1
+            print("Already Crawled")
             continue
         else:
             result1 = requests.get(i)
@@ -143,7 +150,7 @@ try:
             data = json.loads(data)
             try:
                 news_date = data['datePublished']
-                news_date = dateparser.parse(news_date)
+                news_date = dateparser.parse(news_date,  settings={'DATE_ORDER': 'YMD'} )
             except:
                 news_date = ""
             try:
@@ -189,7 +196,7 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
@@ -204,17 +211,11 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.datetime.now()
-except Exception as e:
-    Error_Time =  datetime.datetime.now()
+except:
+    Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
 
-    running_Sequence.append(e)
-
-
-# **************************************************************************
-
-# **************************************************************************
 
 # **************************************************************************
 rep = ''
@@ -232,6 +233,7 @@ except Exception as e:
     rep = traceback.format_exc()
 
     pass
+
 
 log = {}
 
@@ -251,6 +253,6 @@ log['Links_Skipped'] = Already_exist
 
 log['Last_news_crawl_time'] = last_time
 
-log['Browser'] = 'Chrome'
+log['Browser'] = 'None'
 
 error_logs.insert_one(log)

@@ -157,8 +157,8 @@ try:
     proxies_list = ['us-wa','fr','jp','au','de']
     import random
     p = random.choice(proxies_list)
-    proxies = {'http': f"http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280",
-            'https': f"http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280"}
+    proxies = {'http': f"http://waleeProxy:Cheeta@1@us-dc.proxymesh.com:31280",
+            'https': f"http://waleeProxy:Cheeta@1@us-dc.proxymesh.com:31280"}
     headers = {"Connection": "keep-alive",
                 "sec-ch-ua":  'Not A;Brand";v="99", "Chromium";v="99", "Google Chrome";v="99"',
                 "sec-ch-ua-mobile": "?0",
@@ -180,6 +180,12 @@ try:
     # print(response)
     data = response.css(".results-list-submodule .results-list-submodule__name-link ::attr(href)").getall()
     print(data)
+
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     for i in data:
         try:
             news_weblink = i
@@ -188,19 +194,17 @@ try:
         if news_weblink == "":
             continue
             
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+        
         if news_weblink in db_list:
             # print("Link Already exists")
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
             # news, image = parse_newspaper_data(news_weblink)
             # print("Comes here at first point")
-            result1 = requests.get(news_weblink , headers=headers)
+            result1 = requests.get(news_weblink , headers=headers, proxies=proxies,)
             result1.encoding = 'utf-8'
             response1 = Selector(result1)
             # print("reach to point 2")

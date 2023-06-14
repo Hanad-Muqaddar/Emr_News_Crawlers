@@ -140,60 +140,62 @@ try:
 
     print(news_links)
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+     # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-            print(title)
-        except:
-            title = data.find('h1', attrs = {"itemprop":"headline"}).get_text(strip=True)
-
-        announcement_type = "Press release"
-        language = "en-us"
-
-        image = ""
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-            print(sub_category)
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-            print(analysis)
-        except:
-            analysis = ""
-        try:
-            news_date = datetime.now()
-            
-        except:
-            news_date = ""
-
-        page_source = "https://www.fluke.com/en/support/press-releases"
-        news_weblink = i
-        
-        try:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            print(announcement)
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+    for i in news_links:   
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled...")
             continue
-        else:
+        else:     
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('meta', attrs = {"property":"og:title"}).get("content")
+                print(title)
+            except:
+                title = data.find('h1', attrs = {"itemprop":"headline"}).get_text(strip=True)
+
+            announcement_type = "Press release"
+            language = "en-us"
+
+            image = ""
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+                print(sub_category)
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+                print(analysis)
+            except:
+                analysis = ""
+            try:
+                news_date = datetime.now()
+                
+            except:
+                news_date = ""
+
+            page_source = "https://www.fluke.com/en/support/press-releases"
+            news_weblink = i
+            
+            try:
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

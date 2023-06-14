@@ -47,6 +47,9 @@ from urllib.request import Request, urlopen
 
 from newspaper import fulltext
 
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
+
 # ************************************************************************
 # defining variables
 
@@ -124,104 +127,129 @@ else:
 
 # *****************************************************************************
 try:
+     # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = True
+
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+    driver.get("https://www.metz-connect.com/home/company/news.62.en.html")
+    time.sleep(10)
     Main_url = "https://www.metz-connect.com"
-    Base_url = "https://www.metz-connect.com/xml/overlay:sitemap.en.xml"
-    result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
-    
+
     news_links = []
-
-    links = soup.find_all("loc")
+    news_dates = []
+    links = driver.find_elements(By.XPATH, '//div[@class="page-wrapper"]//a[@class="news"]')
     for link in links:
-        news_link = link.text
-        if "company/news/" in news_link and news_link not in news_links:
-            news_links.append(news_link)
+        news_link = link.get_attribute('href')
+        news_links.append(news_link)
+        try:
+            news_date = link.find_element(By.XPATH, './/div[@class="body"]/div[@class="date"]').text
+            news_dates.append(news_date)
+        except:
+            news_date = ""
+            news_dates.append(news_date)
 
-    print(news_links)
+    f_news_links = [l.split(';jsessionid')[0] for l in news_links]
+
+    print(f_news_links)
+    print(len(f_news_links))
+
+    print(news_dates)
+    print(len(news_dates))
+
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
-        
-    for i in news_links:
-        
+
+    for i,d in zip(f_news_links,news_dates):
         if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
-            continue       
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+            print("Already Crawled..")
+            continue      
+        else: 
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
 
-        try:
-            title = data.find('h1', attrs = {"class":"headline medium black"}).get_text(strip=True)
-            print(title)
-        except:
-            title = data.find('title').get_text(strip=True)
-            print(title)
-        
-        announcement_type = "News"
-
-        language = "en-us"
-
-        try:
-            image = Main_url + data.find('div', attrs = {"class":"content-modules"}).find('img').get('src')
-        except:
-            image = ""
-        
-        try:
-            sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            date = data.find('div', attrs = {"class":"date"}).get_text(strip=True)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://www.metz-connect.com/home/company/news.62.en.html"
-        news_weblink = i
-        
-        try:
-            announcement = data.find('div', attrs = {"class":"content-modules"}).get_text(strip=True)            
-            print(announcement)
+            try:
+                title = data.find('h1', attrs = {"class":"headline medium black"}).get_text(strip=True)
+                print(title)
+            except:
+                title = data.find('title').get_text(strip=True)
+                print(title)
             
-        except:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            print(announcement)
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        
-        company_news = {}
-        company_news['companyId'] = ''
-        company_news['location']=''
-        company_news['comment']=''
-        company_news['Date']= news_date
-        company_news['Crawled_on']=date
-        company_news['title']=title
-        company_news['Language']= language
-        company_news['announcementType']= announcement_type
-        company_news['Source'] = page_source
-        company_news['News_Weblink'] = news_weblink
-        company_news['photo']= image
-        company_news['videos']= ''
-        company_news['announcement']=announcement
-        company_news['historySubCategory']= sub_category
-        company_news['analysis'] = analysis
-        try:
-            collection.insert_one(company_news)
-            total_crwalled_links += 1
-        except Exception as e:
-            running_Sequence.append(e)
+            announcement_type = "News"
+
+            language = "en-us"
+
+            try:
+                image = Main_url + data.find('div', attrs = {"class":"content-modules"}).find('img').get('src')
+            except:
+                image = ""
+            
+            try:
+                sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"name":"description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                news_date = dateparser.parse(d,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
+            except:
+                news_date = datetime.now()
+
+            page_source = "https://www.metz-connect.com/home/company/news.62.en.html"
+            news_weblink = i
+            
+            try:
+                announcement = data.find('div', attrs = {"class":"content-modules"}).get_text(strip=True)            
+                print(announcement)
+                
+            except:
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
+            
+            date = datetime.now()
+            # Creating a list of links already avilable in database
+            
+            company_news = {}
+            company_news['companyId'] = ''
+            company_news['location']=''
+            company_news['comment']=''
+            company_news['Date']= news_date
+            company_news['Crawled_on']=date
+            company_news['title']=title
+            company_news['Language']= language
+            company_news['announcementType']= announcement_type
+            company_news['Source'] = page_source
+            company_news['News_Weblink'] = news_weblink
+            company_news['photo']= image
+            company_news['videos']= ''
+            company_news['announcement']=announcement
+            company_news['historySubCategory']= sub_category
+            company_news['analysis'] = analysis
+            try:
+                collection.insert_one(company_news)
+                total_crwalled_links += 1
+            except Exception as e:
+                running_Sequence.append(e)
     
     if Already_exist >= 1:
 
