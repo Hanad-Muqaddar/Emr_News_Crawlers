@@ -56,7 +56,9 @@ try:
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)
+
     # client= MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin')
+
     running_Sequence.append('Connected to DB Server')
 except:
     running_Sequence.append('Not Connected')

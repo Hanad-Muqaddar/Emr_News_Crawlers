@@ -46,6 +46,7 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from newspaper import fulltext
 from googletrans import Translator
+import scrapy  
 # ************************************************************************
 # defining variables
 
@@ -128,7 +129,6 @@ try:
     Base_url = "https://alexander-buerkle.com/de-de/magazin-news"
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
-    
     news_links = []
     news_dates = [] 
 
@@ -137,26 +137,26 @@ try:
         Trans_text = translator.translate(Trans,dest='en')
         return Trans_text.text
     
-    # links = soup.find_all('div',{ "class" : "newstilestyled__NewsTileWrapper-sc-94h61i-1 VhXTt"})
-
-    links = soup.find_all("div", class_=lambda value: value and value.startswith("newstilestyled__NewsTileWrapper"))
-
+    response2 = scrapy.Selector(result)
+    links = response2.xpath('//div[contains(@class, "sliderstyled__SliderItemContainer")]')
     for link in links:
-        news_link = Main_url + link.find('a').get('href')
+        news_link = Main_url + link.xpath('.//a/@href').get()
+        # print(news_link)
+
         if news_link not in news_links:
             news_links.append(news_link)
             try:
-                # news_date = link.find('div',{"class":"styled__ABText-sc-131boho-0 fYzUUn newstilestyled__ArticleDate-sc-1ahky7f-6 gaIKhp"}).get_text(strip=True)
-                news_date = link.find('div', attrs = {"type":"overline"}).find_next('div', attrs = {"type":"overline"}).get_text(strip=True)                
+                news_date = link.xpath('.//div[contains(@class, "newstilestyled__ArticleTagAndDateWrapper")]/div[@type="overline"][2]/text()').get()             
                 news_dates.append(news_date)
             except:
                 news_date = ""
                 news_dates.append(news_date)
 
+
     # print(news_links)
     # print(news_dates)
-    # print(len(news_links))
-    # print(len(news_dates))
+    print(len(news_links))
+    print(len(news_dates))
 
      # Creating a list of links already avilable in database
     links_list = []

@@ -185,7 +185,7 @@ try:
                 print(title)
             except:
                 title = data.find('title').text
-                # print(title)
+                print(title)
             
             if title in All_title_list:
                 Already_exist += 1

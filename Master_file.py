@@ -92,6 +92,7 @@ crawlerToCollectionMapping={
     "Cooper_Lighting":"Cooper_Lighting",
     "Deha_group":"Deha_Group",
     "Dehn_International":"DEHN",
+    "Dehn_International_Second":"DEHN",
     "Draka_Comteq":"Draka_Comteq",
     "Eaton":"EATON",
     "ELEKTROKABEL":"ELEKTROKABEL",
@@ -158,6 +159,8 @@ crawlerToCollectionMapping={
     "RS_Components":"RS_Components",
     "RYBINSKKABEL":"RYBINSKKABEL",
     "RZB":"RZB",
+    "RZB_Second":"RZB",
+    "Trilux_GmbH":"TriluxGmbH",
     "SARANSKKABEL":"SARANSKKABEL",
     "Schenider_Electric":"SCHNIDER_ELECTRIC",
     "Schenider_Electric2":"SCHNIDER_ELECTRIC",
@@ -190,7 +193,7 @@ crawlerToCollectionMapping={
     "Harting" : "HARTING",
     "Wieland" : "WIELAND",
     "Bosch" : "BOSCH",
-    "Wieland_Electric" : "WIELAND_ELECTRIC",    
+    "Wieland_Electric" : "WIELAND_ELECTRIC",
 }
 
 def annoucments_time(client_Coll,crawler_name,datefilter):
@@ -320,6 +323,7 @@ Emr_News_Cralers_Dict = {
     "Cooper_Lighting":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Deha_group":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Dehn_International":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
+    "Dehn_International_Second":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Draka_Comteq":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Eaton":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "ELEKTROKABEL":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
@@ -384,6 +388,8 @@ Emr_News_Cralers_Dict = {
     "RS_Components":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "RYBINSKKABEL":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "RZB":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
+    "RZB_Second" :"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
+    "Trilux_GmbH" : "/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "SARANSKKABEL":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Schuch":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "SCHUURMAN":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",

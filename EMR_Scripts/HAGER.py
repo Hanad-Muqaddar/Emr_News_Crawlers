@@ -138,15 +138,17 @@ try:
             news_links.append(news_link)
 
     # print(news_links)
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
 
     for i in news_links:
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+        
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
 
         else:        

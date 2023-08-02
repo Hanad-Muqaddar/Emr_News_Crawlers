@@ -82,11 +82,12 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -164,6 +165,12 @@ try:
         z = i.find('p').text
         para.append(z)
     all_links = main.find_all('a', class_='dehn-button button internal')
+
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     for i,j,k,l,m in zip(dates,all_head, images,para,all_links):
         
         try:
@@ -171,13 +178,10 @@ try:
         except:
             news_weblink = ""
             
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
             try:
@@ -230,7 +234,7 @@ try:
             company_news['announcement'] = announcement
             company_news['historySubCategory']= sub_category
             try:
-                collection.insert_one(company_news)
+                # collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

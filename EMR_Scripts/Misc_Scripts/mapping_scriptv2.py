@@ -267,6 +267,7 @@ try:
     'SOUTHWIRE' :ObjectId('618a44cc2aa941a7225c5ff2'),
     'Hubbell': ObjectId("6087dff16cbd41ac14ad52d0"), 
     'Weidmuller' : ObjectId("61ceaad983ff8a2ac7eb1fa0"),
+    "TriluxGmbH" : ObjectId("61cef57383ff8a2ac7eb3f8e"),
     }
     count=0
     done = []

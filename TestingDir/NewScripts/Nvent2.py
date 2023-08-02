@@ -136,7 +136,7 @@ try:
     News_list = response1.xpath('//section[contains(@class,"nv-layout--three-col")]//div[@class="nvent-block"]//a[@class="card__link"]')
     for news in News_list:
         link = news.xpath('./@href').get()
-        news_links.append(link)
+        news_links.append(Main_url + link)
          
     print(news_links)
     print(len(news_links))
@@ -151,6 +151,7 @@ try:
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
 
         else:        

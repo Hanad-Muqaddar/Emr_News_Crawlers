@@ -131,15 +131,17 @@ try:
     links = response.css(".carousel-inner .active .card-shadow .card-img-top ::attr(href)").getall()
     final_links = [Base_Link + link for link in links]
     print(final_links)
-    for i in final_links:
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
         
+    for i in final_links:
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1
+            print("Already Crawled")
             continue
         else:
             result1 = requests.get(i)

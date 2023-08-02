@@ -149,7 +149,7 @@ try:
     final_links = [Base_Link + link for link in links]
     print(final_links)
 
-    
+    print(final_links)
     for i in final_links:
         db_list = []
         mydoc = collection.find()

@@ -126,6 +126,7 @@ try:
     feed = feedparser.parse('https://www.element14.com/news/tagfeed/en/tags/News')
     for i in feed['entries']:     
         n_link =   i['link'] 
+        print(n_link)
 
         db_list = []
         mydoc = collection.find()
@@ -134,6 +135,7 @@ try:
         if n_link in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
 
         else:       

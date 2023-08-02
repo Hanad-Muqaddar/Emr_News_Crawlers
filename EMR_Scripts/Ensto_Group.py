@@ -64,11 +64,11 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -132,6 +132,7 @@ try:
     for i in range(len(data['Cards'])):
         try:
             title = data['Cards'][i]['header']
+            print(title)
         except:
             title = ""
         try:
@@ -174,6 +175,7 @@ try:
         if news_weblink in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
             company_news = {}

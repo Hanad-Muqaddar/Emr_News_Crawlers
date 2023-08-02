@@ -166,6 +166,7 @@ try:
             soup = BeautifulSoup(result.content, 'lxml')
             try:
                 title = soup.find("title").text
+                print(title)
             except:
                 title = ""
             print(title)

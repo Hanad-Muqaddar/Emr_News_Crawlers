@@ -138,59 +138,62 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-
-        try:
-            title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-        except:
-            title = data.find('title').text
-        announcement_type = "Press release"
-
-        language = "en-us"
-
-        try:
-            image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-        except:
-            image = ""
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            date = data.find('span', {"class":"post-date text-color-primary pr-2"}).find('time', attrs = {"itemprop":"datePublished"}).get_text(strip=True)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-        except:
-            news_date = ""
-
-        page_source = "https://www.telegaertner.com/en/newsroom"
-        news_weblink = i
-        
-        try:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')    
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
+    # Creating a list of links already avilable in database
         links_list = []
         mydoc = collection.find()
         for x in mydoc:
             links_list.append(x['News_Weblink'])
 
-        if news_weblink in links_list:
+    for i in news_links: 
+        
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
+        else:       
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('meta', attrs = {"property":"og:title"}).get("content")
+            except:
+                title = data.find('title').text
+            announcement_type = "Press release"
+
+            language = "en-us"
+
+            try:
+                image = data.find('meta', attrs = {"property":"og:image"}).get("content")
+            except:
+                image = ""
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                date = data.find('span', {"class":"post-date text-color-primary pr-2"}).find('time', attrs = {"itemprop":"datePublished"}).get_text(strip=True)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+            except:
+                news_date = ""
+
+            page_source = "https://www.telegaertner.com/en/newsroom"
+            news_weblink = i
+            
+            try:
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')    
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

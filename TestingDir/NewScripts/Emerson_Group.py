@@ -75,10 +75,12 @@ try:
     result = requests.get("https://www.emerson.com/en-us/news", headers=headers)
     response = Selector(result)
     news_links = response.css("#section4 .card-item .display-content a::attr(href)").getall()
+    f_news_links = ["https://www.emerson.com"+l for l in news_links]
     news_dates = response.css("#section4 .card-item .meta-4::text").getall()
-    # print(news_links)
-    # print(news_dates)
-    for i, L_date in zip(news_links, news_dates):
+    print(news_links)
+    print(news_dates)
+
+    for i, L_date in zip(f_news_links, news_dates):
         if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -90,11 +92,11 @@ try:
             try:
                 title = data.find('meta', attrs = {"property":"og:title"}).get("content")
                 title = title.replace('| Emerson US','')
-                # print(title)
+                print(title)
             except:
                 title = data.find('title').get_text(strip=True)
                 title = title.replace('| Emerson US','')
-                # print(title)
+                print(title)
             language = "en-us"
             announcement_type = "News"
             try:

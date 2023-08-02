@@ -47,7 +47,6 @@ try:
     client = MongoClient(db_path)
 
     # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
-
     running_Sequence.append('Connected to DB Server')
 
 except:
@@ -133,6 +132,7 @@ try:
                 news_date = ""
             try:
                 title = response1.css(".detail-intro h1::text").get()
+                print(title)
             except:
                 title = ""
             try:

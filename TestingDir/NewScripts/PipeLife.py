@@ -47,6 +47,9 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
+
 # ************************************************************************
 # defining variables
 # opts = Options()
@@ -146,34 +149,69 @@ else:
 # *****************************************************************************
 
 try:
-    result = requests.get("https://www.pipelife.com/service/news-and-projects.html")
-    soup = BeautifulSoup(result.content, 'lxml')
-    # news = soup.find_all("div", class_='js-variableHeight teaser-item teaser-item__cardimage')
-    news = soup.find_all("div", class_='teaser-item teaser-item__cardimage')
-    for j in news:
-        try:
-            news_weblink = "https://www.pipelife.com"  + j.find("a").get("href")
-        except:
-            news_weblink = ""
-        try:
-            analysis = j.find_all("p")[1].text
-        except:
-            try:
-                j.find_all('P')[1].find("b").text
-            except:
-                analysis = ""
-        try:
-            news_date = j.find_all("p")[0].text.split("|")[0]
-            news_date = dateparser.parse(news_date)
-        except:
-            news_date = ""
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+    
+     # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = True
+
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+    driver.get("https://www.pipelife.com/service/news-and-projects.html")
+    Main_url = "https://www.pipelife.com"
+
+
+    news_links = []
+    links = driver.find_elements(By.XPATH, '//div[contains(@class,"browser--newslist")]//article//a[@class="teaser-item__asset"]')
+    for link in links:
+        news_link = link.get_attribute('href')
+        news_links.append(news_link)
+
+    print(news_links)
+    print(len(news_links))
+
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
+    # result = requests.get("https://www.pipelife.com/service/news-and-projects.html")
+    # soup = BeautifulSoup(result.content, 'lxml')
+    # # news = soup.find_all("div", class_='js-variableHeight teaser-item teaser-item__cardimage')
+    # news = soup.find_all("div", class_='teaser-item teaser-item__cardimage')
+    # for j in news:
+    #     try:
+    #         news_weblink = "https://www.pipelife.com"  + j.find("a").get("href")
+    #         print(news_weblink)
+    #     except:
+    #         news_weblink = ""
+    #     try:
+    #         analysis = j.find_all("p")[1].text
+    #     except:
+    #         try:
+    #             j.find_all('P')[1].find("b").text
+    #         except:
+    #             analysis = ""
+    #     try:
+    #         news_date = j.find_all("p")[0].text.split("|")[0]
+    #         news_date = dateparser.parse(news_date)
+    #     except:
+    #         news_date = ""
+
+    for news_weblink in news_links:
+        
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
             res = requests.get(news_weblink)
@@ -186,10 +224,24 @@ try:
                 image = soup2.find("meta", attrs={"property":"og:image"}).get("content")
             except:
                 image = ""
+
+            try:
+                analysis = soup2.find("meta", attrs={"property":"og:description"}).get("content")
+            except:
+                analysis = ""
+
             try:
                 sub_category = soup2.find("meta", attrs={"property":"og:type"}).get("content")
             except:
                 sub_category = ""
+
+            try:
+                date = soup2.find('span', {"class":"intro__date"}).get_text(strip=True)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
+            except:
+                news_date = ""
+
             try:
                 announcement = soup2.find("div", class_='root responsivegrid').text
             except:
@@ -215,7 +267,7 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

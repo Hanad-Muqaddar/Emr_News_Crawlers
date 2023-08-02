@@ -13,22 +13,48 @@ from pymongo import MongoClient
 
 from bs4 import BeautifulSoup
 
+from selenium import webdriver
+
+# from webdriver_manager.chrome import ChromeDriver
+
+from selenium.webdriver.chrome.options import Options
+
+from selenium.webdriver.support.ui import WebDriverWait
+
+from selenium.webdriver.common.keys import Keys
+
+from selenium.webdriver.support import expected_conditions
+
+from selenium.webdriver.common.by import By
+
+from urllib.parse import urlparse
+
+import re
+
 import traceback
+
+import urllib
 
 import dateparser
 
-import datetime
+from datetime import datetime
+
+from bson.objectid import ObjectId
+
+from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
-from scrapy import Selector
-
 from newspaper import fulltext
+from scrapy import Selector
+from googletrans import Translator
 
 # ************************************************************************
+# defining variables
+
 running_Sequence = []
 
-started_on = datetime.datetime.now()
+started_on = datetime.now()
 
 c_name = 'RITTAL' # Name of the Collection
 
@@ -41,11 +67,7 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    # data = json.load(file)
-    # db_path = data[0]['Db_Path']
-    # client = MongoClient(db_path)
-    
+
     client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
@@ -82,9 +104,9 @@ except:
 
 if last_insertion == None:
 
-    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
 
-    Crwl_time = datetime.datetime.now()
+    Crwl_time = datetime.now()
 
 else:
 
@@ -103,72 +125,92 @@ else:
 ####################################################
 
 # *****************************************************************************
-
 try:
-    result = requests.get("https://www.rittal.com/com-en/Company/Presse/Pressemeldungen")
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    Main_url = "https://www.rittal.com"
+    Base_url = "https://www.rittal.com/com-en/Company/Presse/Pressemeldungen"
+    result = requests.get(Base_url,headers=headers)
     response = Selector(result)
-    links = response.xpath('//div[@class="teaser-block"]//div[@class="teaser --default"]//a[@class="custom-link ricon-after-link"]/@href').getall()
-    Base_Link = "https://www.rittal.com"
-    final_links = [Base_Link + link for link in links if "https" not in link]
-    print(final_links)
-
-    db_list = []
+    
+    news_links = response.xpath('//div[@class="article-content"]//div[@class="teaser --default"]//a[@class="teaser-image"]/@href').getall()
+    news_links = [Main_url + l for l in news_links]
+    print(news_links)
+  
+    # Creating a list of links already avilable in database
+    links_list = []
     mydoc = collection.find()
     for x in mydoc:
-        db_list.append(x['News_Weblink'])
+        links_list.append(x['News_Weblink'])
+
+    for n in news_links:   
         
-    for i in final_links:
-        
-        if i in db_list:
-            Already_exist += 1
+        if n in links_list:
             total_crwalled_links += 1
+            Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
-            result1 = requests.get(i)
-            response1 = Selector(result1)
+        else:     
+            result2 = requests.get(n, headers=headers)
+            response2 = Selector(result2)
+            
             try:
-                N_date = response1.xpath('//div[@class="intro-title"]/p/text()').get()
-                print(N_date)
+                title = response2.xpath('//article[@class="panel"]//h1[@class="panel__title"]/text()').get()
+                print(title)
+            except:
+                title = ""
+            
+            language = "en-us"
+            
+            try:
+                image = response2.xpath('//div[contains(@class,"detail-stage nested --middle --center")]/img/@src').get()
+                print(image)
+            except:
+                image = ""
+
+            announcement_type = "News"
+            
+            try:
+                sub_category = response2.xpath('//meta[@property="og:type"]/@content').get()
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = response2.xpath('//meta[@property="og:description"]/@content').get()
+                print(analysis)
+            except:
+                analysis = ""
+            try:
+                N_date = response2.xpath('//div[@class="intro-title"]/p[1]/text()').get()
                 news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
                 print(news_date)
             except:
                 news_date = ""
+
+            page_source = "https://www.rittal.com/com-en/Company/Presse/Pressemeldungen" 
+            news_weblink = n
+            
             try:
-                title = response1.xpath('//div[@class="detail-intro"]//h1/text()').get()
-                print(title)
-            except:
-                title = ""
-            try:
-                analysis = response1.xpath('//meta[@property="og:description"]/@content').get()
-            except:
-                analysis = ""
-            try:
-                image = response1.xpath('//meta[@property="og:image"]/@content').get()
-            except:
-                image = ""
-            sub_category = ""
-            try:
-                announcement = fulltext(result1.text)
+                announcement = fulltext(result2.text)
                 announcement = announcement.replace('\n','<br>')
                 print(announcement)
+                
             except:
-                announcement = ""
-            announcement_type = "News"
-            language = "en-US"
-            page_source = "https://www.rittal.com/com-en/Company/Presse/Pressemeldungen"
-            crawled_date = datetime.datetime.now()
-
+                announcement = response2.xpath('normalize-space(//div[@class="article-content"])').get()
+                print(announcement)
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
             company_news['comment']=''
             company_news['Date']= news_date
-            company_news['Crawled_on']=crawled_date
+            company_news['Crawled_on']=date
             company_news['title']=title
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = i
+            company_news['News_Weblink'] = news_weblink
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement
@@ -183,24 +225,19 @@ try:
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
+
     else:
 
         tmp_txt = ''
 
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
-    ended_on = datetime.datetime.now()
-except Exception as e:
-    Error_Time =  datetime.datetime.now()
+    ended_on = datetime.now()
+except:
+    Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
 
-    running_Sequence.append(e)
-
-
-# **************************************************************************
-
-# **************************************************************************
 
 # **************************************************************************
 rep = ''
@@ -218,6 +255,7 @@ except Exception as e:
     rep = traceback.format_exc()
 
     pass
+
 
 log = {}
 
@@ -237,6 +275,6 @@ log['Links_Skipped'] = Already_exist
 
 log['Last_news_crawl_time'] = last_time
 
-log['Browser'] = 'Chrome'
+log['Browser'] = 'None'
 
-# error_logs.insert_one(log)
+error_logs.insert_one(log)

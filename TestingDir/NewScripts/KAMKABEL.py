@@ -144,80 +144,83 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
 
-    # print(news_links)
+    print(news_links)
     # print(len(news_links))
 
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
+
     for i in news_links:
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-        try:
-            title = data.find('section',attrs = {"class":"page-top"}).find('h1').get_text()
-            title = translate(title)
-            print(title)
-        except:
-            try:
-                title = data.find('title').get_text()
-                title = translate(title)
-            except Exception as e:
-                title = data.find('title').get_text()
         
-        announcement_type = "News"
-        language = "en-us"
-
-        try:            
-            image = Main_url + data.find('div',attrs = {'class':'detailimage'}).find('img',attrs = {'class':'img-responsive'}).get('src')
-            # print(image)
-        except:
-            image = ""
-            # print(image)
-
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-            sub_category = translate(sub_category)
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta',attrs = {'property':'og:description'}).get("content")
-            analysis = translate(analysis)
-            # print(analysis)
-        except:
-            analysis = ""
-        try:
-            date = data.find('div',{'class':'period'}).find('span').get_text()
-            date = translate(date)
-            # print(date)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            # print(news_date)
-        except:
-            date = data.find('div',{'class':'period'}).get_text()
-            date = translate(date)
-            # print(date)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            # print(news_date)
-
-        page_source = "https://www.kamkabel.ru/press/news/"
-        news_weblink = i
-        
-        try:
-            announcement = data.find('div',{'class':'content'}).get_text()
-            announcement = translate(announcement)
-            # print(announcement)            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+            try:
+                title = data.find('section',attrs = {"class":"page-top"}).find('h1').get_text()
+                title = translate(title)
+                print(title)
+            except:
+                try:
+                    title = data.find('title').get_text()
+                    title = translate(title)
+                except Exception as e:
+                    title = data.find('title').get_text()
+            
+            announcement_type = "News"
+            language = "en-us"
+
+            try:            
+                image = Main_url + data.find('div',attrs = {'class':'detailimage'}).find('img',attrs = {'class':'img-responsive'}).get('src')
+                # print(image)
+            except:
+                image = ""
+                # print(image)
+
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+                sub_category = translate(sub_category)
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta',attrs = {'property':'og:description'}).get("content")
+                analysis = translate(analysis)
+                # print(analysis)
+            except:
+                analysis = ""
+            try:
+                date = data.find('div',{'class':'period'}).find('span').get_text()
+                date = translate(date)
+                # print(date)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                # print(news_date)
+            except:
+                date = data.find('div',{'class':'period'}).get_text()
+                date = translate(date)
+                # print(date)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                # print(news_date)
+
+            page_source = "https://www.kamkabel.ru/press/news/"
+            news_weblink = i
+            
+            try:
+                announcement = data.find('div',{'class':'content'}).get_text()
+                announcement = translate(announcement)
+                # print(announcement)            
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

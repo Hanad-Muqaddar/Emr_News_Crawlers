@@ -68,6 +68,7 @@ try:
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)
+
     # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
     running_Sequence.append('Connected to DB Server')
 
@@ -147,15 +148,16 @@ try:
 
         for k,l in zip(links_list, dates_list):
             if k in db_list:
-                # print("Link Already exists in database")
                 total_crwalled_links += 1
                 Already_exist += 1
+                print("Already Crawled")
                 continue
             else:
                 res = requests.get(k)
                 soup = BeautifulSoup(res.content, 'lxml')
                 try:
                     title = soup.find("meta", attrs = {"property":"og:title"}).get("content")
+                    print(title)
                 except:
                     title = ""
                 try:

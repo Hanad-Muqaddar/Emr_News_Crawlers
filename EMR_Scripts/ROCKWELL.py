@@ -130,8 +130,8 @@ try:
     # This is for Press Release
 
     feed = feedparser.parse("https://ir.rockwellautomation.com/rss/PressRelease.aspx")
-    print(feed)
-    for i in feed['entries']:
+    # print(feed)
+    for i in feed:
         print(i)
         print(i['link'])
         db_list = []

@@ -153,7 +153,6 @@ try:
 
     print(news_links)
     print(len(news_links))
-    print('\n\n*************************************************************************************')
 
 
     db_list = []
@@ -165,6 +164,7 @@ try:
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
 
         else:        

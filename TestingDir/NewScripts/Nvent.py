@@ -87,6 +87,7 @@ try:
     data = json.load(file)
     db_path = data[0]['Db_Path']
     client = MongoClient(db_path)
+
     # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
     running_Sequence.append('Connected to DB Server')
 
@@ -145,19 +146,24 @@ else:
 # *****************************************************************************
 
 try:
-    result = requests.get("https://investors.nvent.com/rss/PressRelease.aspx?LanguageId=1&CategoryWorkflowId=1cb807d2-208f-4bc3-9133-6a9ad45ac3b0&tags=").content
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    result = requests.get("https://investors.nvent.com/rss/PressRelease.aspx?LanguageId=1&CategoryWorkflowId=1cb807d2-208f-4bc3-9133-6a9ad45ac3b0&tags=",headers=headers).content
     soup = BeautifulSoup(result, 'lxml')
     links = [ "https:" +item.text.split('https:')[1].split('.aspx')[0] +".aspx" for item in soup.find_all('item') ]
     print(links)
+
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     for j in links:
         news_weblink = j
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+        
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
             result2 = requests.get(news_weblink)

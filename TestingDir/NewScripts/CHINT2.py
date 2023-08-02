@@ -175,7 +175,7 @@ try:
             response1 = Selector(response)
             try:
                 title = data.find('h1', {'class':"elementor-heading-title elementor-size-default"}).get_text(strip=True)
-                # print(title)
+                print(title)
             except:
                 title = ""
             

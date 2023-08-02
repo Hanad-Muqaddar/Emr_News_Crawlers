@@ -44,7 +44,10 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
+
 from newspaper import fulltext
+from scrapy import Selector
+from googletrans import Translator
 
 # ************************************************************************
 # defining variables
@@ -124,85 +127,88 @@ else:
 # *****************************************************************************
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    Main_url = "https://www.are.fi"
-    Base_url = "https://www.are.fi/en/news-and-articles/"
+    Main_url = "https://www.mynewsdesk.com"
+    Base_url = "https://www.mynewsdesk.com/fi/are/latest_news"
     result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
+    response = Selector(result)
     
-    news_links = []
-
-    links = soup.find('div',{ "class" : "content"}).find_all('div',{ "class" : "arkisto-feed"})
-    for link in links:
-        news_link = link.find('a').get('href')
-        if news_link not in news_links:
-            news_links.append(news_link)
-
+    news_links = response.xpath('//div[@class=" sm:w-1/2 lg:w-1/3"]/a/@href').getall()
     print(news_links)
-    print(len(news_links))
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+    def translate(Trans):
+        translator = Translator()
+        Trans_text = translator.translate(Trans,dest='en')
+        return Trans_text.text
 
-        try:
-            title = data.find('meta',attrs = {'property':'og:title'}).get('content')
-            title = title.replace('- Are','')
-            print(title)
-        except:
-            title = ""
-            print(title)
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
+
+    for n in news_links:   
         
-        announcement_type = "News"
-        language = "en-us"
-        image = ""
-
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            try:
-                date = data.find('meta',attrs = {'property':'article:modified_time'}).get('content')
-                print(date)
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-                print(news_date)
-            except:
-                date = data.find('section',{ "id" : "subPage_wrapper"}).find('p').get_text().replace('Published','').replace(':','')
-                print(date)
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'DMY'} )
-                print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://www.are.fi/en/news-and-articles/"
-        news_weblink = i
-        
-        try:            
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            print(announcement)
-            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if n in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
+        else:     
+            result2 = requests.get(n, headers=headers)
+            response2 = Selector(result2)
+            
+            try:
+                title = response2.xpath('//article[@class="panel"]//h1[@class="panel__title"]/text()').get()
+                title = translate(title)
+                print(title)
+            except:
+                title = ""
+            
+            language = "en-us"
+            
+            try:
+                image = response2.xpath('//meta[@property="og:image"]/@content').get()
+                print(image)
+            except:
+                image = ""
+
+            announcement_type = "News"
+
+            try:
+                sub_category = response2.xpath('//meta[@property="og:type"]/@content').get()
+                sub_category = translate(sub_category)
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = response2.xpath('//meta[@property="og:description"]/@content').get()
+                analysis = translate(analysis)
+                print(analysis)
+            except:
+                analysis = ""
+            try:
+                N_date = response2.xpath('//article[@class="panel"]//time/@datetime').get()
+                N_date = translate(N_date)
+                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
+                print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://www.mynewsdesk.com/fi/are/latest_news"
+            news_weblink = n
+            
+            try:
+                announcement = fulltext(result2.text)
+                announcement = announcement.replace('\n','<br>')
+                announcement = translate(announcement)
+                print(announcement)
+                
+            except:
+                announcement = response2.xpath('normalize-space(//article[@class="panel"]//div[@class="panel__text"])').get()
+                announcement = translate(announcement)
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

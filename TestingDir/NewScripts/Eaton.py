@@ -70,12 +70,12 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
 
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -157,8 +157,8 @@ try:
     proxies_list = ['us-wa','fr','jp','au','de']
     import random
     p = random.choice(proxies_list)
-    proxies = {'http': f"http://waleeProxy:Cheeta@1@us-dc.proxymesh.com:31280",
-            'https': f"http://waleeProxy:Cheeta@1@us-dc.proxymesh.com:31280"}
+    proxies = {'http': f"http://waleeProxy:Cheeta@1@de.proxymesh.com:31280",
+            'https': f"http://waleeProxy:Cheeta@1@de.proxymesh.com:31280"}
     headers = {"Connection": "keep-alive",
                 "sec-ch-ua":  'Not A;Brand";v="99", "Chromium";v="99", "Google Chrome";v="99"',
                 "sec-ch-ua-mobile": "?0",

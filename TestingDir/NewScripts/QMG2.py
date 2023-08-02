@@ -153,7 +153,6 @@ try:
         All_title_list.append(x['title'])
 
     for i in news_links:
-        
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1

@@ -1,202 +1,283 @@
+# Packages to be imported
 import requests
+
 import time
+
 import json
+
 from random import randint
+
 from bs4 import BeautifulSoup
+
 from pymongo import MongoClient
+
+from bs4 import BeautifulSoup
+
+from selenium import webdriver
+
+# from webdriver_manager.chrome import ChromeDriver
+
+from selenium.webdriver.chrome.options import Options
+
+from selenium.webdriver.support.ui import WebDriverWait
+
+from selenium.webdriver.common.keys import Keys
+
+from selenium.webdriver.support import expected_conditions
+
+from selenium.webdriver.common.by import By
+
+from urllib.parse import urlparse
+
+import re
+
 import traceback
 
-from datetime import date, timedelta
-from datetime import datetime
+import urllib
+
 import dateparser
-import copy
-today = datetime.now()
-running_sequence = []
+
+from datetime import datetime
+
+from bson.objectid import ObjectId
+
+from urllib.error import HTTPError
+
+from urllib.request import Request, urlopen
+
+from newspaper import fulltext
+from scrapy import Selector
+from googletrans import Translator
+
+# ************************************************************************
+# defining variables
+
+running_Sequence = []
+
 started_on = datetime.now()
 
-def CreateDbConnection(key,running_sequence):
-    try:
-        client= MongoClient(key)
-        running_sequence.append('Connected to Server')
-    except:
-        running_sequence.append('Not Connected')
-    return client
+c_name = 'SITECO' # Name of the Collection
 
-def check_link_exists(url,db,collection):
-    ch=db.get_collection(collection).find({'News_Weblink':url})
-    check=[]
-    for x in ch:
-        check.append(x)
-    if(len(check)<=0):
-        return False
-    else:
-        return True
-
-
-def News_SinglePageParser(url,running_sequence):
-    req = requests.get(url,verify=False)
-    running_sequence.append('Getting News Link')
-#     req = requests.get(url)
-#     print ('1')
-    soup = BeautifulSoup(req.content, 'lxml')
-    NewsData ={}
-    NewsData['companyId'] = '200000'
-    NewsData['Date'] = ''
-    NewsData['location']=''
-    NewsData['announcementType'] = 'News'
-    NewsData['Source'] = url
-    NewsData['News_Weblink'] = url 
-    try:
-        NewsData['title'] = soup.find('figcaption', class_= 'slideshow__slide-overlay').get_text().strip()
-    except:
-        NewsData['title']=''
-    try: 
-        NewsData['announcement'] = soup.find('div', class_ = 'textmedia__text' ).get_text()
-    except :
-        NewsData['announcement'] = datetime.today()
-        
-    try:
-        photo = 'https://www.siteco.com' + soup.find('img', class_ = 'slideshow__slide-image').get('src')
-    except:
-        photo=''
-    NewsData['historySubCategory']=''
-    refrences=''
-    analysis=''
-    # date_time=datetime.today()
-    NewsData['photo']= photo
-    NewsData['Language']= 'English'
-    today=datetime.today()
-    NewsData['Crawled_on']=today
-    validatedObject  ={}
-    validatedObject['companyId']=NewsData['companyId']
-    validatedObject['Date']=NewsData['Date']
-    validatedObject['title']=NewsData['title'] 
-    validatedObject['announcement']=NewsData['announcement']
-    validatedObject['announcementType']=NewsData['announcementType']
-    
-    validatedObject['photo']=photo
-    validatedObject['analysis']=analysis
-    validatedObject['refrences ']=refrences
-    validatedObject['historySubCategory']= NewsData['historySubCategory']
-
-    NewsData['validatedObject']=validatedObject
-    return NewsData
-def History_newsParser(news_url,localDb,localCollectionName,running_sequence):
-    req = requests.get(url,verify=False)
-#     req = requests.get(url)
-    soup = BeautifulSoup(req.content, 'lxml')
-    running_sequence.append('Getting News Link')
-    NewsPageUrls = []
-    all_news = []
-    div =  soup.find('div',class_='main-content').find_all('div', class_ = 'block' )
-    count=0
-    for single in div:
-        if(single.find('div',class_='row')):
-            if(count>0):
-                break
-            for i in single:
-                try:
-                    new_url='https://www.siteco.com' + i.find('a', class_ =  'internal-link').get('href')
-                    NewsPageUrls.append(new_url)
-                    status=check_link_exists(new_url,db,collection)
-                    if(status):
-                        count+=1
-#                         print ('exist')
-#                         print ('*************')
-                        break
-                    else:
-#                         print ("Not Exist in db")
-                        data=News_SinglePageParser(new_url,running_sequence)
-#                         print (data['title'])
-#                         print ('*****************')
-                        all_news.append(data) 
-                except:
-                    pass
-        
-        else:
-            pass
-    print(all_news)
-    return all_news     
-    
-last_insertion = None
-last_time = ''
-Already_exist = 0
 total_crwalled_links = 0
-try:
-    
-#   -----------LocalNewsCrawler---------------
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    key = db_path
-    # key='mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin'
-    dbName='TEMP_EMR_NEWS_Crawler_DB'
-    c_name ='SITECO'
-    url='https://www.siteco.com/en/company/news'
-    
-    Client=CreateDbConnection(key,running_sequence)
-    db =  Client[dbName]
-    collection = db[c_name]
-    error_logs = Client['Logs_DB']['Logs_TEMP_EMR_NEWS_Crawler_DB']
-    try:
-        for l_i in collection.find().sort('Date', -1).limit(1):
-            last_insertion = l_i
-    except:
-        # print('Fresh Starting News Crawler')
-        last_insertion = None
-    if last_insertion == None:
-        running_sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
-        Crwl_time = datetime.now()
-    else:
-        last_time = last_insertion['Date']
 
-    news_list = History_newsParser(url,db,c_name,running_sequence)
+Already_exist = 0
+
+# *************************************************************************
+
+# trying to connect with mongodb
+
+try:
+
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+
+    running_Sequence.append('Connected to DB Server')
+
+except:
+
+    running_Sequence.append('Not Connected')
+
+# *************************************************************************
+
+client_name = 'TEMP_EMR_NEWS_Crawler_DB'
+
+news =  client[client_name]
+
+collection = news[c_name]
+
+error_logs = client['Logs_DB']['Logs_TEMP_EMR_NEWS_Crawler_DB']
+
+last_insertion = None
+
+last_time = ''
+
+# ****************************************************************************
+
+try:
+
+    for l_i in collection.find().sort('Date', -1).limit(1):
+
+        last_insertion = l_i
+
+except:
+
+    last_insertion = None
+
+if last_insertion == None:
+
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
+
+    Crwl_time = datetime.now()
+
+else:
+
+    last_time = last_insertion['Date']
+
+    # running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+
+    Crwl_time = last_insertion['Date']
+
+# ****************************************************************************
+
+####################################################
+
+############# Every Company Logic Here #############
+
+####################################################
+
+# *****************************************************************************
+try:
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    Main_url = 'https://www.siteco.com'
+    Base_url = 'https://www.siteco.com/news'
+    result = requests.get(Base_url,headers=headers)
+    response = Selector(result)
+
+    news_links = response.xpath('//div[@class="block"]//div[@class="textmedia__text"]//a/@href').getall()
+    news_links = [Main_url + l for l in news_links]
+    print(news_links)
+  
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])                                                                                                    
+
+    for n in news_links:   
+
+        if n in links_list:
+            total_crwalled_links += 1
+            Already_exist += 1
+            print("Already Crawled")
+            continue
+        else:     
+            result2 = requests.get(n, headers=headers)
+            response2 = Selector(result2)
+            
+            try:
+                title = response2.xpath('//meta[@property="og:title"]/@content').get()
+                print(title)
+            except:
+                title = ""
+            
+            language = "en-us"
+            
+            try:
+                image = Main_url + response2.xpath('//img/@src').get()
+                print(image)
+            except:
+                image = ""
+
+            announcement_type = "News"
+            
+            try:
+                sub_category = response2.xpath('//meta[@property="og:type"]/@content').get()
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = response2.xpath('//meta[@property="og:description"]/@content').get()
+                print(analysis)
+            except:
+                analysis = ""
+            try:
+                N_date = datetime.now()
+                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
+                print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://www.siteco.com/news"
+            news_weblink = n
+            
+            try:
+                announcement = fulltext(result2.text)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
+                
+            except:
+                announ = response2.xpath('//div[@class="block"]//text()[normalize-space()]').getall()
+                announcement = ''
+                for i in announ: 
+                    announcement = announcement + ' ' + i
+                print(announcement)
+            
+            date = datetime.now()
+        
+            company_news = {}
+            company_news['companyId'] = ''
+            company_news['location']=''
+            company_news['comment']=''
+            company_news['Date']= news_date
+            company_news['Crawled_on']=date
+            company_news['title']=title
+            company_news['Language']= language
+            company_news['announcementType']= announcement_type
+            company_news['Source'] = page_source
+            company_news['News_Weblink'] = news_weblink
+            company_news['photo']= image
+            company_news['videos']= ''
+            company_news['announcement']=announcement
+            company_news['historySubCategory']= sub_category
+            company_news['analysis'] = analysis
+            try:
+                collection.insert_one(company_news)
+                total_crwalled_links += 1
+            except Exception as e:
+                running_Sequence.append(e)
     
-    for i in news_list:
-        weblink = i['News_Weblink']
-        l = False
-        for k in collection.find({ 'News_Weblink' : weblink }):
-            if k:
-                l = True
-                break
-        if l:
-            total_crwalled_links +=1
-            Already_exist +=1
-            # print('\n'+news['Link']+'\nNews Already Exist in DB\n')        
-        else:
-            i['Crawled_on'] = datetime.now()
-            total_crwalled_links +=1
-            collection.insert_one(i)
-    if Already_exist >=1:
+    if Already_exist >= 1:
+
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
+
     else:
+
         tmp_txt = ''
 
-    running_sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
+    running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
+
     ended_on = datetime.now()
-     
-except Exception as e:
-     
+except:
     Error_Time =  datetime.now()
+
     Reported_Error = traceback.format_exc()
+
+
+# **************************************************************************
 rep = ''
+
 try:
+
     Error = {}
+
     Error['Error_Detail'] = Reported_Error
+
     Error['Error_Time'] = Error_Time
+
 except Exception as e:
-     
+
     rep = traceback.format_exc()
+
     pass
-c_name ='SITECO'
+
+
 log = {}
+
 log['Crawler_name'] = c_name+'.py'
+
 log['Crawler_type'] = c_name
+
 log['Starting_time'] = started_on
+
 log['Ending_time'] = Error_Time if rep == '' else ended_on
+
 log['Error_Detail'] =  Error if rep == '' else ''
-log['Crawler_Runing Sequence'] = running_sequence if running_sequence else ''
+
+log['Crawler_Runing Sequence'] = running_Sequence if running_Sequence else ''
+
 log['Links_Skipped'] = Already_exist
+
 log['Last_news_crawl_time'] = last_time
+
 log['Browser'] = 'None'
-# error_logs.insert_one(log)
+
+error_logs.insert_one(log)

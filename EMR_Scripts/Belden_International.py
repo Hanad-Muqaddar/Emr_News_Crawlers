@@ -65,11 +65,11 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -136,8 +136,11 @@ try:
     data = soup.find_all("loc")
     links = []
     for j in data:
-        if "news" in j.text:
-            links.append(j.text)
+        if "News" in j.text:
+            if "2023" in j.text:
+                links.append(j.text)
+            else:
+                continue
         else:
             continue
     links = links[1:]
