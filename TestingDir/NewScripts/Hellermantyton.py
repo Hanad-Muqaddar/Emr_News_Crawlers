@@ -148,49 +148,52 @@ try:
     result = requests.get("https://www.hellermanntyton.com/news")
     soup = BeautifulSoup(result.content, 'lxml')
     links = soup.find_all("span", class_='ht-red show-news-link')
+    
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     for i in links:
         news_weblink = "https://www.hellermanntyton.com" + i.get("href")
-        response = requests.get(news_weblink)
-        soup = BeautifulSoup(response.content, 'lxml')
-        try:
-            image = soup.find("meta", attrs={"property":"og:image"}).get("content")
-        except:
-            image = ""
-        try:
-            title = soup.find("meta", attrs={"property":"og:title"}).get("content")
-        except:
-            title = ""
-        try:
-            news_date = dateparser.parse(soup.find("div", class_='intro_text').text.strip().replace("Date: ",""))
-        except:
-            news_date = ""
-        try:
-            analysis = soup.find("meta", attrs = {"name":"description"}).get("content")
-        except:
-            analysis = title
-        try:
-            announcement = soup.find("div", id='main_full').text.strip()
-        except:
-            announcement = ""
-        try:
-            announcement_type = news_weblink.replace("https://www.hellermanntyton.com/","").split('/')[0]
-        except:
-            announcement_type =""
-            
-        language = "en-US"
-        page_source = "https://www.hellermanntyton.com/news"
-        crawled_date = datetime.datetime.now()
-        sub_category = ""
-        
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
+            response = requests.get(news_weblink)
+            soup = BeautifulSoup(response.content, 'lxml')
+            try:
+                image = soup.find("meta", attrs={"property":"og:image"}).get("content")
+            except:
+                image = ""
+            try:
+                title = soup.find("meta", attrs={"property":"og:title"}).get("content")
+            except:
+                title = ""
+            try:
+                news_date = dateparser.parse(soup.find("div", class_='intro_text').text.strip().replace("Date: ",""))
+            except:
+                news_date = ""
+            try:
+                analysis = soup.find("meta", attrs = {"name":"description"}).get("content")
+            except:
+                analysis = title
+            try:
+                announcement = soup.find("div", id='main_full').text.strip()
+            except:
+                announcement = ""
+            try:
+                announcement_type = news_weblink.replace("https://www.hellermanntyton.com/","").split('/')[0]
+            except:
+                announcement_type =""
+                
+            language = "en-US"
+            page_source = "https://www.hellermanntyton.com/news"
+            crawled_date = datetime.datetime.now()
+            sub_category = ""
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

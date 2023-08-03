@@ -139,16 +139,22 @@ def parse_newspaper_data(url):
     image = article.top_image
     return full_news, image
 
-
 try:
-    proxies = {'http': 'http://alihaider9:salma_walee@de.proxymesh.com:31280',
-            'https': 'http://alihaider9:salman_walee@de.proxymesh.com:31280'}
+        
+    proxies = {'http': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280',
+            'https': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280'}
 
     result = requests.get("https://hubbell.gcs-web.com/rss/news-releases.xml")
     first_res = xmltodict.parse(result.text)
     d = json.dumps(first_res)
     data = json.loads(d)
     f_data = data['rss']['channel']['item']
+
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     for i in f_data:
         try:
             news_weblink = i['link']
@@ -156,11 +162,7 @@ try:
             news_weblink = ""
         if news_weblink == "":
             continue
-            
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+        
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1

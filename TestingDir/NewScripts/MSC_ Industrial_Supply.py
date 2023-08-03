@@ -159,46 +159,48 @@ try:
     # print(len(total_dates))
     # print(len(total_links))
     
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-    for i , N_Date, lin in zip(total_titles,total_dates, total_links):        
-        
-        try:
-            title = i
-            # print(title)
-        except:
-            title = ""
-            # print(title)
-       
-        announcement_type = "Press Release"
-        language = "en-us"
-        
-        image = ""         
-        sub_category = ""   
-        analysis = ""
-        try:
-            news_date = dateparser.parse(N_Date)
-            # print(news_date)
-        except:
-            news_date = ""
+    for i , N_Date, lin in zip(total_titles,total_dates, total_links):  
 
-        page_source = "https://www.mscdirect.com/corporate/press-releases"
-        news_weblink = lin
-        # print(news_weblink)
-        
-        announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
+        else:      
+        
+            try:
+                title = i
+                # print(title)
+            except:
+                title = ""
+                # print(title)
+        
+            announcement_type = "Press Release"
+            language = "en-us"
+            
+            image = ""         
+            sub_category = ""   
+            analysis = ""
+            try:
+                news_date = dateparser.parse(N_Date)
+                # print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://www.mscdirect.com/corporate/press-releases"
+            news_weblink = lin
+            # print(news_weblink)
+            
+            announcement = ""
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

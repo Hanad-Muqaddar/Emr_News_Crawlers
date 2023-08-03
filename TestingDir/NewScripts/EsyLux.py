@@ -145,15 +145,17 @@ else:
 # *****************************************************************************
 
 try:
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+        
     result = requests.get("https://www.esylux.com/press/#c787")
     soup = BeautifulSoup(result.content, 'lxml')
     data = soup.find_all("div", class_="row pressemitteilung")
     # print(data)
     for i in data:
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+        
         try:
             news_link = "https://www.esylux.com" + i.find("a").get("href")
         except:

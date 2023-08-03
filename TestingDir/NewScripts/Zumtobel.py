@@ -155,7 +155,13 @@ def parse_filtered_news(announcement):
         return new_data
 
 try:
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+    db_list = []
+    mydoc = collection.find()
+    # print('1')
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(version='114.0.5735.90').install()), options=opts)
     links = ['https://z.lighting/en/group/news-insights/?category=company', 'https://z.lighting/en/group/news-insights/?category=zumtobel']
     for i in links:
         driver.get(i)
@@ -187,16 +193,13 @@ try:
         # print(f_links)
         for j in f_links:
             news_weblink = j
-            db_list = []
-            mydoc = collection.find()
-            # print('1')
-            for x in mydoc:
-                db_list.append(x['News_Weblink'])
+            
             # print('2')
             if news_weblink in db_list:
                 # print('skip')
                 total_crwalled_links += 1
                 Already_exist += 1
+                print("Already Crawled")
                 continue
             driver.get(j)
             # print("Inner Links chal raha hn")

@@ -143,70 +143,73 @@ try:
     print(news_links)
     print(news_dates)
 
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
+
     # for i in news_links:  
-    for i, L_date in zip(news_links, news_dates):      
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-
-        try:
-            title = data.find('title').get_text(strip=True)
-            title  = title.replace('| itsme Nederland','')
-            print(title)
-        except:
-            title = ""
-
-        announcement_type = "News"
-        language = "en-us"
-
-        try:
-            image = data.find("div", {"class":"content"}).find("img").get('src')
-            print(image)
-        except:
-            image = ""
-
-        try:
-            video = data.find('iframe').get('src')
-            print(video)
-        except:
-            video = ""
+    for i, L_date in zip(news_links, news_dates):     
         
-        sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-            print(analysis)
-        except:
-            analysis = ""
-        try:
-            news_date = dateparser.parse(L_date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
-        except:
-            date = ""
-
-        page_source = "https://www.itsmenederland.nl/itsme/en/EUR/content/news/list"
-        news_weblink = i
-        
-        try:
-            
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            print(announcement)
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('title').get_text(strip=True)
+                title  = title.replace('| itsme Nederland','')
+                print(title)
+            except:
+                title = ""
+
+            announcement_type = "News"
+            language = "en-us"
+
+            try:
+                image = data.find("div", {"class":"content"}).find("img").get('src')
+                print(image)
+            except:
+                image = ""
+
+            try:
+                video = data.find('iframe').get('src')
+                print(video)
+            except:
+                video = ""
+            
+            sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"name":"description"}).get("content")
+                print(analysis)
+            except:
+                analysis = ""
+            try:
+                news_date = dateparser.parse(L_date,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
+            except:
+                date = ""
+
+            page_source = "https://www.itsmenederland.nl/itsme/en/EUR/content/news/list"
+            news_weblink = i
+            
+            try:
+                
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

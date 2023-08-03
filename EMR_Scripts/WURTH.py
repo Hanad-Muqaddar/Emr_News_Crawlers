@@ -126,16 +126,17 @@ else:
 # *****************************************************************************
 
 try:
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     feed = feedparser.parse("https://news.wuerth.com/feed/en")
     for i in feed['entries']:
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
-        
         if i['link'] in db_list:
             Already_exist += 1
             total_crwalled_links += 1
+            print("Already Crawled")
             continue
         else:
             try:

@@ -160,6 +160,7 @@ try:
         if news_web_link in db_list:
             Already_exist += 1
             total_crwalled_links += 1
+            print("Already Crawled")
             continue
         else:
             result1 = requests.get(news_web_link)

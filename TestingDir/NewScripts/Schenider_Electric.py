@@ -148,6 +148,11 @@ def parse_filtered_news(announcement):
         new_data =  ""
         return new_data
 try:
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     proxies = {'http': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280',
             'https': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280'}
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
@@ -165,14 +170,11 @@ try:
         
         if news_weblink == "":
             continue
-            
-        db_list = []
-        mydoc = collection.find()
-        # for x in mydoc:
-        #     db_list.append(x['News_Weblink'])
+                    
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
             result2 = requests.get(news_weblink, headers=headers)
@@ -255,7 +257,7 @@ try:
             company_news['emrLite'] = emr_lite
             company_news['News_Html'] = emr_html
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

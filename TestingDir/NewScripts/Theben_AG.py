@@ -140,71 +140,73 @@ try:
     print(news_links)
     print(len(news_links))
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+     # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-            print(title)
-        except:
-            title = data.find('title').text
-            title = title.replace('| Theben AG','')
-            print(title)
-        
-        announcement_type = "News"
-
-        language = "en-us"
-
-        try:
-            image = Main_url + data.find('meta', attrs = {"property":"og:image"}).get("content")
-            print(image)
-        except:
-            image = ""
-            print(image)
-
-        try:
-            video = data.find('div',{"class":"media leftAlone"}).find('iframe').get('src')
-            print(video)
-        except:
-            video = ""
-            print(video)
-
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-        except:
-            analysis = ""
-         
-
-        page_source = "https://www.theben.de/home-en-gb/"
-        news_weblink = i
-        
-        try:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            print(announcement)
-            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+    for i in news_links:  
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
+        else:      
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('meta', attrs = {"property":"og:title"}).get("content")
+                print(title)
+            except:
+                title = data.find('title').text
+                title = title.replace('| Theben AG','')
+                print(title)
+            
+            announcement_type = "News"
+
+            language = "en-us"
+
+            try:
+                image = Main_url + data.find('meta', attrs = {"property":"og:image"}).get("content")
+                print(image)
+            except:
+                image = ""
+                print(image)
+
+            try:
+                video = data.find('div',{"class":"media leftAlone"}).find('iframe').get('src')
+                print(video)
+            except:
+                video = ""
+                print(video)
+
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+            except:
+                analysis = ""
+            
+
+            page_source = "https://www.theben.de/home-en-gb/"
+            news_weblink = i
+            
+            try:
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
+                
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

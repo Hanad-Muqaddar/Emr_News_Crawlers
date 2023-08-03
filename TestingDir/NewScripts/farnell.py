@@ -123,15 +123,17 @@ else:
 
 # *****************************************************************************
 try:
+    
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     feed = feedparser.parse('https://www.element14.com/news/tagfeed/en/tags/News')
     for i in feed['entries']:     
         n_link =   i['link'] 
         print(n_link)
 
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
         if n_link in db_list:
             total_crwalled_links += 1
             Already_exist += 1

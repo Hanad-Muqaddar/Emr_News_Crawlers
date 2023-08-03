@@ -132,7 +132,6 @@ try:
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
 
-
     def translate(Trans):
         translator = Translator()
         Trans_text = translator.translate(Trans,dest='en')
@@ -146,58 +145,62 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
 
-    for i in news_links:   
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('title').get_text().replace('Infralogic -','').strip()
-            title = translate(title)
-        except:
-            title =""
+    for i in news_links: 
         
-        announcement_type = "Press Release"
-        language = "en-us"        
-        image = ""
-
-        try:
-            sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
-            sub_category = translate(sub_category)
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-            analysis = translate(analysis)
-        except:
-            analysis = ""
-
-        try:            
-            news_date = dateparser.parse(datetime.datetime.now(),  settings={'DATE_ORDER': 'YMD'} )
-        except:
-            news_date = ""
-
-        page_source = "http://www.infralogic.se/"
-        news_weblink = i
-        
-        try:
-            announcement = data.find('div',{"itemprop":"articleBody"}).get_text()
-            announcement = translate(announcement)         
-        except:
-            announcement = ""
-        
-        date = datetime.datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
+
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('title').get_text().replace('Infralogic -','').strip()
+                title = translate(title)
+            except:
+                title =""
+            
+            announcement_type = "Press Release"
+            language = "en-us"        
+            image = ""
+
+            try:
+                sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
+                sub_category = translate(sub_category)
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"name":"description"}).get("content")
+                analysis = translate(analysis)
+            except:
+                analysis = ""
+
+            try:            
+                news_date = dateparser.parse(datetime.datetime.now(),  settings={'DATE_ORDER': 'YMD'} )
+            except:
+                news_date = ""
+
+            page_source = "http://www.infralogic.se/"
+            news_weblink = i
+            
+            try:
+                announcement = data.find('div',{"itemprop":"articleBody"}).get_text()
+                announcement = translate(announcement)         
+            except:
+                announcement = ""
+            
+            date = datetime.datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

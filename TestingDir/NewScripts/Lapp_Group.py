@@ -134,12 +134,6 @@ try:
     
     news_links = []
 
-    # links = soup.find_all("div",{ "class" : "col-xs-12 col-md-6"})
-    # for link in links:
-    #     news_link = Main_url + link.find('a',{ "class" : "clean"}).get('href')
-    #     if news_link not in news_links:
-    #         news_links.append(news_link)
-
     links = soup.find("div",{ "class" : "row js-calc-height"}).find_all('a',{ "class" : "clean"})
     for link in links:
         news_link = Main_url + link.get('href')
@@ -148,64 +142,68 @@ try:
 
     print(news_links)
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('title').get_text(strip=True)
-            # print(title)
-        except:
-            title = ""
+    for i in news_links:  
         
-        language = "en-us"
-        
-        try:
-            image = data.find('div',{ "class" : "intrinsic"}).find('img',{ "class" : "img-responsive"}).get('src')
-            # print(image)
-        except:
-            image = ""
-
-        announcement_type = "News"
-        
-        sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-            # print(analysis)
-        except:
-            analysis = ""
-        try:
-            news_date = datetime.now()
-            # print(news_date)
-        except:
-            news_date = ''
-
-        page_source = "https://www.lappkabel.com/news/current-news.html"
-        news_weblink = i
-        
-        
-        try:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            # print(announcement)
-            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
+
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('title').get_text(strip=True)
+                # print(title)
+            except:
+                title = ""
+            
+            language = "en-us"
+            
+            try:
+                image = data.find('div',{ "class" : "intrinsic"}).find('img',{ "class" : "img-responsive"}).get('src')
+                # print(image)
+            except:
+                image = ""
+
+            announcement_type = "News"
+            
+            sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"name":"description"}).get("content")
+                # print(analysis)
+            except:
+                analysis = ""
+            try:
+                news_date = datetime.now()
+                # print(news_date)
+            except:
+                news_date = ''
+
+            page_source = "https://www.lappkabel.com/news/current-news.html"
+            news_weblink = i
+            
+            
+            try:
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')
+                # print(announcement)
+                
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

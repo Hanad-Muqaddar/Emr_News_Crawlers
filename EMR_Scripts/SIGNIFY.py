@@ -65,8 +65,8 @@ try:
     try:
         # total_page = json.loads(requests.get('https://www.signify.com/content/signify/en_AA/our-company/news/n13-press-releases.feeds.json').text)
 
-        proxies = {'http': f"http://waleeProxy:Cheeta@1@de.proxymesh.com:31280",
-            'https': f"http://waleeProxy:Cheeta@1@de.proxymesh.com:31280"}
+        proxies = {'http': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280',
+            'https': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280'}
 
         agent = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36", "Accept": "application/yang-data+json"}
         total_page = requests.get("https://www.signify.com/content/signify/en_AA/our-company/news/n13-press-releases.feeds.json", proxies=proxies)

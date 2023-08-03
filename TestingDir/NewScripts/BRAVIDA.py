@@ -132,7 +132,6 @@ try:
     years_news_links = []
     All_News_links = []
     try:
-
         links = soup.find('ul',{ "class" : "js-resultlist row justify-content-center mt-8"}).find_all('li')
         for link in links:
             news_link = link.find('a').get('href')
@@ -153,9 +152,9 @@ try:
     for i in All_News_links:
         try:
             if i in links_list:
-                print("Already Crawled")
                 total_crwalled_links += 1
                 Already_exist += 1
+                print("Already Crawled")
                 continue
             else:
                 response = requests.get(i, headers=headers)

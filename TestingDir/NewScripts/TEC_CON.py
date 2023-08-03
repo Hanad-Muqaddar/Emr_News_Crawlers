@@ -146,70 +146,73 @@ try:
     print(news_links)
     print(len(news_links))
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('meta',attrs = {'property':'og:title'}).get('content')
-            title = translate(title)
-            print(title)
-        except:
-            title = ""
-            print(title)
+    for i in news_links: 
         
-        announcement_type = "News"
-        language = "en-us"
-
-        try:
-            image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-            print(image)
-        except:
-            image = ""
-            print(image)
-
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-            sub_category = translate(sub_category)
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-            analysis = translate(analysis)
-        except:
-            analysis = ""
-        try:
-            date = data.find('meta', attrs = {"property":"article:published_time"}).get('content')
-            print(date)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://www.teccon.no/"
-        news_weblink = i
-        
-        try:            
-            announcement = data.find("div",{"class":"row row-parent style-light limit-width double-top-padding double-bottom-padding"}).get_text()
-            announcement = translate(announcement)
-            print(announcement)
-            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
+        else:       
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('meta',attrs = {'property':'og:title'}).get('content')
+                title = translate(title)
+                print(title)
+            except:
+                title = ""
+                print(title)
+            
+            announcement_type = "News"
+            language = "en-us"
+
+            try:
+                image = data.find('meta', attrs = {"property":"og:image"}).get("content")
+                print(image)
+            except:
+                image = ""
+                print(image)
+
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+                sub_category = translate(sub_category)
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+                analysis = translate(analysis)
+            except:
+                analysis = ""
+            try:
+                date = data.find('meta', attrs = {"property":"article:published_time"}).get('content')
+                print(date)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://www.teccon.no/"
+            news_weblink = i
+            
+            try:            
+                announcement = data.find("div",{"class":"row row-parent style-light limit-width double-top-padding double-bottom-padding"}).get_text()
+                announcement = translate(announcement)
+                print(announcement)
+                
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -227,7 +230,7 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

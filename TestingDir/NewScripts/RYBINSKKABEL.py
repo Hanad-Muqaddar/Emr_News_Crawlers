@@ -148,69 +148,69 @@ try:
         news_link = link.find_element(By.XPATH, './/h3/a').get_attribute('href')        
         news_links.append(news_link)
    
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
     # for i in news_links:   
-    for i in news_links:     
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-
-        try:
-            title = data.find('title').get_text(strip=True)
-            title = translate(title)
-            print(title)
-        except:
-            title = ""
-            print(title)
-        
-        announcement_type = "News"
-        language = "en-us"
-
-        try:
-            image = data.find("div",{"class":"press_center"}).find("img").get('src')
-        except:
-            image = ""
-        try:
-            sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            date = data.find('div', {"class":"date"}).get_text(strip=True)
-            date = translate(date)
-            print(date)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://www.rkz.ru/company/press/"
-        news_weblink = i
-        
-        try:
-            announcement = data.find("div",{"class":"press_center"}).get_text()
-            announcement = translate(announcement)
-            print(announcement)
-            
-        except:
-            announcement = ""
-
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
+    for i in news_links: 
         if news_weblink in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
+        else:    
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('title').get_text(strip=True)
+                title = translate(title)
+                print(title)
+            except:
+                title = ""
+                print(title)
+            
+            announcement_type = "News"
+            language = "en-us"
+
+            try:
+                image = data.find("div",{"class":"press_center"}).find("img").get('src')
+            except:
+                image = ""
+            try:
+                sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"name":"description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                date = data.find('div', {"class":"date"}).get_text(strip=True)
+                date = translate(date)
+                print(date)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://www.rkz.ru/company/press/"
+            news_weblink = i
+            
+            try:
+                announcement = data.find("div",{"class":"press_center"}).get_text()
+                announcement = translate(announcement)
+                print(announcement)
+                
+            except:
+                announcement = ""
+
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -228,7 +228,7 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

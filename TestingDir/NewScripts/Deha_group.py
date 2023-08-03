@@ -153,12 +153,11 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-
     for i in news_links:   
-        
         if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:     
             response = requests.get(i, headers=headers)

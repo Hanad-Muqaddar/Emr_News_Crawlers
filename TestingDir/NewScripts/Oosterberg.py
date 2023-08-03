@@ -146,74 +146,76 @@ try:
     # print(news_links)
     # print(len(news_links))
 
-    for i in news_links:   
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('title').get_text(strip=True)
-            title = title.replace('- Oosterberg','')
-            title = translate(title)
-            # print(title)
-        except:
+    for i in news_links:   
+        if i in links_list:
+            total_crwalled_links += 1
+            Already_exist += 1
+            print("Already Crawled")
+            continue
+        else:
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
             try:
                 title = data.find('title').get_text(strip=True)
                 title = title.replace('- Oosterberg','')
+                title = translate(title)
+                # print(title)
             except:
-                title = ""
-            # print(title)
-        
-        announcement_type = "News"
-        language = "en-us"
+                try:
+                    title = data.find('title').get_text(strip=True)
+                    title = title.replace('- Oosterberg','')
+                except:
+                    title = ""
+                # print(title)
+            
+            announcement_type = "News"
+            language = "en-us"
 
-        try:            
-            image = Main_url + data.find('div',attrs = {"class":"parallaxer"}).find('img').get('src')
-            # print(image)
-        except:
-            image = ""
-            # print(image)
+            try:            
+                image = Main_url + data.find('div',attrs = {"class":"parallaxer"}).find('img').get('src')
+                # print(image)
+            except:
+                image = ""
+                # print(image)
 
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-            sub_category = translate(sub_category)
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-            analysis = translate(analysis)
-            # print(analysis)
-        except:
-            analysis = ""
-        try:
-            date = data.find('meta', attrs = {"property":"article:published_time"}).get('content')
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            # print(news_date)
-        except:
-            news_date = ""
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+                sub_category = translate(sub_category)
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+                analysis = translate(analysis)
+                # print(analysis)
+            except:
+                analysis = ""
+            try:
+                date = data.find('meta', attrs = {"property":"article:published_time"}).get('content')
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                # print(news_date)
+            except:
+                news_date = ""
 
-        page_source = "https://www.oosterberg.nl/category/algemeen-nieuws/"
-        news_weblink = i
+            page_source = "https://www.oosterberg.nl/category/algemeen-nieuws/"
+            news_weblink = i
+            
+            try:
+                announcement = data.find('div',{'id':'left-content'}).find('article').get_text()
+                announcement = translate(announcement).replace('Back to General news','')
+                # print(announcement)            
+            except:
+                announcement = ""
+            
+            date = datetime.now()
         
-        try:
-            announcement = data.find('div',{'id':'left-content'}).find('article').get_text()
-            announcement = translate(announcement).replace('Back to General news','')
-            # print(announcement)            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
-            total_crwalled_links += 1
-            Already_exist += 1
-            continue
-        else:
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

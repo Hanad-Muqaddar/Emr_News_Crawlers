@@ -166,7 +166,6 @@ try:
     for x in mydoc:
         All_title_list.append(x['title'])
 
-
     for i in news_links:
         if i in db_list:
             total_crwalled_links += 1

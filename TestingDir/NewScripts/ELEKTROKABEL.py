@@ -131,7 +131,6 @@ try:
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
    
-
     def translate(Trans):
         translator = Translator()
         Trans_text = translator.translate(Trans,dest='en')
@@ -155,7 +154,6 @@ try:
         links_list.append(x['News_Weblink'])
 
     for i in news_links:      
-        
         if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1

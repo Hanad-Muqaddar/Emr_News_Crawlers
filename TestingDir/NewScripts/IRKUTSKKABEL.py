@@ -146,70 +146,72 @@ try:
     print(news_links)
     print(len(news_links))
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('meta',attrs = {'property':'og:title'}).get('content')
-            title = translate(title)
-            print(title)
-        except:
-            title =""
-            print(title)
-        
-        announcement_type = "News"
-        language = "en-us"
-
-        try:            
-            image = data.find('div',{'class':'mk-image-inner'}).find('img').get('src')
-            print(image)
-        except:
-            image = ""
-            print(image)
-
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-            sub_category = translate(sub_category)
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta',attrs = {'property':'og:description'}).get("content")
-            analysis = translate(analysis)
-            print(analysis)
-        except:
-            analysis = ""
-        try:
-            date = data.find('meta', attrs = {"itemprop":"dateModified"}).get('content')
-            print(date)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://irkutskkabel.ru/novosti"
-        news_weblink = i
-        
-        try:
-            announcement = data.find("div",{"class":"wpb_row vc_row vc_row-fluid jupiter-donut- mk-fullwidth-false attched-false vc_custom_1461923277900 js-master-row mk-grid"}).find('div',{"class":"mk-text-block jupiter-donut-"}).get_text()
-            announcement = translate(announcement)
-            print(announcement)            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
+    for i in news_links:   
         if news_weblink in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
+        else:     
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('meta',attrs = {'property':'og:title'}).get('content')
+                title = translate(title)
+                print(title)
+            except:
+                title =""
+                print(title)
+            
+            announcement_type = "News"
+            language = "en-us"
+
+            try:            
+                image = data.find('div',{'class':'mk-image-inner'}).find('img').get('src')
+                print(image)
+            except:
+                image = ""
+                print(image)
+
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+                sub_category = translate(sub_category)
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta',attrs = {'property':'og:description'}).get("content")
+                analysis = translate(analysis)
+                print(analysis)
+            except:
+                analysis = ""
+            try:
+                date = data.find('meta', attrs = {"itemprop":"dateModified"}).get('content')
+                print(date)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://irkutskkabel.ru/novosti"
+            news_weblink = i
+            
+            try:
+                announcement = data.find("div",{"class":"wpb_row vc_row vc_row-fluid jupiter-donut- mk-fullwidth-false attched-false vc_custom_1461923277900 js-master-row mk-grid"}).find('div',{"class":"mk-text-block jupiter-donut-"}).get_text()
+                announcement = translate(announcement)
+                print(announcement)            
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

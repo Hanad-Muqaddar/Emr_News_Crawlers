@@ -150,6 +150,7 @@ try:
         if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
 

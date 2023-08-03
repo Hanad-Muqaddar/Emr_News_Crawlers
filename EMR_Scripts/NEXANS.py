@@ -148,13 +148,12 @@ try:
     Base_Link = "https://www.nexans.com"
     final_links = [Base_Link + link for link in links]
     print(final_links)
-
-    print(final_links)
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+        
     for i in final_links:
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
         
         if i in db_list:
             Already_exist += 1

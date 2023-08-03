@@ -146,70 +146,72 @@ try:
     print(news_links)
     print(len(news_links))
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+     # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('meta',attrs = {'property':'og:title'}).get('content')
-            title = title.replace('| Marchiol d.o.o.','')
-            title = translate(title)
-            print(title)
-        except:
-            title =""
-            print(title)
-        
-        announcement_type = "News"
-        language = "en-us"
-
-        try:            
-            image = Base_url + data.find('meta',attrs = {'property':'og:image'}).get('content')
-            print(image)
-        except:
-            image = ""
-            print(image)
-
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-            sub_category = translate(sub_category)
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-            analysis = translate(analysis)
-        except:
-            analysis = ""
-        try:
-            date = data.find('div', attrs = {"class":"article-date mb-2"}).get_text(strip=True)
-            print(date)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://marchiol.si/en/news"
-        news_weblink = i
-        
-        try:
-            announcement = data.find('div', attrs = {"class":"article-content my-2"}).get_text(strip=True)
-            announcement = translate(announcement)
-            print(announcement)            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+    for i in news_links:    
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
+        else:    
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('meta',attrs = {'property':'og:title'}).get('content')
+                title = title.replace('| Marchiol d.o.o.','')
+                title = translate(title)
+                print(title)
+            except:
+                title =""
+                print(title)
+            
+            announcement_type = "News"
+            language = "en-us"
+
+            try:            
+                image = Base_url + data.find('meta',attrs = {'property':'og:image'}).get('content')
+                print(image)
+            except:
+                image = ""
+                print(image)
+
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+                sub_category = translate(sub_category)
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+                analysis = translate(analysis)
+            except:
+                analysis = ""
+            try:
+                date = data.find('div', attrs = {"class":"article-date mb-2"}).get_text(strip=True)
+                print(date)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://marchiol.si/en/news"
+            news_weblink = i
+            
+            try:
+                announcement = data.find('div', attrs = {"class":"article-content my-2"}).get_text(strip=True)
+                announcement = translate(announcement)
+                print(announcement)            
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+       
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

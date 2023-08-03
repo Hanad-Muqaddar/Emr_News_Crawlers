@@ -149,7 +149,6 @@ try:
     soup = BeautifulSoup(result.content , 'lxml')
     
     news_links = []
-
     links = soup.find_all('a',{ "class" : "elementor-post__thumbnail__link"})
     for link in links:
         news_link = link.get('href')

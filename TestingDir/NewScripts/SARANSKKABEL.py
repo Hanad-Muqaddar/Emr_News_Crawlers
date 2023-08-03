@@ -145,66 +145,68 @@ try:
 
     print(news_links)
 
-    for i  in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-        try:
-            title = data.find('meta',attrs = {'property':'og:title'}).get('content')
-            title = translate(title)
-            print(title)
-        except:
-            title = ""
-            print(title)
-       
-        announcement_type = "News"
-        language = "en-us"
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            image = Main_url + data.find('div',{"style":"margin-left: 30px"}).find('img').get('src')
-            print(image)
-        except:
-            image = ""
-            print(image)
-
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            N_Date = data.find('div',{"class":"top-meta__date font_13 color_333"}).get_text(strip = True)
-            news_date = dateparser.parse(N_Date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://saranskkabel.ru/news"
-        news_weblink = i
-        
-        try:
-            announcement = data.find('div',{"itemprop":"description"}).get_text()
-            announcement = translate(announcement)
-            print(announcement)
-            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
+    for i  in news_links:   
         if news_weblink in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
+        else:     
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+            try:
+                title = data.find('meta',attrs = {'property':'og:title'}).get('content')
+                title = translate(title)
+                print(title)
+            except:
+                title = ""
+                print(title)
+        
+            announcement_type = "News"
+            language = "en-us"
+
+            try:
+                image = Main_url + data.find('div',{"style":"margin-left: 30px"}).find('img').get('src')
+                print(image)
+            except:
+                image = ""
+                print(image)
+
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                N_Date = data.find('div',{"class":"top-meta__date font_13 color_333"}).get_text(strip = True)
+                news_date = dateparser.parse(N_Date,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://saranskkabel.ru/news"
+            news_weblink = i
+            
+            try:
+                announcement = data.find('div',{"itemprop":"description"}).get_text()
+                announcement = translate(announcement)
+                print(announcement)
+                
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

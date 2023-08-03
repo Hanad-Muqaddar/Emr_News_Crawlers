@@ -157,17 +157,17 @@ try:
     json_result = page.json()
     news_links = []
 
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     for data in json_result['entries']:
         
         link = Main_url + data['url']
         news_links.append(link)
 
     print(news_links)
-
-    db_list = []
-    mydoc = collection.find()
-    for x in mydoc:
-        db_list.append(x['News_Weblink'])
 
     All_title_list = []
     for x in mydoc:

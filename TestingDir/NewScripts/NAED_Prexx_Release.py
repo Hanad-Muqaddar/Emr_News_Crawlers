@@ -160,81 +160,84 @@ try:
 
     # print(news_links)
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-        response1 = Selector(response)
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('div', {"class":"post-text"}).find('h2').get_text(strip=True)
-            # print(title)
-        except:
-            title = data.find('title').text
-            # print(title)
-        try:
-            announcement_type = data.find('div',{"class":"banner-wrapper"}).find('h1').get_text(strip=True)
-            # print(announcement_type)
-        except:
-            announcement_type = "Press Release"
-
-        language = "en-us"
-
-        try:
-            image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-            # print(image)
-        except:
-            image = ""
-            # print(image)
-
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            date = data.find('div', {"class":"social"}).find('date').get_text(strip=True)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            # print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://blog.naed.org/press-release"
-        news_weblink = i
-        
-        try:
-            announcement = response1.css(".post-text").get()
-            replace1 = response1.css(".post-text h2").get()
-            announcement = announcement.replace(replace1, "")
-            announcement = announcement.replace('\n','<br>')
-            return_data = parse_filtered_news(announcement)
-            announcement = return_data['filteredBody']
-            emr_essentail = return_data['emrEssential']
-            emr_executive = return_data['emrExecutive']
-            emr_lite = return_data['emrLite']
-            emr_html = return_data['emrHtmlText']
-        except:
-            announcement = ""
-            emr_essentail = ""
-            emr_executive = ""
-            emr_lite = ""
-            emr_html = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+    for i in news_links:     
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
+
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+            response1 = Selector(response)
+
+            try:
+                title = data.find('div', {"class":"post-text"}).find('h2').get_text(strip=True)
+                # print(title)
+            except:
+                title = data.find('title').text
+                # print(title)
+            try:
+                announcement_type = data.find('div',{"class":"banner-wrapper"}).find('h1').get_text(strip=True)
+                # print(announcement_type)
+            except:
+                announcement_type = "Press Release"
+
+            language = "en-us"
+
+            try:
+                image = data.find('meta', attrs = {"property":"og:image"}).get("content")
+                # print(image)
+            except:
+                image = ""
+                # print(image)
+
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                date = data.find('div', {"class":"social"}).find('date').get_text(strip=True)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                # print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://blog.naed.org/press-release"
+            news_weblink = i
+            
+            try:
+                announcement = response1.css(".post-text").get()
+                replace1 = response1.css(".post-text h2").get()
+                announcement = announcement.replace(replace1, "")
+                announcement = announcement.replace('\n','<br>')
+                return_data = parse_filtered_news(announcement)
+                announcement = return_data['filteredBody']
+                emr_essentail = return_data['emrEssential']
+                emr_executive = return_data['emrExecutive']
+                emr_lite = return_data['emrLite']
+                emr_html = return_data['emrHtmlText']
+            except:
+                announcement = ""
+                emr_essentail = ""
+                emr_executive = ""
+                emr_lite = ""
+                emr_html = ""
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

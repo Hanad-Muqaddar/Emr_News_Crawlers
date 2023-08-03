@@ -147,6 +147,11 @@ else:
 
 # *****************************************************************************
 try:
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     proxies = {
             'http': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280',
             'https': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280'
@@ -162,13 +167,11 @@ try:
             news_weblink = ""
         if news_weblink == "":
             continue
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+        
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
             try:
@@ -225,7 +228,7 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 print("inserted")
                 total_crwalled_links += 1
             except Exception as e:

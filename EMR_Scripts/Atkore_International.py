@@ -141,55 +141,57 @@ try:
             }
     result = requests.get("https://www.atkore.com/post-sitemap.xml",headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
+
     links = soup.find_all("loc")
     for i in links:
-        response = requests.get(i.text, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
-        try:
-            title = data.find('title').text
-        except:
-            title = ""
-        announcement_type = "News"
-        try:
-            sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-        except:
-            sub_category = ""
-        try:
-            language = data.find('meta', attrs = {"property":"og:locale"}).get("content")
-        except:
-            language = ""
-        try:
-            analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            date = data.find('meta', attrs = {"property":"article:published_time"}).get("content")
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-        except:
-            news_date = ""
-        page_source = "https://www.atkore.com/news/"
-        news_weblink = i.text
-        try:
-            image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-        except:
-            image = ""
-        try:
-            announcement = data.find("div", id="main-content").find("div", class_='col-md-10').text
-        except:
-            announcement = data.find("div", id="main-content").text
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+        if i.text in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
+            response = requests.get(i.text, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+            try:
+                title = data.find('title').text
+            except:
+                title = ""
+            announcement_type = "News"
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            except:
+                sub_category = ""
+            try:
+                language = data.find('meta', attrs = {"property":"og:locale"}).get("content")
+            except:
+                language = ""
+            try:
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                date = data.find('meta', attrs = {"property":"article:published_time"}).get("content")
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+            except:
+                news_date = ""
+            page_source = "https://www.atkore.com/news/"
+            news_weblink = i.text
+            try:
+                image = data.find('meta', attrs = {"property":"og:image"}).get("content")
+            except:
+                image = ""
+            try:
+                announcement = data.find("div", id="main-content").find("div", class_='col-md-10').text
+            except:
+                announcement = data.find("div", id="main-content").text
+            
+            date = datetime.now()
+            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

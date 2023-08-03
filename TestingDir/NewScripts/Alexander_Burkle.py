@@ -152,7 +152,6 @@ try:
                 news_date = ""
                 news_dates.append(news_date)
 
-
     # print(news_links)
     # print(news_dates)
     print(len(news_links))
@@ -164,9 +163,7 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-
     for i , N_Date in zip(news_links,news_dates): 
-       
         if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -185,7 +182,6 @@ try:
         
             announcement_type = "News"
             language = "en-us"
-
             image = ""
                 
             try:

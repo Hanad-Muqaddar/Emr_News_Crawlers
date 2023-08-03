@@ -131,16 +131,18 @@ try:
     soup = BeautifulSoup(result.content, 'lxml')
     data = soup.find("div", class_='article-block --grey').find_all("div", class_='teaser page --default')
     links_list = []
+
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     for i in data:
         news_weblink = "https://www.rittal.com" + i.find('a').get("href")
         links_list.append(news_weblink)
         
     for j in links_list:
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
-        
+                
         if j in db_list:
             print("Link Already Exists")
             continue

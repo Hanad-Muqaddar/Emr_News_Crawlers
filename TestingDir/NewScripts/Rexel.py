@@ -160,6 +160,12 @@ try:
     response = Selector(result)
     data = response.css(".box--el")
     links = [link.css('a::attr(href)').get() for link in data]
+
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     for i in links:
         try:
             news_weblink = i
@@ -168,13 +174,10 @@ try:
         if news_weblink == "":
             continue
             
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
             result1 = requests.get(i)

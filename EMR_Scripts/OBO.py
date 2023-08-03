@@ -154,9 +154,9 @@ try:
     for i in news_links:
         
         if i in db_list:
-            print("Already crawled")
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already crawled")
             continue
 
         else:        

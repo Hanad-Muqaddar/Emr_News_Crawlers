@@ -150,6 +150,13 @@ try:
     data = soup.find_all('url')
     news_links = []
     dates = []
+
+    # Creating a list of links already avilable in database
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     for i in data:
         if "news" in i.find("loc").text:
             link = i.find('loc').text
@@ -159,13 +166,11 @@ try:
         else:
             continue
     for j,k in zip(news_links, dates):
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+        
         if j in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
             res = requests.get(j)

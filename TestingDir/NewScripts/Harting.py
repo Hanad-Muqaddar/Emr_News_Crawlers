@@ -137,6 +137,7 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
     print(news_links)
+    
     db_list = []
     mydoc = collection.find()
     for x in mydoc:

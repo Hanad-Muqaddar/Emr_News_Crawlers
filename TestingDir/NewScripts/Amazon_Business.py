@@ -67,6 +67,7 @@ else:
 try:
     proxies = {'http': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280',
             'https': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280'}
+    
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Base_url = "https://press.aboutamazon.com/press-release-archive"
     result = requests.get(Base_url,headers=headers, proxies=proxies)
@@ -75,10 +76,6 @@ try:
     news_links = response1.xpath('//div[@class="PromoCardSearchResults-title"]//a[@class="Link"]/@href').getall()
     # news_links = [Main_url + l for l in news_links]
 
-
-    #     if '/news-releases/news-release-details/' in a['href']:
-
-    
     print(news_links)
     print(len(news_links))
 

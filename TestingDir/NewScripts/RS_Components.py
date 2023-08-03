@@ -139,73 +139,76 @@ try:
 
     print(news_links)
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers)
-        data = BeautifulSoup(response.content, 'lxml')
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('div', {"id":"pr_headLine"}).find('h1').get_text(strip=True)
-            print(title)
-        except:
-            title = data.find('title').text
-            print(title)
-        try:
-            announcement_type = data.find('p',{"class":"pagetitle"}).get_text(strip=True)
-            print(announcement_type)
-        except:
-            announcement_type = "Press Release"
-
-        language = "en-us"
-
-        try:
-            image = data.find('div', {"id":"pr_text"}).find('img').get("src")
-            print(image)
-        except:
-            image = ""
-            print(image)
-
-        try:
-            sub_category = data.find('meta', attrs = {"name":"Type"}).get("content")
-        except:
-            sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"name":"Description"}).get("content")
-        except:
-            analysis = ""
-        try:
-            date = data.find('div', {"id":"pr_text"}).find('p', {"class":"date"}).get_text()
-            date = date.replace('London,','').replace('UK,','').strip()
-            print(date)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-            print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://uk.rs-online.com/web/generalDisplay.html?id=footer1"
-        news_weblink = i
-        
-        try:
-            html = requests.get(i).text
-            announcement = fulltext(html)
-            announcement = announcement.replace('\n','<br>')
-            print(announcement)
-            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
+    for i in news_links:     
         if news_weblink in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
+
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('div', {"id":"pr_headLine"}).find('h1').get_text(strip=True)
+                print(title)
+            except:
+                title = data.find('title').text
+                print(title)
+            try:
+                announcement_type = data.find('p',{"class":"pagetitle"}).get_text(strip=True)
+                print(announcement_type)
+            except:
+                announcement_type = "Press Release"
+
+            language = "en-us"
+
+            try:
+                image = data.find('div', {"id":"pr_text"}).find('img').get("src")
+                print(image)
+            except:
+                image = ""
+                print(image)
+
+            try:
+                sub_category = data.find('meta', attrs = {"name":"Type"}).get("content")
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"name":"Description"}).get("content")
+            except:
+                analysis = ""
+            try:
+                date = data.find('div', {"id":"pr_text"}).find('p', {"class":"date"}).get_text()
+                date = date.replace('London,','').replace('UK,','').strip()
+                print(date)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://uk.rs-online.com/web/generalDisplay.html?id=footer1"
+            news_weblink = i
+            
+            try:
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
+                
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

@@ -141,6 +141,11 @@ try:
     json_dump = json.dumps(xml_data)
     json_data = json.loads(json_dump)
     urls = json_data['rss']['channel']['item']
+
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
     
     for i in range(len(urls)):
         try:
@@ -165,13 +170,11 @@ try:
             # print(news_weblink)
         except:
             news_weblink = ""
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+        
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
             try:

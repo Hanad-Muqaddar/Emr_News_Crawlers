@@ -234,7 +234,7 @@ try:
             company_news['announcement'] = announcement
             company_news['historySubCategory']= sub_category
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

@@ -149,15 +149,19 @@ try:
     
     soup = BeautifulSoup(res.content, 'lxml')
     data = soup.find_all("div", class_='small-12 medium-4 columns')
+
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     for i in data:
         news_weblink = "https://www.mennekes.org" + i.find("a", class_='teaser-topic__link').get("href")
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+        
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
             try:

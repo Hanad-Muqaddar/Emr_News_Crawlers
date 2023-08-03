@@ -153,6 +153,12 @@ try:
         result = requests.get(main_page_link)
         data = Selector(result)
         news = data.css(".home-news__item")
+
+        db_list = []
+        mydoc = collection.find()
+        for x in mydoc:
+            db_list.append(x['News_Weblink'])
+
         for j in news:
             try:
                 date = j.css(".date ::text").get()
@@ -171,11 +177,7 @@ try:
                 news_weblink = "https://www.mersen.com" + j.css(".go-link ::attr(href)").get()
             except:
                 news_weblink = ""
-                
-            db_list = []
-            mydoc = collection.find()
-            for x in mydoc:
-                db_list.append(x['News_Weblink'])
+                            
             if news_weblink in db_list:
                 total_crwalled_links += 1
                 Already_exist += 1

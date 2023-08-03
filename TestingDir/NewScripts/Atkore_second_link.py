@@ -47,7 +47,8 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
-from newspaper import fulltext
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
 
 # ************************************************************************
 # defining variables
@@ -147,8 +148,7 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     # service = Service("C:\Program Files (x86)\chromedriver.exe")
-    driver = webdriver.Chrome(executable_path='/home/ubuntu/chrome_driver/chromedriver.exe',options=opts)
-
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(version='114.0.5735.90').install()), options=opts)
     driver.get("https://investors.atkore.com/events-and-presentations/default.aspx")
     time.sleep(5)
 
@@ -207,6 +207,7 @@ try:
         if news_weblink in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
             company_news = {}

@@ -130,8 +130,10 @@ try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://www.phoenixcontact.com"
     Base_url = "https://www.phoenixcontact.com/en-pc/events-and-news"
-    proxies = {'http': 'http://alihaider9:salman_walee@ch.proxymesh.com:31280',
-            'https': 'http://alihaider9:salman_walee@ch.proxymesh.com:31280'}
+
+    proxies = {'http': 'http://waleeProxy:Cheeta@1@ch.proxymesh.com:31280',
+            'https': 'http://waleeProxy:Cheeta@1@ch.proxymesh.com:31280'}
+
     print("First step done")
     try:
         result = requests.get(Base_url,headers=headers, proxies=proxies)
@@ -152,62 +154,64 @@ try:
     print(news_links)
     print(len(news_links))
 
-    for i in news_links:        
-        response = requests.get(i, headers=headers, proxies=proxies)
-        data = BeautifulSoup(response.content, 'lxml')
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
 
-        try:
-            title = data.find('title').get_text()
-            print(title)
-        except:
-            title = ""
-            print(title)
-        
-        announcement_type = "News"
-        language = "en-us"
-
-        try:
-            image = data.find('img', {"class":"ex-newsdetailpage__image"}).get('src')
-            print(image)
-        except:
-            image = ""
-
-        sub_category = ""
-        
-        try:
-            analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-        except:
-            analysis = ""
-        try:            
-            date = data.find('div', {"class":"ex-newsdetailpage-news-container__date"}).get_text(strip=True)
-            print(date)
-            news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'MDY'} )
-            print(news_date)            
-        except:
-            news_date = ""
-
-        page_source = "https://www.phoenixcontact.com/en-pc/events-and-news"
-        news_weblink = i
-        
-        try:            
-            announcement = data.find('div', {"class":"container ex-content-module-container"}).get_text(strip=True)
-            print(announcement)
-            
-        except:
-            announcement = ""
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
-        if news_weblink in links_list:
+    for i in news_links:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
-        else:
+        else:        
+            response = requests.get(i, headers=headers, proxies=proxies)
+            data = BeautifulSoup(response.content, 'lxml')
+
+            try:
+                title = data.find('title').get_text()
+                print(title)
+            except:
+                title = ""
+                print(title)
+            
+            announcement_type = "News"
+            language = "en-us"
+
+            try:
+                image = data.find('img', {"class":"ex-newsdetailpage__image"}).get('src')
+                print(image)
+            except:
+                image = ""
+
+            sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"name":"description"}).get("content")
+            except:
+                analysis = ""
+            try:            
+                date = data.find('div', {"class":"ex-newsdetailpage-news-container__date"}).get_text(strip=True)
+                print(date)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'MDY'} )
+                print(news_date)            
+            except:
+                news_date = ""
+
+            page_source = "https://www.phoenixcontact.com/en-pc/events-and-news"
+            news_weblink = i
+            
+            try:            
+                announcement = data.find('div', {"class":"container ex-content-module-container"}).get_text(strip=True)
+                print(announcement)
+                
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+       
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
