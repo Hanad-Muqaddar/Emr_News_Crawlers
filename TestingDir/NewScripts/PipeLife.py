@@ -164,7 +164,7 @@ try:
     opts.headless = True
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(version='114.0.5735.90').install()), options=opts)
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(version='105.0.5195.125').install()), options=opts)
     driver.get("https://www.pipelife.com/service/news-and-projects.html")
     Main_url = "https://www.pipelife.com"
 
@@ -182,29 +182,6 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-
-    # result = requests.get("https://www.pipelife.com/service/news-and-projects.html")
-    # soup = BeautifulSoup(result.content, 'lxml')
-    # # news = soup.find_all("div", class_='js-variableHeight teaser-item teaser-item__cardimage')
-    # news = soup.find_all("div", class_='teaser-item teaser-item__cardimage')
-    # for j in news:
-    #     try:
-    #         news_weblink = "https://www.pipelife.com"  + j.find("a").get("href")
-    #         print(news_weblink)
-    #     except:
-    #         news_weblink = ""
-    #     try:
-    #         analysis = j.find_all("p")[1].text
-    #     except:
-    #         try:
-    #             j.find_all('P')[1].find("b").text
-    #         except:
-    #             analysis = ""
-    #     try:
-    #         news_date = j.find_all("p")[0].text.split("|")[0]
-    #         news_date = dateparser.parse(news_date)
-    #     except:
-    #         news_date = ""
 
     for news_weblink in news_links:
         
