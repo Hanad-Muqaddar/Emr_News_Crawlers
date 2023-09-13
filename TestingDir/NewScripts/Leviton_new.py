@@ -152,6 +152,7 @@ try:
     page = requests.get(Base_url,headers=headers, proxies=proxies)
     json_result = page.json()
     print(json_result)
+    print("Starting a script")
     news_links = []
     news_dates = []
 
