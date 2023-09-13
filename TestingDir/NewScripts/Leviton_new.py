@@ -151,6 +151,7 @@ try:
     Main_url = "https://www.leviton.com"
     page = requests.get(Base_url,headers=headers, proxies=proxies)
     json_result = page.json()
+    print(json_result)
     news_links = []
     news_dates = []
 
@@ -160,6 +161,8 @@ try:
 
         link = Main_url + data['assoc_link']
         news_links.append(link)
+
+
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
@@ -170,6 +173,9 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         All_title_list.append(x['title'])
+
+    print(news_links)
+    print(news_dates)
 
     for i,d in zip(news_links, news_dates):
         
