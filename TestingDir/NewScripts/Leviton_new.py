@@ -152,7 +152,10 @@ try:
     Base_url = "https://www.leviton.com/sites/Satellite?pagename=LC/Utilities/GetAllPressReleases&d=Default&id=1469251297323"
     Main_url = "https://www.leviton.com"
     try:
-        page = requests.get(Base_url,headers=headers, proxies=proxies)
+        # page = requests.get(Base_url,headers=headers)
+        session = requests.Session()
+        session.verify = False  # This disables SSL certificate verification; use with caution.
+        response = session.get(Base_url,headers=headers)
     except Exception as e:
         print(e)
     json_result = page.json()
