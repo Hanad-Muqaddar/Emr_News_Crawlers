@@ -148,14 +148,15 @@ try:
     
     print("Starting a script")
     
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
+               "Content-Type": "text/html; charset=UTF-8",
+                
+               }
     Base_url = "https://www.leviton.com/sites/Satellite?pagename=LC/Utilities/GetAllPressReleases&d=Default&id=1469251297323"
     Main_url = "https://www.leviton.com"
     try:
-        # page = requests.get(Base_url,headers=headers)
-        session = requests.Session()
-        session.verify = False  # This disables SSL certificate verification; use with caution.
-        response = session.get(Base_url,headers=headers)
+        page = requests.get(Base_url,headers=headers)
+        
     except Exception as e:
         print(e)
     json_result = page.json()
