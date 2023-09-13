@@ -146,13 +146,18 @@ try:
     proxies = {'http': f"http://waleeProxy:Cheeta@1@de.proxymesh.com:31280",
             'https': f"http://waleeProxy:Cheeta@1@de.proxymesh.com:31280"}
     
+    print("Starting a script")
+    
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Base_url = "https://www.leviton.com/sites/Satellite?pagename=LC/Utilities/GetAllPressReleases&d=Default&id=1469251297323"
     Main_url = "https://www.leviton.com"
-    page = requests.get(Base_url,headers=headers, proxies=proxies)
+    try:
+        page = requests.get(Base_url,headers=headers, proxies=proxies)
+    except Exception as e:
+        print(e)
     json_result = page.json()
     print(json_result)
-    print("Starting a script")
+    
     news_links = []
     news_dates = []
 
