@@ -149,9 +149,9 @@ try:
     print("Starting a script")
     
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
-               "Content-Type": "text/html; charset=UTF-8",
-                
+               "Content-Type": "text/html; charset=UTF-8"              
                }
+    
     Base_url = "https://www.leviton.com/sites/Satellite?pagename=LC/Utilities/GetAllPressReleases&d=Default&id=1469251297323"
     Main_url = "https://www.leviton.com"
     try:
@@ -160,7 +160,6 @@ try:
     except Exception as e:
         print(e)
     json_result = page.json()
-    print(json_result)
     
     news_links = []
     news_dates = []

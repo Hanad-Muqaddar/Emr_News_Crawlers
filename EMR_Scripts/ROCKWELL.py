@@ -130,14 +130,15 @@ try:
     # This is for Press Release
 
     feed = feedparser.parse("https://ir.rockwellautomation.com/rss/PressRelease.aspx")
-    # print(feed)
+    print(feed)
     for i in feed:
         print(i)
         print(i['link'])
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
         
         if i['link'] in db_list:
             Already_exist += 1
