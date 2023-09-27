@@ -111,7 +111,7 @@ else:
 
     last_time = last_insertion['Date']
 
-    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+    # running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
 
     Crwl_time = last_insertion['Date']
 
@@ -165,7 +165,7 @@ try:
             response2 = Selector(result2)
             
             try:
-                title = response2.xpath('///meta[@name="og:title"]/@content').get()
+                title = response2.xpath('//meta[@property="og:title"]/@content').get()
                 print(title)
             except:
                 title = ""
