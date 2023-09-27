@@ -163,7 +163,7 @@ try:
             response2 = Selector(result2)
             
             try:
-                title = response2.xpath('//article[@class="panel"]//h1[@class="panel__title"]/text()').get()
+                title = response2.xpath('//div[@class="dehn--module dehn--module--text-only-and-or-headline dehn--module--text-only-and-or-headline__h1 paragraph paragraph--view-mode--default"]//h1/text()').get()
                 print(title)
             except:
                 title = ""

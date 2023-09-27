@@ -27,13 +27,14 @@ start_RAM_Stat = str(psutil.virtual_memory())
 today = datetime.now()
 try:
     try:
-        file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-        data = json.load(file)
-        db_path = data[0]['Db_Path']
+        # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+        # data = json.load(file)
+        # db_path = data[0]['Db_Path']
+
         Client = MongoClient('localhost',27017)
         #liveDb = MongoClient('localhost',27017)
-        # liveDb = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin')
-        liveDb = MongoClient(db_path)
+        liveDb = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin')
+        # liveDb = MongoClient(db_path)
         emrDB = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@34.121.98.98:27017/emrweb?authSource=admin')
         runnung_sequence.append('Connected Sucessfully')
     except:
@@ -172,7 +173,7 @@ try:
     'MSC_ Industrial_Supply' : ObjectId("61715d10c91d8776ded7c2bf"),
     'Atkore_International' : ObjectId("60be0da5c35e8a6bcd13b54a"),
     'Simon_Electric' : ObjectId("60cc323cf55392bb06c91ce4"),
-    'WAGO' : ObjectId("62fe31c12f68dbba24590996"),
+    'WAGO' : ObjectId("63806fb17498254fca0a2746"),
     'AO' : ObjectId("623484224bb2fdf46639fe56"),
     'BECKHOFF' : ObjectId("637f23887498254fca079ef1"),
     'HARTING' : ObjectId("63806b387498254fca0a2668"),
@@ -268,6 +269,8 @@ try:
     'Hubbell': ObjectId("6087dff16cbd41ac14ad52d0"), 
     'Weidmuller' : ObjectId("61ceaad983ff8a2ac7eb1fa0"),
     "TriluxGmbH" : ObjectId("61cef57383ff8a2ac7eb3f8e"),
+    'City_Electrical_Factors':ObjectId('626b96af489769a0ad3d4cf8'),
+    'City_Electrical_Supply':ObjectId('626a70ac489769a0ad3bcf09'),
     }
     count=0
     done = []
@@ -280,9 +283,14 @@ try:
         indCompany = companyCollection.find_one({'_id':companyMapping[i]})
 
         newsCollection = newsDb[i]
-        allNewsFromDb = newsCollection.find({})
 
+        allNewsFromDb = newsCollection.find({})
+        if indCompany == None:
+            print ("SKIPPING  ---- ID INCORRECT")
+            print ("........")
+            continue
         existingNewsInSystem = historiesCollection.distinct('references.link.value',{'companyId.value':indCompany['_id']})
+        
         for j in allNewsFromDb:
         
             if j['News_Weblink'] in existingNewsInSystem:
@@ -316,7 +324,6 @@ try:
                 
                 new_News_Links.append(j['News_Weblink'])
             historiesCollection.insert_one(tempIndNews)
-
         New_News_List = historiesCollection.find({"references.link.value":{"$in":new_News_Links}})
         for n in New_News_List:
             N_Date = n["Date"]["value"]
@@ -332,11 +339,12 @@ try:
             else:
                 print("else mein a gya hn ")
                 historiesCollection.update_one({"references.link.value": n["references"]["link"]["value"] }, { "$set": { "Date.value": C_Date } })
-
         done.append(i)
+        
     runnung_sequence.append(str(count)+' documents updated')
     newsWithoutValidation = historiesCollection.find({'validatedObject':{'$exists':False}})
     count = 0
+        
     for tempIndHistory in newsWithoutValidation:
         if count%10==0:
             runnung_sequence.append(str(count) + ' ==>  count value in last section for tempIndHistory in newsWithoutValidation')
@@ -367,7 +375,6 @@ except Exception as e:
     Error_Time =  datetime.now()
     Reported_Error = traceback.format_exc()
 
-
 rep = ''
 try:
     Error = {}
@@ -376,20 +383,27 @@ try:
 except Exception as e:
     rep = traceback.format_exc()
     pass
-
+        
 log = {}
 log['File_name'] = 'mapping_script.py'
 log['File_type'] = 'Script Mapper by Salman Ansari'
 log['Initial_CPU_Stat'] = start_CPU_Stat
 log['Initial_RAM_Stat'] = start_RAM_Stat
 log['Starting_time'] = start_time
+
 log['Ending_time'] = Error_Time if rep == '' else end_time
 log['Error_Detail'] =  Error if rep == '' else ''
 log['Mapper_Runing_Sequence'] = runnung_sequence if runnung_sequence else ''
 log['Last_UpdateOn'] = last_time if last_time!= None else log['Ending_time']
+
+
 log['CPU_Usage'] = str(psutil.cpu_percent())
 log['Total_RAM'] = str(psutil.virtual_memory().total)
 log['RAM_Usage'] = str(psutil.virtual_memory().percent)
 log['Avaiable_RAM_%'] = str(psutil.virtual_memory().available * 100 / psutil.virtual_memory().total)
 # error_logs.insert_one(log)
-status_Database.update_one({"_id": status_Id.inserted_id , "name": "Mapping_Script"}, { "$set": { "status": "Script Completed" } })
+
+try:
+    status_Database.update_one({"_id": status_Id.inserted_id , "name": "Mapping_Script"}, { "$set": { "status": "Script Completed" } })
+except:
+    print ("SKIPPING LOG INSERTION, ID IS MISSING")

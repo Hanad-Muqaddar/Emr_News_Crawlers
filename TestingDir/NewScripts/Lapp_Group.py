@@ -126,15 +126,15 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     
-    Main_url = "https://www.lappkabel.com"
-    Base_url = "https://www.lappkabel.com/news/current-news.html"
+    Main_url = "https://lappconnecto.lappgroup.com"
+    Base_url = "https://lappconnecto.lappgroup.com/en/news.html"
      
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
     
     news_links = []
 
-    links = soup.find("div",{ "class" : "row js-calc-height"}).find_all('a',{ "class" : "clean"})
+    links = soup.find("div",{ "class" : "row show-grid"}).find_all('a',{ "class" : "clean"})
     for link in links:
         news_link = Main_url + link.get('href')
         if news_link not in news_links:
@@ -161,16 +161,16 @@ try:
             data = BeautifulSoup(response.content, 'lxml')
 
             try:
-                title = data.find('title').get_text(strip=True)
-                # print(title)
+                title = data.find("h1",{ "class" : "text-uppercase"}).text
+                print(title)
             except:
                 title = ""
             
             language = "en-us"
             
             try:
-                image = data.find('div',{ "class" : "intrinsic"}).find('img',{ "class" : "img-responsive"}).get('src')
-                # print(image)
+                image = "https://lappconnecto.lappgroup.com" + data.find('div',{ "class" : "intrinsic"}).find('img',{ "class" : "lazyload img-fluid  img-thumbnail"}).get('data-src')
+                print(image)
             except:
                 image = ""
 
@@ -189,7 +189,7 @@ try:
             except:
                 news_date = ''
 
-            page_source = "https://www.lappkabel.com/news/current-news.html"
+            page_source = "https://lappconnecto.lappgroup.com/en/news.html"
             news_weblink = i
             
             

@@ -65,11 +65,11 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -130,23 +130,27 @@ else:
 try:
     result = requests.get("https://www.weidmuller.com/en/company/press/company_news/index.jsp")
     response = Selector(result)
-    links = response.css(".text-video__buttons a::attr(href)").getall()
+    links = response.css(".text-image__buttons a::attr(href)").getall()
     final_links = [link for link in links if link != '']
+    print(final_links)
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
+
     for link in final_links:
-        
+        print(link)
         if link in db_list:
             total_crwalled_links += 1
             Already_exist += 1
+            print("Already Crawled")
             continue
         else:
             res = requests.get(link)
             response2 = Selector(res)
             try:
-                title = response2.css(".text-module h2::text").get()
+                title = response2.xpath('//h2[@class="text-image__heading text-left"]/text()').get()
+                print(title)
             except:
                 title = ""
             try:
@@ -188,7 +192,7 @@ try:
             company_news['analysis'] = analysis
             
             try:
-                collection.insert_one(company_news)
+                # collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

@@ -1,229 +1,280 @@
-
-
+# Packages to be imported
 import requests
+
 import time
+
 import json
+
 from random import randint
+
 from bs4 import BeautifulSoup
+
 from pymongo import MongoClient
+
+from bs4 import BeautifulSoup
+
+from selenium import webdriver
+
+# from webdriver_manager.chrome import ChromeDriver
+
+from selenium.webdriver.chrome.options import Options
+
+from selenium.webdriver.support.ui import WebDriverWait
+
+from selenium.webdriver.common.keys import Keys
+
+from selenium.webdriver.support import expected_conditions
+
+from selenium.webdriver.common.by import By
+
+from urllib.parse import urlparse
+
 import re
-from datetime import date, timedelta
-import datetime
-import dateparser
-import copy
-from datetime import datetime
-today = datetime.now()
+
 import traceback
-import sys
-log_obj={
-    'Crawler_name':'SIEMENS_ENERGY',
-    'Starting_time':datetime.now(),
-    'Ending_time':'',
-    'Running_sequance':[],
-    }
 
-def CreateDbConnection(key):
-    try:
-        client= MongoClient(key)
-        log_obj['Running_sequance'].append('Connected to Server')
-    except:
-        log_obj['Running_sequance'].append('Not Connected')
-    return client
+import urllib
 
-def check_link_exists(url,db,collection):
-    ch=db.get_collection(collection).find({'News_Weblink':url})
-    check=[]
-    for x in ch:
-        check.append(x)
-    if(len(check)==0):
-        return False
-    else:
-        return True 
+import dateparser
 
-def Parser(mainSource,localDb,localCollectionName):
-    scraped_news=[]
-    source=mainSource
-    links=[]
-    flag=True
-    while(flag):
-        req=requests.get(source)
-        soup=BeautifulSoup(req.content, 'lxml')
-        news_divs=soup.find('div',class_='view-content').find_all('div',class_='press-search-results-view-row content-type-c2-ct-press-release views-row')
-        for one in news_divs:
-            links.append('https://press.siemens-energy.com'+one.find('a').get('href'))
-        if(soup.find('ul',class_='js-pager__items pager')):
-            source= ('https://press.siemens-energy.com/global/en/press-search'+soup.find('ul',class_='js-pager__items pager').find('a').get('href'))
-#             print (source)
-        else:
-            flag=False
-    source=mainSource
-    for single_news_link in links:
-        status=check_link_exists(single_news_link,localDb,collectionName)
-        print (single_news_link)
-        if(status):
-#             print ('exist')
-            break
-        else:   
-#             print ('not exist')
-            response =  requests.get(single_news_link)
-            try:
-                mainDiv = BeautifulSoup(response.content,'lxml').find('div',class_='content')
-            except:
-                mainDiv=''
-            if(mainDiv !=''):
-                try:
-                    info= (mainDiv.find('section',class_='MetaData Press Release container'))
-                except:
-                    info=''
-                if(info != ''):
+from datetime import datetime
 
-                    try:
-                        typee= info.find('span',class_='txt').text.strip()
-                    except:
-                        typee=''
-                    try:
-                        date= dateparser.parse(info.find('span',class_='Date').text.strip())
-                    except:
-                        date=''
-                    try:
-                        catagory=info.find('span',class_='EditorExt').text.strip()
-                    except:
-                        catagory=''
-                    try:
-                        location=info.find('span',class_='Location').text.strip()
-                    except:
-                        location=''
+from bson.objectid import ObjectId
 
-                try:
-                    paragraph= mainDiv.find('section',class_='Intro Press Release container').find('div',class_='Summary').find('ul').text.strip()
-                except:
-                    paragraph=''
-                try:
-                    for para in (mainDiv.find('section',class_='Intro Press Release container').find('div',class_='row IntroText')):
-                        try:
-                            paragraph=paragraph+ ' '+(para.text.strip())
-                        except:
-                            pass
-                except:
-                    pass
+from urllib.error import HTTPError
 
+from urllib.request import Request, urlopen
 
-                try:
-                    paragraph=paragraph+ ' '+mainDiv.find('section',class_='container Row').text.strip()
-                except:
-                    pass
-                try:
-                    related_links= ( mainDiv.find('section',class_='container Row VisibleCols3').find_all('ul',class_='link-list'))
-                except:
-                    related_links=''
-                if(related_links != ''):
-                    try:
-                        downloads=[]
-                        for li in related_links[0]:
-                            d_link=li.find('a').get('href')
-                            downloads.append(d_link)
-                    except:
-                        downloads=[]
+from newspaper import fulltext
+from scrapy import Selector
 
-                    try:
-                        further_links=[]
-                        for li in related_links[1]:
-                            f_link=li.find('a').get('href')
-                            if('http' not in f_link):
-                                f_link='https:'+f_link
+# ************************************************************************
+# defining variables
 
-                            further_links.append(f_link)
-                    except:
-                        further_links=[]
-                else:
-                    further_links=[]
-                    downloads=[]
-                try:
-                    images=[]
-                    for section in (mainDiv.find_all('section',class_='container Row')):
-                        try:
-                            images.append(section.find('img').get('src'))
-                        except:
-                            pass
-                except:
-                    images=[]
-                try:
-                    title=mainDiv.find('h1').get_text()
-                    print(title)
-                except:
-                    title=''
-                NewsData= {}
-                NewsData['companyId'] = ''
-                NewsData['location']=location
-                NewsData['comment']=''
-                NewsData['Date']=date
-                today=datetime.today()
-                NewsData['Crawled_on']=today
-                NewsData['title']=title
-                NewsData['Language']= 'English'
-                NewsData['announcementType']=typee
-                NewsData['historySubCategory']=catagory
-                NewsData['Source'] = source
-                NewsData['News_Weblink'] = single_news_link
-                NewsData['photo']= images
-                NewsData['videos']= ''
-                NewsData['further_links']= further_links
-                NewsData['downloads']= downloads
-                NewsData['announcement']=paragraph
+running_Sequence = []
 
+started_on = datetime.now()
 
-                refrences=''
-                analysis=''
-                validatedObject  ={}
-                validatedObject['companyId']=NewsData['companyId']
-                validatedObject['Date']=NewsData['Date']
-                validatedObject['title']=NewsData['title']
-                validatedObject['announcement']=NewsData['announcement']
-                validatedObject['announcementType']=NewsData['announcementType']
-                validatedObject['photo']=NewsData['photo']
-                validatedObject['analysis']=analysis
-                validatedObject['refrences ']=refrences
-                validatedObject['historySubCategory']= NewsData['historySubCategory']
-                NewsData['validatedObject']=validatedObject 
-                scraped_news.append(NewsData)
-    if(len(scraped_news)>0):
-        localDb.get_collection(localCollectionName).insert_many(scraped_news)
-    log_obj['Running_sequance'].append(str(len(scraped_news))+ " new news inserted in db.")
-  
-        
-if __name__ == "__main__":  
+c_name = 'SIEMENS_ENERGY' # Name of the Collection
 
+total_crwalled_links = 0
+
+Already_exist = 0
+
+# *************************************************************************
+
+# trying to connect with mongodb
+
+try:
+
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+
+    running_Sequence.append('Connected to DB Server')
+
+except:
+
+    running_Sequence.append('Not Connected')
+
+# *************************************************************************
+
+client_name = 'TEMP_EMR_NEWS_Crawler_DB'
+
+news =  client[client_name]
+
+collection = news[c_name]
+
+error_logs = client['Logs_DB']['Logs_TEMP_EMR_NEWS_Crawler_DB']
+
+last_insertion = None
+
+last_time = ''
+
+# ****************************************************************************
+
+try:
+
+    for l_i in collection.find().sort('Date', -1).limit(1):
+
+        last_insertion = l_i
+
+except:
+
+    last_insertion = None
+
+if last_insertion == None:
+
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
+
+    Crwl_time = datetime.now()
+
+else:
+
+    last_time = last_insertion['Date']
+
+    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+
+    Crwl_time = last_insertion['Date']
+
+# ****************************************************************************
+
+####################################################
+
+############# Every Company Logic Here #############
+
+####################################################
+
+# *****************************************************************************
+try:
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    Main_url = "https://press.siemens-energy.com"
+    Base_url = "https://press.siemens-energy.com/global/en/press-search"
+    result = requests.get(Base_url,headers=headers)
+    response = Selector(result)
     
-    try:    
-        # key='mongodb://localhost:27017/'
-        # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-        # data = json.load(file)
-        # db_path = data[0]['Db_Path']
-        # key = db_path
-        key='mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin'
-        dbName='TEMP_EMR_NEWS_Crawler_DB'
-        collectionName='SIEMENS_ENERGY'
-        url='https://press.siemens-energy.com/global/en/press-search?f%5B0%5D=content_type:c2_ct_press_release'
+    news_links = []
 
-        Client=CreateDbConnection(key)
-        db =  Client[dbName]
-        log_collection = Client['Logs_DB']['Logs_TEMP_EMR_NEWS_Crawler_DB']
-   
-        Parser(url,db,collectionName)
+    News = response.xpath('//div[contains(@class,"press-search-results-view-row content-type-c2-ct-press-release")]/div[@class="views-field views-field-title"]/a/@href').getall()
+    for n in News:
+        f_news_links = Main_url + n
+        # print(f_news_links)
+        news_links.append(f_news_links)
 
-        log=copy.deepcopy(log_obj)
-        log['Ending_time']=datetime.now()
-        # log_collection.insert_one(log)
-    except:
-        rep = traceback.format_exc()
-        log=copy.deepcopy(log_obj)
-        log_obj['Running_sequance'].append (rep)
-        log['Ending_time']=datetime.now()
-        # log_collection.insert_one(log)
+    print(news_links)
+    print(len(news_links))
+
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
+
+    for n in news_links:   
+        
+        if n in links_list:
+            total_crwalled_links += 1
+            Already_exist += 1
+            print("Already Crawled")
+            continue
+        else:     
+            result2 = requests.get(n, headers=headers)
+            response2 = Selector(result2)
+            
+            try:
+                title = response2.xpath('//section[@class="Intro Press Release container"]//h1/text()').get()
+                print(title)
+            except:
+                title = response2.xpath('///meta[@name="og:title"]/@content').get()
+                print(title)
+            
+            language = "en-us"
+            
+            image = ""
+
+            announcement_type = "News"
+            try:
+                sub_category = response2.xpath('//meta[@property="og:type"]/@content').get()
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = response2.xpath('//meta[@property="og:description"]/@content').get()
+                print(analysis)
+            except:
+                analysis = ""
+            try:
+                N_date = response2.xpath('//article[@class="panel"]//time/@datetime').get()
+                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
+                print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://press.siemens-energy.com/global/en/press-search"
+            news_weblink = n
+            
+            try:
+                announcement = fulltext(result2.text)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
+                
+            except:
+                announcement = response2.xpath('normalize-space(//article/section[@class="container Row"])').get()
+            
+            date = datetime.now()
+            company_news = {}
+            company_news['companyId'] = ''
+            company_news['location']=''
+            company_news['comment']=''
+            company_news['Date']= news_date
+            company_news['Crawled_on']=date
+            company_news['title']=title
+            company_news['Language']= language
+            company_news['announcementType']= announcement_type
+            company_news['Source'] = page_source
+            company_news['News_Weblink'] = news_weblink
+            company_news['photo']= image
+            company_news['videos']= ''
+            company_news['announcement']=announcement
+            company_news['historySubCategory']= sub_category
+            company_news['analysis'] = analysis
+            try:
+                collection.insert_one(company_news)
+                total_crwalled_links += 1
+            except Exception as e:
+                running_Sequence.append(e)
+    
+    if Already_exist >= 1:
+
+        tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
+
+    else:
+
+        tmp_txt = ''
+
+    running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
+
+    ended_on = datetime.now()
+except:
+    Error_Time =  datetime.now()
+
+    Reported_Error = traceback.format_exc()
 
 
-# In[ ]:
+# **************************************************************************
+rep = ''
+
+try:
+
+    Error = {}
+
+    Error['Error_Detail'] = Reported_Error
+
+    Error['Error_Time'] = Error_Time
+
+except Exception as e:
+
+    rep = traceback.format_exc()
+
+    pass
 
 
+log = {}
 
+log['Crawler_name'] = c_name+'.py'
 
+log['Crawler_type'] = c_name
+
+log['Starting_time'] = started_on
+
+log['Ending_time'] = Error_Time if rep == '' else ended_on
+
+log['Error_Detail'] =  Error if rep == '' else ''
+
+log['Crawler_Runing Sequence'] = running_Sequence if running_Sequence else ''
+
+log['Links_Skipped'] = Already_exist
+
+log['Last_news_crawl_time'] = last_time
+
+log['Browser'] = 'None'
+
+error_logs.insert_one(log)

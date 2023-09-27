@@ -129,35 +129,50 @@ else:
 try:
     # This is for Press Release
 
-    feed = feedparser.parse("https://ir.rockwellautomation.com/rss/PressRelease.aspx")
-    print(feed)
-    for i in feed:
-        print(i)
-        print(i['link'])
+    # feed = feedparser.parse("https://ir.rockwellautomation.com/rss/PressRelease.aspx")
+    # print(feed)
+
+    Bas_url = "https://www.rockwellautomation.com/en-us/sitemap.xml"
+
+    page = requests.get(Bas_url)
+    soup = BeautifulSoup(page.content, "html.parser")
+    # print(soup.prettify())
+
+    news_links = [] 
+
+    links = soup.find_all('loc')
+    for link in links:
+        if "/press-releases/" in link.text:
+            news_links.append(link.text)
+    print(news_links)
+    print(len(news_links))
 
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-        
-        if i['link'] in db_list:
+
+    for i in news_links:
+        if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1
             print("Already Crawled")
             continue
         else:
-            result1 = requests.get(i['link'])
+            result1 = requests.get(i)
             response1 = Selector(result1)
             try:
-                news_date = i['published']
-                news_date = dateparser.parse(news_date,  settings={'DATE_ORDER': 'DMY'})
+                ne_date = response1.xpath('//div[@class="hero-banner__subtitle-text"]/text()').get()
+                f_ne_date = ne_date.split('|')[1]
+                news_date = dateparser.parse(f_ne_date,  settings={'DATE_ORDER': 'DMY'})
+                print(news_date)
             except:
                 news_date = ""
             try:
-                title = i['title']
+                title = response1.xpath('//h1[@class="hero-banner__title"]/text()').get().strip()
+                print(title)
             except:
                 title = ""
-            print(title)
             try:
                 analysis = response1.xpath("//meta[@name='description']/@content").get()
             except:
@@ -187,7 +202,7 @@ try:
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = i['link']
+            company_news['News_Weblink'] = i
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement

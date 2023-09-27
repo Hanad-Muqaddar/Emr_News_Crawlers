@@ -194,6 +194,8 @@ crawlerToCollectionMapping={
     "Wieland" : "WIELAND",
     "Bosch" : "BOSCH",
     "Wieland_Electric" : "WIELAND_ELECTRIC",
+    "City_Electrical_Factors":"City_Electrical_Factors",
+    "City_Electrical_Supply":"City_Electrical_Supply",
 }
 
 def annoucments_time(client_Coll,crawler_name,datefilter):
@@ -426,6 +428,9 @@ Emr_News_Cralers_Dict = {
     "Harting":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Bosch":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Wieland_Electric":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
+    "City_Electrical_Factors":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
+    "City_Electrical_Supply":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
+
     # "Wieland":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     
     # "Schenider_Electric":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",

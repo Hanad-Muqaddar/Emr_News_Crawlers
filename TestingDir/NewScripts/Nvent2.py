@@ -136,7 +136,7 @@ try:
     News_list = response1.xpath('//section[contains(@class,"nv-layout--three-col")]//div[@class="nvent-block"]//a[@class="card__link"]')
     for news in News_list:
         link = news.xpath('./@href').get()
-        news_links.append(Main_url + link)
+        news_links.append(link)
          
     print(news_links)
     print(len(news_links))
@@ -167,7 +167,6 @@ try:
             announcement_type = "News"
             language = "en-us"
 
-            
             try:
                 image = response2.xpath('//meta[@property="og:image"]/@content').get()
                 print(image)
