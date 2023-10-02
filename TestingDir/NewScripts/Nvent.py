@@ -48,6 +48,7 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from selenium.webdriver.support.ui import Select
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 # defining variables
 opts = Options()
@@ -159,7 +160,7 @@ try:
 
     for j in links:
         news_weblink = j
-        
+        Emr_Crawlers_Logs(c_name,news_weblink)
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1

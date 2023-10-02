@@ -48,7 +48,7 @@ from urllib.request import Request, urlopen
 from newspaper import fulltext
 
 from scrapy.selector import Selector
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 # defining variables
 
@@ -178,6 +178,7 @@ try:
             des_list.append(des)
 
     for N_title, img, dat, des in zip(title_list,image_list,date_list,des_list): 
+        Emr_Crawlers_Logs(c_name,N_title)
         if N_title in All_title_list:
             total_crwalled_titles += 1
             Already_exist += 1

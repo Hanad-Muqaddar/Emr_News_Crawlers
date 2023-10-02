@@ -27,6 +27,7 @@ from datetime import datetime,date, timedelta
 from bson.objectid import ObjectId
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 running_Sequence = []
 started_on = datetime.now()
 c_name = 'SIGNIFY'
@@ -82,6 +83,7 @@ try:
                 # print(j['link'])
                 l = True
                 break
+        Emr_Crawlers_Logs(c_name,l)
         if l:
             total_crwalled_links +=1
             Already_exist +=1

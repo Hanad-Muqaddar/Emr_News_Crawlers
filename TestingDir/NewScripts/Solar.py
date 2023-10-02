@@ -45,6 +45,7 @@ from scrapy import Selector
 
 from newspaper import fulltext
 import json
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 running_Sequence = []
 
@@ -157,6 +158,8 @@ try:
     for i in data:
         id = i['Id']
         news_web_link = f"https://www.solar.eu/investor/news/news-page/?pressId={id}&lang=en"
+        
+        Emr_Crawlers_Logs(c_name,news_web_link)
         if news_web_link in db_list:
             Already_exist += 1
             total_crwalled_links += 1

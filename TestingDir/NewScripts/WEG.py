@@ -47,7 +47,7 @@ from urllib.request import Request, urlopen
 from scrapy import Selector
 
 import xmltodict
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 # defining variables
 
@@ -170,6 +170,7 @@ try:
             # print(news_weblink)
         except:
             news_weblink = ""
+        Emr_Crawlers_Logs(c_name,news_weblink)
         
         if news_weblink in db_list:
             total_crwalled_links += 1

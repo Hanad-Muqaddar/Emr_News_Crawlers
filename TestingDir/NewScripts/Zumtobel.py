@@ -51,7 +51,7 @@ from scrapy import Selector
 from selenium.webdriver.chrome.service import Service as ChromeService
 
 from webdriver_manager.chrome import ChromeDriverManager
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 
 options = Options()
@@ -164,6 +164,7 @@ try:
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(version='114.0.5735.90').install()), options=opts)
     links = ['https://z.lighting/en/group/news-insights/?category=company', 'https://z.lighting/en/group/news-insights/?category=zumtobel']
     for i in links:
+        Emr_Crawlers_Logs(c_name,i)
         driver.get(i)
         # driver.get_screenshot_as_file("/home/emr/TestingDir/ScreenShots/screenshot.png")
         page_source = i

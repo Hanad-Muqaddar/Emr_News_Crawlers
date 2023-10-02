@@ -49,7 +49,7 @@ from urllib.request import Request, urlopen
 
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 # defining variables
 
@@ -178,38 +178,38 @@ try:
     
     print(news_title)
     print(news_dates)
+
+    # Creating a list of links already avilable in database
+    links_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        links_list.append(x['News_Weblink'])
+
     for N_title, L_date in zip(news_titles, news_dates):
-    
         title = N_title
-        # print(title)
-              
-        language = "en-us"        
-        announcement_type = "Financial News"
-
-        try:
-            # print(L_date)
-            news_date = dateparser.parse(L_date,settings={'DATE_ORDER': 'YMD'})
-            # print(news_date)
-        except:
-            news_date = ""
-
-        page_source = "https://investors.atkore.com/events-and-presentations/default.aspx"
         news_weblink = "https://investors.atkore.com/events-and-presentations/default.aspx?title="+title
-        
-        
-        date = datetime.now()
-        # Creating a list of links already avilable in database
-        links_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            links_list.append(x['News_Weblink'])
-
+        Emr_Crawlers_Logs(c_name,news_weblink)
         if news_weblink in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
-        else:
+        else:           
+                
+            language = "en-us"        
+            announcement_type = "Financial News"
+
+            try:
+                # print(L_date)
+                news_date = dateparser.parse(L_date,settings={'DATE_ORDER': 'YMD'})
+                # print(news_date)
+            except:
+                news_date = ""
+
+            page_source = "https://investors.atkore.com/events-and-presentations/default.aspx"
+            
+            date = datetime.now()
+                    
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

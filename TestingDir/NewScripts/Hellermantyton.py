@@ -46,7 +46,7 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 # defining variables
 # opts = Options()
@@ -155,6 +155,7 @@ try:
         db_list.append(x['News_Weblink'])
 
     for i in links:
+        Emr_Crawlers_Logs(c_name,i)
         news_weblink = "https://www.hellermanntyton.com" + i.get("href")
         if news_weblink in db_list:
             total_crwalled_links += 1

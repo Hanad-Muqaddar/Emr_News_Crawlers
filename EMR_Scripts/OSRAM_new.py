@@ -15,6 +15,7 @@ import time
 import dateparser
 from datetime import datetime,date, timedelta
 from scrapy import Selector
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 running_Sequence = []
 started_on = datetime.now()
@@ -103,6 +104,7 @@ try:
             if k:
                 l = True
                 break
+        Emr_Crawlers_Logs(c_name,l)
         if l:
             total_crwalled_links +=1
             Already_exist +=1

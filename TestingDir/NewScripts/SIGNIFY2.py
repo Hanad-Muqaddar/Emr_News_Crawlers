@@ -45,7 +45,7 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 from newspaper import fulltext
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 # defining variables
 
@@ -146,6 +146,7 @@ try:
 
 
     for i in News_Links:
+        Emr_Crawlers_Logs(c_name,i)
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1

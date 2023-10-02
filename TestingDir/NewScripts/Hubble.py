@@ -51,7 +51,7 @@ from scrapy import Selector
 from newspaper import Article
 
 import xmltodict
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 
 running_Sequence = []
@@ -162,6 +162,8 @@ try:
             news_weblink = ""
         if news_weblink == "":
             continue
+
+        Emr_Crawlers_Logs(c_name,news_weblink)
         
         if news_weblink in db_list:
             total_crwalled_links += 1

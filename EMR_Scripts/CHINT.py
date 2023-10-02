@@ -50,6 +50,7 @@ from newspaper import fulltext
 from googletrans import Translator
 
 from scrapy import Selector
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 # defining variables
 
@@ -138,6 +139,7 @@ try:
         db_list.append(x['News_Weblink'])
 
     for i in links:
+        Emr_Crawlers_Logs(c_name,i)
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1

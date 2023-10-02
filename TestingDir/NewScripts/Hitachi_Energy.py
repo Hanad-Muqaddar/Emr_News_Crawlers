@@ -46,7 +46,7 @@ from scrapy import Selector
 from newspaper import fulltext
 
 import unicodedata
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 running_Sequence = []
 
@@ -218,6 +218,7 @@ try:
         All_title_list.append(x['title'])
 
     for i in links:
+        Emr_Crawlers_Logs(c_name,i)
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1

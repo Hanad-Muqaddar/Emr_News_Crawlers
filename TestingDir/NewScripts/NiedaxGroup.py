@@ -46,7 +46,7 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 # defining variables
 # opts = Options()
@@ -158,7 +158,7 @@ try:
 
     for i in data:
         news_weblink = "https://www.niedax-group.com" + i.find("a").get("href")
-        
+        Emr_Crawlers_Logs(c_name,i)
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1

@@ -46,7 +46,7 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 # defining variables
 # opts = Options()
@@ -177,6 +177,8 @@ try:
             news_weblink = "https://www.dehn-international.com" + m.get('href')
         except:
             news_weblink = ""
+
+        Emr_Crawlers_Logs(c_name,news_weblink)
             
         if news_weblink in db_list:
             total_crwalled_links += 1

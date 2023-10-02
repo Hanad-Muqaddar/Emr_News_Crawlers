@@ -53,7 +53,7 @@ from scrapy import Selector
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ************************************************************************
 
@@ -181,6 +181,7 @@ try:
         db_list.append(x['News_Weblink'])
 
     for news_link , d in zip(news_links,news_dates):
+        Emr_Crawlers_Logs(c_name,news_link)
 
     # headers = {
     #     'Cookie': 'AWSALB=JbCkIr+AtI72m9HbLWNw7bktd7WB3btj/faED/qYUQeUgoe+/I+HDkbmL65o1ounCii6QADP+k7lK3Ot2vZTuah5pBapeDyGaq4aj84Y2jWINxGXdTDife5ObF3E; AWSALBCORS=JbCkIr+AtI72m9HbLWNw7bktd7WB3btj/faED/qYUQeUgoe+/I+HDkbmL65o1ounCii6QADP+k7lK3Ot2vZTuah5pBapeDyGaq4aj84Y2jWINxGXdTDife5ObF3E',

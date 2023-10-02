@@ -47,7 +47,7 @@ from scrapy import Selector
 from newspaper import fulltext
 
 import feedparser
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 running_Sequence = []
 
@@ -147,13 +147,15 @@ def parse_filtered_news(announcement):
 # *****************************************************************************
 
 try:
+    db_list = []
+    mydoc = collection.find()
+    for x in mydoc:
+        db_list.append(x['News_Weblink'])
+
     feed = feedparser.parse('https://www.sonepar.com/service/rss/en/7956/feed.rss')
     for i in feed['entries']:
-        
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+               
+        Emr_Crawlers_Logs(c_name,i)
         
         if i['link'] in db_list:
             Already_exist += 1

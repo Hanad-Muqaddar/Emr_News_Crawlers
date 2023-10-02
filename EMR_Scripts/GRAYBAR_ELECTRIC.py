@@ -48,7 +48,7 @@ from newspaper import fulltext
 
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 running_Sequence = []
 
@@ -175,7 +175,7 @@ try:
         db_list.append(x['News_Weblink'])
 
     for i , j ,k , title in zip(final_links, dates, announcement_type, titles):
-        
+        Emr_Crawlers_Logs(c_name,i)
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1

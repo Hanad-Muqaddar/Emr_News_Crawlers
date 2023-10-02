@@ -49,7 +49,7 @@ from urllib.request import Request, urlopen
 
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 # defining variables
 # opts = Options()
@@ -184,7 +184,7 @@ try:
         db_list.append(x['News_Weblink'])
 
     for news_weblink in news_links:
-        
+        Emr_Crawlers_Logs(c_name,news_weblink)
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1

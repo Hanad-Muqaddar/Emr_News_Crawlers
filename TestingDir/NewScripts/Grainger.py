@@ -46,6 +46,7 @@ from scrapy import Selector
 from newspaper import fulltext
 
 import feedparser
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 running_Sequence = []
 
@@ -132,7 +133,8 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-    for i in data:
+    for i in data:        
+        Emr_Crawlers_Logs(c_name,i.link)
         if i.link in db_list:
             Already_exist += 1
             total_crwalled_links += 1

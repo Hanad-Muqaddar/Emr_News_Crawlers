@@ -26,6 +26,7 @@ from datetime import datetime,date, timedelta
 from bson.objectid import ObjectId
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 opts = Options()
 # opts.add_argument("--window-size=190,100")
 # opts.add_argument("--disable-automation")
@@ -111,6 +112,7 @@ try:
                 if k:
                     l = True
                     # break
+            Emr_Crawlers_Logs(c_name,l)
             if l:
                 total_crwalled_links +=1
                 Already_exist +=1

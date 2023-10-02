@@ -46,7 +46,7 @@ from urllib.request import Request, urlopen
 from scrapy import Selector
 
 from newspaper import fulltext
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 running_Sequence = []
 
@@ -133,7 +133,7 @@ try:
         db_list.append(x['News_Weblink'])
 
     for i in data['urlset']['url']:
-        
+        Emr_Crawlers_Logs(c_name,i['loc'])
         if i['loc'] in db_list:
             Already_exist += 1
             total_crwalled_links += 1

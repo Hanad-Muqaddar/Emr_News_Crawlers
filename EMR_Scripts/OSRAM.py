@@ -24,6 +24,7 @@ import urllib
 import time
 import dateparser
 from datetime import datetime,date, timedelta
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # from bson.objectid import ObjectId
 # from urllib.error import HTTPError
 # from urllib.request import Request, urlopen
@@ -102,6 +103,7 @@ try:
             if k:
                 l = True
                 break
+        Emr_Crawlers_Logs(c_name,l)
         if l:
             total_crwalled_links +=1
             Already_exist +=1

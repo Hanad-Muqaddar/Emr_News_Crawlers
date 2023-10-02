@@ -10,6 +10,8 @@ from datetime import date, timedelta
 from datetime import datetime
 import dateparser
 import copy
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+
 today = datetime.now()
 running_sequence = []
 started_on = datetime.now()
@@ -153,6 +155,7 @@ try:
     
     for i in news_list:
         weblink = i['News_Weblink']
+        Emr_Crawlers_Logs(c_name,weblink)
         l = False
         for k in collection.find({ 'News_Weblink' : weblink }):
             if k:

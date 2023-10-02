@@ -27,8 +27,8 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from selenium.webdriver.chrome.service import Service as ChromeService
-
 from webdriver_manager.chrome import ChromeDriverManager
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 opts = Options()
 opts.add_argument("--window-size=190,100")
@@ -115,6 +115,8 @@ try:
             if k:
                 l = True
                 break
+            
+        Emr_Crawlers_Logs(c_name,l)
         if l:
             total_crwalled_links +=1
             Already_exist +=1

@@ -44,7 +44,7 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 # defining variables
 
@@ -149,6 +149,7 @@ try:
 
     links = soup.find_all("loc")
     for i in links:
+        Emr_Crawlers_Logs(c_name,i.text)
         if i.text in links_list:
             total_crwalled_links += 1
             Already_exist += 1

@@ -30,6 +30,7 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from scrapy import Selector
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 running_Sequence = []
 started_on = datetime.now()
@@ -109,6 +110,9 @@ try:
     url_api = 'https://global.abb/group/en/media/releases/group.abbglobal-news-search.json?feeds=abb:feeds/group_functions/corporate_communications/group_press_releases&feedsOperator=OR&dateFrom=2020-01-01&dateTo='+str(api_date)+'&limit=100&offset=0'
     total_page = json.loads(requests.get(url_api).text)
     for j in total_page['news'][:10]:
+        n_link = 'https://global.abb/'+ j['path']
+        Emr_Crawlers_Logs(c_name,n_link)
+
         l = False
         for k in collection.find({ 'News_Weblink' : str('https://global.abb/'+j['path']) }):
             if k:
@@ -172,6 +176,8 @@ try:
     url_api = 'https://global.abb/group/en/media/releases/stories.abbglobal-news-search.json?feeds=abb:feeds/group_functions/corporate_communications/group_web_stories&feedsOperator=OR&dateFrom=2019-01-01&dateTo='+str(api_date)+'&limit=200&offset=0'
     total_page = json.loads(requests.get(url_api).text)
     for j in total_page['news'][:10]:
+        n_link = 'https://global.abb/'+ j['path']
+        Emr_Crawlers_Logs(c_name,n_link)
         l = False
         for k in collection.find({ 'News_Weblink' : str('https://global.abb/'+j['path']) }):
             if k:

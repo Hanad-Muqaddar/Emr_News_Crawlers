@@ -44,7 +44,7 @@ from urllib.request import Request, urlopen
 from scrapy import Selector
 
 from newspaper import fulltext
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 running_Sequence = []
 
@@ -148,10 +148,13 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
+
     for i in links:
+        Emr_Crawlers_Logs(c_name,i)
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1
+            print("Already Crawled")
             continue
         else:
             result1 = requests.get(i)

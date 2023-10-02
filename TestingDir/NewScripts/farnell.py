@@ -45,7 +45,7 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 import feedparser
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 # defining variables
 
@@ -133,7 +133,7 @@ try:
     for i in feed['entries']:     
         n_link =   i['link'] 
         print(n_link)
-
+        Emr_Crawlers_Logs(c_name,n_link)
         if n_link in db_list:
             total_crwalled_links += 1
             Already_exist += 1

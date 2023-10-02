@@ -49,6 +49,7 @@ from urllib.request import Request, urlopen
 from scrapy import Selector
 
 from newspaper import Article
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 # defining variables
 # opts = Options()
@@ -173,6 +174,8 @@ try:
             news_weblink = ""
         if news_weblink == "":
             continue
+
+        Emr_Crawlers_Logs(c_name,news_weblink)
             
         if news_weblink in db_list:
             total_crwalled_links += 1

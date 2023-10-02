@@ -45,7 +45,7 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
-
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ************************************************************************
 # defining variables
 
@@ -147,6 +147,7 @@ try:
             news_weblink = "https://www.ensto.com" + data['Cards'][i]['link']['url']
         except:
             news_weblink = ""
+        Emr_Crawlers_Logs(c_name,news_weblink)
         try:
             image = data['Cards'][0]['images'][0]['url']
         except:
