@@ -155,8 +155,9 @@ try:
         db_list.append(x['News_Weblink'])
 
     for i in links:
-        Emr_Crawlers_Logs(c_name,i)
+        
         news_weblink = "https://www.hellermanntyton.com" + i.get("href")
+        Emr_Crawlers_Logs(c_name,news_weblink)
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1

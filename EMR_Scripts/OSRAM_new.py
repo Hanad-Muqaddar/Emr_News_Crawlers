@@ -97,14 +97,14 @@ try:
     newsData = resp.json()['results'][0]['hits']
     for j in newsData:
         # lowerTitle = j['dp_headline'].lower()
-        
+        Emr_Crawlers_Logs(c_name,j['link'])
         l = False
         # for k in collection.find({ 'News_Weblink' : j['link']  , 'title' : lowerTitle}):
         for k in collection.find({ 'News_Weblink' : j['link']}):
             if k:
                 l = True
                 break
-        Emr_Crawlers_Logs(c_name,l)
+        
         if l:
             total_crwalled_links +=1
             Already_exist +=1

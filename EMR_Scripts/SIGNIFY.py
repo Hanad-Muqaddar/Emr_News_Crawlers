@@ -76,8 +76,10 @@ try:
         print(e)
     data = total_page.json()
     for j in data:
+        N_link = str(j['link']) 
+        Emr_Crawlers_Logs(c_name,N_link)
         l = False
-        for k in collection.find({ 'News_Weblink' : str(j['link']) }):
+        for k in collection.find({ 'News_Weblink' :N_link}):
             if k:
                 # print("Skip Link")
                 # print(j['link'])

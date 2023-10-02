@@ -92,12 +92,14 @@ try:
         data = json.loads(requests.get(req_url).text)['articles']
         running_Sequence.append('Crawling News Data for ADHQ, count - ' +str(i+1))
         for j in data:
+            n_link = str('https://www.adhq.com/about/ad-news/'+j['url_segment'])
+            Emr_Crawlers_Logs(c_name,n_link)
             l = False
-            for k in collection.find({ 'News_Weblink' : str('https://www.adhq.com/about/ad-news/'+j['url_segment']) }):
+            for k in collection.find({ 'News_Weblink' : n_link }):
                 if k:
                     l = True
                     break
-            Emr_Crawlers_Logs(c_name,l)
+            
             if l:
                 total_crwalled_links +=1
                 Already_exist +=1

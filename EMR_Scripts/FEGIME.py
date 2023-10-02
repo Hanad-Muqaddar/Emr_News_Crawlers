@@ -84,12 +84,12 @@ try:
         soup = BeautifulSoup(main_resp.content, 'lxml').find('section',class_= 'container section-content')
         for i in soup.find_all('article',attrs={'class':'card w-100','data-type':'post'}):
             website = i.find('link').get('href')
+            Emr_Crawlers_Logs(c_name,website)
             l = False
             for k in collection.find({ 'News_Weblink' : website }):
                 if k:
                     l = True
                     break
-            Emr_Crawlers_Logs(c_name,l)
             if l:
                 total_crwalled_links +=1
                 Already_exist +=1

@@ -148,7 +148,7 @@ try:
 
     for i in news_links:
         Emr_Crawlers_Logs(c_name,i)
-        if news_weblink in links_list:
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled..")

@@ -193,6 +193,7 @@ try:
         # print('Links aagay hn')
         # print(f_links)
         for j in f_links:
+            Emr_Crawlers_Logs(c_name,j)
             news_weblink = j
             
             # print('2')

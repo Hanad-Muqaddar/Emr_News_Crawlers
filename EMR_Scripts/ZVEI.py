@@ -110,13 +110,14 @@ try:
     # print('Link out')
 
     for url in news_link:
+        n_link = url['link']
+        Emr_Crawlers_Logs(c_name,n_link)
         l = False
-        for k in collection.find({ 'News_Weblink' : url['link'] }):
+        for k in collection.find({ 'News_Weblink' :n_link}):
             if k:
                 l = True
                 break
             
-        Emr_Crawlers_Logs(c_name,l)
         if l:
             total_crwalled_links +=1
             Already_exist +=1

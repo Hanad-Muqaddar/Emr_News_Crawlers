@@ -107,12 +107,13 @@ try:
     for i in news_list:            
         if i[2].get('href'):
             weblink = i[2].get('href')
+            Emr_Crawlers_Logs(c_name,weblink)
             l = False
             for k in collection.find({ 'News_Weblink' : weblink }):
                 if k:
                     l = True
                     # break
-            Emr_Crawlers_Logs(c_name,l)
+            
             if l:
                 total_crwalled_links +=1
                 Already_exist +=1

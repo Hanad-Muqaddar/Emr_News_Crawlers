@@ -158,7 +158,7 @@ try:
 
     for i in data:
         news_weblink = "https://www.niedax-group.com" + i.find("a").get("href")
-        Emr_Crawlers_Logs(c_name,i)
+        Emr_Crawlers_Logs(c_name,news_weblink)
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1

@@ -155,7 +155,7 @@ try:
     feed = feedparser.parse('https://www.sonepar.com/service/rss/en/7956/feed.rss')
     for i in feed['entries']:
                
-        Emr_Crawlers_Logs(c_name,i)
+        Emr_Crawlers_Logs(c_name,i['link'])
         
         if i['link'] in db_list:
             Already_exist += 1
