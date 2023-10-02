@@ -98,12 +98,12 @@ try:
     # print(type(newsData))
     print(len(newsData))
     for j in newsData:
+        Emr_Crawlers_Logs(c_name,j['link'])
         l = False
         for k in collection.find({'News_Weblink': j['link']}):
             if k:
                 l = True
                 break
-        Emr_Crawlers_Logs(c_name,l)
         if l:
             total_crwalled_links +=1
             Already_exist +=1
