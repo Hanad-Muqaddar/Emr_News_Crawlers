@@ -215,6 +215,7 @@ def annoucments_time(client_Coll,crawler_name,datefilter):
     return Times_Data
 
 def crawler_health_function(crawler_name, path, today_date):
+    print(crawler_name)
     # print(count_c)
     item = {}
     item["name"] = ""
@@ -290,7 +291,7 @@ Emr_News_Cralers_Dict = {
     "OSRAM_new":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "OSRAM":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     # "PANDUIT":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
-    "Phoenix_Contact":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
+    # "Phoenix_Contact":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "Prysmian_Group":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "RDM":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "RITTAL":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
