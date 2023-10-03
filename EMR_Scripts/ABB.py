@@ -30,7 +30,7 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from scrapy import Selector
-from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+#from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 import importlib.util
 
