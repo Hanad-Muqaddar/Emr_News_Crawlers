@@ -35,10 +35,10 @@ from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 import importlib.util
 
 # Specify the absolute path to details.py
-module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/'
+module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
 
 # Load the module using the absolute path
-spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization.py', module_path)
+spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
 Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 
