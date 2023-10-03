@@ -32,6 +32,19 @@ from urllib.request import Request, urlopen
 from scrapy import Selector
 from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
+import importlib.util
+
+# Specify the absolute path to details.py
+module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/'
+
+# Load the module using the absolute path
+spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization.py', module_path)
+Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(Emr_Crawlers_Optimization)
+
+# Now you can access the getName function
+Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs()
+
 running_Sequence = []
 started_on = datetime.now()
 # c_name = 'ABB_New_Testing'
@@ -121,6 +134,7 @@ try:
         if l:
             total_crwalled_links +=1
             Already_exist +=1
+            print("Already Crawled")
             # print('\n'+news['Link']+'\nNews Already Exist in DB\n')        
         else:
             news = {}
