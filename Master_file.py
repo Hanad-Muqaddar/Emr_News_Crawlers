@@ -262,6 +262,7 @@ def crawler_health_function(crawler_name, path, today_date):
        
 
     except Exception as e:
+        print(e)
         end_time = datetime.datetime.now()
         time_interval = calculate_time_interval(start_time, end_time)
         MyCollection.update_one({"_id": returning_id.inserted_id}, {"$set":{"status":"Error In Crawler", "errorType":str(e), "timeIntervalTakenToRun":time_interval}})

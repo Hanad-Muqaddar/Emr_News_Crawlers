@@ -272,7 +272,7 @@ try:
             company_news['emrLite'] = emr_lite
             company_news['News_Html'] = emr_html
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 # print("Inserted")
                 total_crwalled_links += 1
             except Exception as e:
