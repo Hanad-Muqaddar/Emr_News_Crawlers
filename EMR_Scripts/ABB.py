@@ -41,6 +41,7 @@ module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawl
 spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
 Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
+Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 
 # Now you can access the getName function
 running_Sequence = []
@@ -122,9 +123,9 @@ try:
     total_page = json.loads(requests.get(url_api).text)
     for j in total_page['news'][:10]:
         n_link = 'https://global.abb/'+ j['path']
-        Emr_Crawlers_Optimization.Emr_Crawlers_Logs(c_name,n_link)
+        #Emr_Crawlers_Optimization.Emr_Crawlers_Logs(c_name,n_link)
 
-        #Emr_Crawlers_Logs(c_name,n_link)
+        Emr_Crawlers_Logs(c_name,n_link)
 
         l = False
         for k in collection.find({ 'News_Weblink' : str('https://global.abb/'+j['path']) }):
