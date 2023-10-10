@@ -172,9 +172,9 @@ try:
     # mydoc = collection.find()
     # for x in mydoc:
     #     All_title_list.append(x['title'])
-
+    Optimization_links = []
     for i in News_data:
-        Emr_Crawlers_Logs(c_name,i['link'])
+        Optimization_links.append(i['link'])
         if i['link'] in db_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -228,7 +228,8 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    
+                
+    Emr_Crawlers_Logs(c_name,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

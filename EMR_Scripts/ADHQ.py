@@ -96,16 +96,18 @@ else:
     Crwl_time = last_insertion['Date']
 total_crwalled_links = 0
 Already_exist = 0
+
 try:
     # total_page = json.loads(requests.get('https://www.adhq.com/news/json/').text)['total_pages']
     # print(total_page)
+    Optimization_links = []
     for i in range(2):
         req_url = 'https://www.adhq.com/news/json/'+str(i+1)
         data = json.loads(requests.get(req_url).text)['articles']
         running_Sequence.append('Crawling News Data for ADHQ, count - ' +str(i+1))
         for j in data:
             n_link = str('https://www.adhq.com/about/ad-news/'+j['url_segment'])
-            Emr_Crawlers_Logs(c_name,n_link)
+            Optimization_links.append(n_link)
             l = False
             for k in collection.find({ 'News_Weblink' : n_link }):
                 if k:
@@ -163,6 +165,7 @@ try:
                 news['Crawled_on'] = datetime.now()
                 total_crwalled_links +=1
                 collection.insert_one(news)
+        Emr_Crawlers_Logs(c_name,Optimization_links)
         if Already_exist >=1:
             tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
         else:

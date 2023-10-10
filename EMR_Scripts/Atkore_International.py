@@ -158,17 +158,21 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
-
+    N_links = []
     links = soup.find_all("loc")
-    for i in links:
-        Emr_Crawlers_Logs(c_name,i.text)
-        if i.text in links_list:
+    for news_l in links:
+        N_links.append(news_l.text)
+
+    Emr_Crawlers_Logs(c_name,N_links)
+    for i in N_links:
+        
+        if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
         else:
-            response = requests.get(i.text, headers=headers)
+            response = requests.get(i, headers=headers)
             data = BeautifulSoup(response.content, 'lxml')
             try:
                 title = data.find('title').text
@@ -193,7 +197,7 @@ try:
             except:
                 news_date = ""
             page_source = "https://www.atkore.com/news/"
-            news_weblink = i.text
+            news_weblink = i
             try:
                 image = data.find('meta', attrs = {"property":"og:image"}).get("content")
             except:

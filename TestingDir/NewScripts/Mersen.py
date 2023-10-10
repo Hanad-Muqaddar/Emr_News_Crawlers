@@ -178,8 +178,9 @@ try:
             dates.append(news_date)
         else:
             continue
+    Emr_Crawlers_Logs(c_name,news_links)
     for j,k in zip(news_links, dates):
-        Emr_Crawlers_Logs(c_name,j)
+        
         if j in db_list:
             total_crwalled_links += 1
             Already_exist += 1

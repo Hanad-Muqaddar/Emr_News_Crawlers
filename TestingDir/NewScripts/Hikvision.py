@@ -177,8 +177,8 @@ try:
         news_links.append(url) 
     print(news_links)
 
+    Emr_Crawlers_Logs(c_name,news_links)
     for l in news_links:
-        Emr_Crawlers_Logs(c_name,l)
         if l in db_list:
             total_crwalled_links += 1
             Already_exist += 1

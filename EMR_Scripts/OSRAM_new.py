@@ -87,6 +87,7 @@ def parse_filtered_news(announcement):
         return new_data
 
 try:
+    Optimization_links = []
     ################ NEWS Release #####################################
     url = "https://9ps0m7duie-2.algolianet.com/1/indexes/*/queries?x-algolia-agent=Algolia%20for%20JavaScript%20(3.35.1)%3B%20Browser%20(lite)%3B%20react%20(16.12.0)%3B%20react-instantsearch%20(5.7.0)%3B%20JS%20Helper%20(2.28.0)&x-algolia-application-id=9PS0M7DUIE&x-algolia-api-key=321a182fe8706b78ee3234b41c7b58f7"
     news_num = 10
@@ -109,7 +110,7 @@ try:
     newsData = resp.json()['results'][0]['hits']
     for j in newsData:
         # lowerTitle = j['dp_headline'].lower()
-        Emr_Crawlers_Logs(c_name,j['link'])
+        Optimization_links.append(j['link'])
         l = False
         # for k in collection.find({ 'News_Weblink' : j['link']  , 'title' : lowerTitle}):
         for k in collection.find({ 'News_Weblink' : j['link']}):
@@ -269,7 +270,7 @@ try:
     #         break
 
     
-
+    Emr_Crawlers_Logs(c_name,Optimization_links)
     if Already_exist >=1:
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
     else:

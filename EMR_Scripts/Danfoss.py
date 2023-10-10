@@ -161,7 +161,7 @@ def parse_filtered_news(announcement):
 try:
     Base_url = "https://www.danfoss.com"
     result = requests.get("https://www.danfoss.com/sitemap.xml/en/")
-    soup = BeautifulSoup(result.content, "html.parser")
+    soup = BeautifulSoup(result.content, 'lxml')
     links = soup.find_all('loc')
     final_links = [link.text for link in links if "/news/" in link.text or "/case-stories/" in link.text]
     final_links.remove('https://www.danfoss.com/en/service-and-support/case-stories/')

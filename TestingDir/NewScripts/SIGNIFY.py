@@ -174,6 +174,7 @@ try:
 
     data = json.loads(response.text)
     print(data)
+    Optimization_links = []
     for i in data:
         try:
             news_weblink = i['link']
@@ -182,7 +183,7 @@ try:
         if news_weblink == "":
             continue
 
-        Emr_Crawlers_Logs(c_name,news_weblink)
+        Optimization_links.append(news_weblink)
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -248,7 +249,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    
+    Emr_Crawlers_Logs(c_name,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

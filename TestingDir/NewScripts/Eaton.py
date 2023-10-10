@@ -200,6 +200,7 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
+    Emr_Crawlers_Logs(c_name,data)
     for i in data:
         try:
             news_weblink = i
@@ -208,7 +209,7 @@ try:
         if news_weblink == "":
             continue
             
-        Emr_Crawlers_Logs(c_name,news_weblink)
+        
         if news_weblink in db_list:
             # print("Link Already exists")
             total_crwalled_links += 1

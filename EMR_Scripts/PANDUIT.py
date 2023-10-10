@@ -191,8 +191,9 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
+    Emr_Crawlers_Logs(c_name,news_links)
     for news_link , d in zip(news_links,news_dates):
-        Emr_Crawlers_Logs(c_name,news_link)
+        
 
     # headers = {
     #     'Cookie': 'AWSALB=JbCkIr+AtI72m9HbLWNw7bktd7WB3btj/faED/qYUQeUgoe+/I+HDkbmL65o1ounCii6QADP+k7lK3Ot2vZTuah5pBapeDyGaq4aj84Y2jWINxGXdTDife5ObF3E; AWSALBCORS=JbCkIr+AtI72m9HbLWNw7bktd7WB3btj/faED/qYUQeUgoe+/I+HDkbmL65o1ounCii6QADP+k7lK3Ot2vZTuah5pBapeDyGaq4aj84Y2jWINxGXdTDife5ObF3E',

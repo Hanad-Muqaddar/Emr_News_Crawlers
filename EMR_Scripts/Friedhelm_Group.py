@@ -152,9 +152,10 @@ try:
     for i in data:
         news_weblink = "https://www.rittal.com" + i.find('a').get("href")
         links_list.append(news_weblink)
-        
+
+    Emr_Crawlers_Logs(c_name,links_list)
     for j in links_list:
-        Emr_Crawlers_Logs(c_name,j)
+        
         if j in db_list:
             print("Link Already Exists")
             continue

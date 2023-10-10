@@ -122,17 +122,16 @@ try:
     api_date = datetime.now().isoformat().split('T')[0]
     url_api = 'https://global.abb/group/en/media/releases/group.abbglobal-news-search.json?feeds=abb:feeds/group_functions/corporate_communications/group_press_releases&feedsOperator=OR&dateFrom=2020-01-01&dateTo='+str(api_date)+'&limit=100&offset=0'
     total_page = json.loads(requests.get(url_api).text)
+    Optimization_links = []
     for j in total_page['news'][:10]:
         n_link = 'https://global.abb/'+ j['path']
-        #Emr_Crawlers_Optimization.Emr_Crawlers_Logs(c_name,n_link)
-
-        Emr_Crawlers_Logs(c_name,n_link)
 
         l = False
         for k in collection.find({ 'News_Weblink' : str('https://global.abb/'+j['path']) }):
             if k:
                 l = True
                 break
+        Optimization_links.append(l)
         if l:
             total_crwalled_links +=1
             Already_exist +=1
@@ -184,6 +183,8 @@ try:
 
             total_crwalled_links +=1
             collection.insert_one(news)
+            
+    Emr_Crawlers_Logs(c_name,Optimization_links)
 
 
 ########################### Stories #############################################################

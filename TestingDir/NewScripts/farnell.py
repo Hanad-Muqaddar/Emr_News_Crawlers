@@ -142,11 +142,13 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
+    Optimization_links = []
+
     feed = feedparser.parse('https://www.element14.com/news/tagfeed/en/tags/News')
     for i in feed['entries']:     
         n_link =   i['link'] 
         print(n_link)
-        Emr_Crawlers_Logs(c_name,n_link)
+        Optimization_links.append(n_link)
         if n_link in db_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -207,7 +209,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    
+    Emr_Crawlers_Logs(c_name,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

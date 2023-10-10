@@ -174,6 +174,7 @@ db_list = []
 mydoc = collection.find()
 for x in mydoc:
     db_list.append(x['News_Weblink'])
+Optimization_links = []
 try:
     for i in range(17):
         main_url = "https://www.opple.com/en/news?page={}".format(i)
@@ -185,7 +186,7 @@ try:
             break
         for j in links:
             news_weblink = "https://www.opple.com" + j.find("a").get('href')
-            Emr_Crawlers_Logs(c_name,news_weblink)
+            Optimization_links.append(news_weblink)
             if news_weblink in db_list:
                 total_crwalled_links += 1
                 Already_exist += 1
@@ -241,7 +242,8 @@ try:
                     total_crwalled_links += 1
                 except Exception as e:
                     running_Sequence.append(e)
-        
+                    
+    Emr_Crawlers_Logs(c_name,Optimization_links)   
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

@@ -110,8 +110,9 @@ try:
     # print(newsData)
     # print(type(newsData))
     print(len(newsData))
+    Optimization_links = []
     for j in newsData:
-        Emr_Crawlers_Logs(c_name,j['link'])
+        Optimization_links.append(j['link'])
         l = False
         for k in collection.find({'News_Weblink': j['link']}):
             if k:
@@ -225,8 +226,8 @@ try:
                     break
                 # else:
                     # skip_next = False
+            Optimization_links.append(l)
             if l:
-                
                 total_crwalled_links +=1
                 Already_exist +=1       
             else:
@@ -283,7 +284,7 @@ try:
         #     break
 
     
-
+    Emr_Crawlers_Logs(c_name,Optimization_links)
     if Already_exist >=1:
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
     else:

@@ -180,6 +180,8 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
+    Emr_Crawlers_Logs(c_name,links)
+
     for i in links:
         try:
             news_weblink = i
@@ -187,8 +189,6 @@ try:
             news_weblink = ""
         if news_weblink == "":
             continue
-
-        Emr_Crawlers_Logs(c_name,news_weblink)
             
         if news_weblink in db_list:
             total_crwalled_links += 1

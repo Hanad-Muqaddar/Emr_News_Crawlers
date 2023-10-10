@@ -160,6 +160,7 @@ else:
 # *****************************************************************************
 
 try:
+    Optimization_links = []
     for i in range(0,12):
         main_page_link = 'https://www.mersen.com/news-media/events-news?page={}'.format(i)
         result = requests.get(main_page_link)
@@ -190,7 +191,7 @@ try:
             except:
                 news_weblink = ""
 
-            Emr_Crawlers_Logs(c_name,news_weblink)
+            Optimization_links.append(news_weblink)
                             
             if news_weblink in db_list:
                 total_crwalled_links += 1
@@ -235,7 +236,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    
+    Emr_Crawlers_Logs(c_name,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

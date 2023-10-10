@@ -163,8 +163,9 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
+    Emr_Crawlers_Logs(c_name,links)
     for j in links:
-        Emr_Crawlers_Logs(c_name,j)
+        
         if j in links_list:
             total_crwalled_links += 1
             Already_exist += 1

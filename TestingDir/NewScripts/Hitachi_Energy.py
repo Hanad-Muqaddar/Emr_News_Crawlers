@@ -230,8 +230,8 @@ try:
     for x in mydoc:
         All_title_list.append(x['title'])
 
+    Emr_Crawlers_Logs(c_name,links)
     for i in links:
-        Emr_Crawlers_Logs(c_name,i)
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1

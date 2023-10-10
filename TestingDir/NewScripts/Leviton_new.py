@@ -199,8 +199,8 @@ try:
     print(news_links)
     print(news_dates)
 
+    Emr_Crawlers_Logs(c_name,news_links)
     for i,d in zip(news_links, news_dates):
-        Emr_Crawlers_Logs(c_name,i)
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1

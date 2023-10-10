@@ -157,9 +157,9 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
+    Emr_Crawlers_Logs(c_name,News_Links)
 
     for i in News_Links:
-        Emr_Crawlers_Logs(c_name,i)
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1

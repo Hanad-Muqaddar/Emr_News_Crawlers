@@ -188,8 +188,9 @@ def get_newsweblinks(collection):
 try:
     links, dates, error_l, no_news = get_all_links_and_dates()
     main_news_list = get_newsweblinks(collection)
+    Emr_Crawlers_Logs(c_name,links)
     for i,j in zip(links,dates):
-        Emr_Crawlers_Logs(c_name,i)
+        
         if i in main_news_list:
             total_crwalled_links += 1
             Already_exist += 1

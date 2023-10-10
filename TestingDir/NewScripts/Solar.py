@@ -168,11 +168,14 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
+
+    Optimization_links = []
+
     for i in data:
         id = i['Id']
         news_web_link = f"https://www.solar.eu/investor/news/news-page/?pressId={id}&lang=en"
         
-        Emr_Crawlers_Logs(c_name,news_web_link)
+        Optimization_links.append(news_web_link)
         if news_web_link in db_list:
             Already_exist += 1
             total_crwalled_links += 1
@@ -230,6 +233,8 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
+                
+    Emr_Crawlers_Logs(c_name,Optimization_links)
     
     if Already_exist >= 1:
 

@@ -165,10 +165,10 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-        
+    Optimization_links = []
     for i in data:
         news_weblink = i.find("a").get("href")
-        Emr_Crawlers_Logs(c_name,news_weblink)
+        Optimization_links.append(news_weblink)
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -228,6 +228,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)    
+    Emr_Crawlers_Logs(c_name,Optimization_links)
     
     if Already_exist >= 1:
 

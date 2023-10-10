@@ -77,6 +77,7 @@ total_crwalled_links = 0
 Already_exist = 0
 try:
     try:
+        Optimization_links = []
         # total_page = json.loads(requests.get('https://www.signify.com/content/signify/en_AA/our-company/news/n13-press-releases.feeds.json').text)
 
         proxies = {'http': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280',
@@ -90,7 +91,7 @@ try:
     data = total_page.json()
     for j in data:
         N_link = str(j['link']) 
-        Emr_Crawlers_Logs(c_name,N_link)
+        Optimization_links.append(N_link)
         l = False
         for k in collection.find({ 'News_Weblink' :N_link}):
             if k:
@@ -135,6 +136,7 @@ try:
     for j in soup_1:
         l = False
         weblink = j.find('a').get('href')
+        Optimization_links.append(weblink)
         for k in collection.find({ 'News_Weblink' : weblink }):
             if k:
                 l = True
@@ -174,6 +176,7 @@ try:
             news['Crawled_on'] = datetime.now()
             total_crwalled_links +=1
             collection.insert_one(news)
+    Emr_Crawlers_Logs(c_name,Optimization_links)
     if Already_exist >=1:
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
     else:

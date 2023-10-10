@@ -146,8 +146,9 @@ try:
 
     feed = feedparser.parse("https://news.wuerth.com/feed/en")
 
+    Optimization_links = []
     for i in feed['entries']:
-        Emr_Crawlers_Logs(c_name,i['link'])
+        Optimization_links.append(i['link'])
         if i['link'] in db_list:
             Already_exist += 1
             total_crwalled_links += 1
@@ -202,7 +203,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    
+    Emr_Crawlers_Logs(c_name,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

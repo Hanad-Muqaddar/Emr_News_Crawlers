@@ -87,6 +87,7 @@ else:
 total_crwalled_links = 0
 Already_exist = 0
 try:
+    Optimization_links = []
     urls = ['https://www.fegime.com/news/page/1','https://www.fegime.com/news/page/2','https://www.fegime.com/news/page/3']
     # driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)
     # driver.set_page_load_timeout(220)
@@ -97,12 +98,13 @@ try:
         soup = BeautifulSoup(main_resp.content, 'lxml').find('section',class_= 'container section-content')
         for i in soup.find_all('article',attrs={'class':'card w-100','data-type':'post'}):
             website = i.find('link').get('href')
-            Emr_Crawlers_Logs(c_name,website)
+            
             l = False
             for k in collection.find({ 'News_Weblink' : website }):
                 if k:
                     l = True
                     break
+            Optimization_links.append(l)
             if l:
                 total_crwalled_links +=1
                 Already_exist +=1

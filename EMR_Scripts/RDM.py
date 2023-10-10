@@ -154,9 +154,10 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-        
+    
+    Emr_Crawlers_Logs(c_name,links_list)
     for j in links_list:
-        Emr_Crawlers_Logs(c_name,j)
+        
         if j in db_list:
             total_crwalled_links += 1
             Already_exist += 1

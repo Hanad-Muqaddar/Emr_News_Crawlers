@@ -198,10 +198,11 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
+    Optimization_links = []
     for N_title, L_date in zip(news_titles, news_dates):
         title = N_title
         news_weblink = "https://investors.atkore.com/events-and-presentations/default.aspx?title="+title
-        Emr_Crawlers_Logs(c_name,news_weblink)
+        Optimization_links.append(news_weblink)
         if news_weblink in links_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -244,7 +245,8 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    
+                
+    Emr_Crawlers_Logs(c_name,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

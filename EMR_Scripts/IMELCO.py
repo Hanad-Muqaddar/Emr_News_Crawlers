@@ -105,6 +105,7 @@ news_dict_template = {
         "historySubCategory" : "",
 }
 try:
+    Optimization_links = []
     urls =['https://imelco.com/publications/press-releases']
     resp = requests.get(urls[0])
     soup = BeautifulSoup(resp.text, 'lxml').find('div',class_='vc_row wpb_row vc_row-fluid slant-top slant-top-noshadow').find('div',class_='wpb_text_column wpb_content_element').find_all(['div','a'])
@@ -120,7 +121,7 @@ try:
     for i in news_list:            
         if i[2].get('href'):
             weblink = i[2].get('href')
-            Emr_Crawlers_Logs(c_name,weblink)
+            Optimization_links.append(weblink)
             l = False
             for k in collection.find({ 'News_Weblink' : weblink }):
                 if k:
@@ -143,6 +144,8 @@ try:
                 news['Crawled_on'] = datetime.now()
                 total_crwalled_links +=1
                 collection.insert_one(news)
+                
+    Emr_Crawlers_Logs(c_name,Optimization_links)
     if Already_exist >=1:
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
     else:

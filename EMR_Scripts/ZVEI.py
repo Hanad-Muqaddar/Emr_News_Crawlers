@@ -122,9 +122,10 @@ try:
             break
     # print('Link out')
 
+    Emr_Crawlers_Logs(c_name,news_link)
     for url in news_link:
         n_link = url['link']
-        Emr_Crawlers_Logs(c_name,n_link)
+        
         l = False
         for k in collection.find({ 'News_Weblink' :n_link}):
             if k:

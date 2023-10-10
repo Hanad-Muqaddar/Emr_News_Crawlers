@@ -159,6 +159,8 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
     
+    Optimization_links = []
+    
     for i in range(len(urls)):
         try:
             image = json_data['rss']['channel']['item'][i]['content:encoded']
@@ -182,7 +184,7 @@ try:
             # print(news_weblink)
         except:
             news_weblink = ""
-        Emr_Crawlers_Logs(c_name,news_weblink)
+        Optimization_links.append(news_weblink)
         
         if news_weblink in db_list:
             total_crwalled_links += 1
@@ -224,7 +226,8 @@ try:
             except Exception as e:
                 print(e)
                 running_Sequence.append(e)
-        
+    
+    Emr_Crawlers_Logs(c_name,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

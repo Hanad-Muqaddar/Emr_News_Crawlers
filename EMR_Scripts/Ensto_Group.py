@@ -139,6 +139,7 @@ else:
 # *****************************************************************************
 
 try:
+    Optimization_links = []
     result = requests.get("https://www.ensto.com/api/collection/search?firstPageSize=80&id%5B%5D=289")
     data = json.loads(result.text)
     for i in range(len(data['Cards'])):
@@ -159,7 +160,7 @@ try:
             news_weblink = "https://www.ensto.com" + data['Cards'][i]['link']['url']
         except:
             news_weblink = ""
-        Emr_Crawlers_Logs(c_name,news_weblink)
+        Optimization_links.append(news_weblink)
         try:
             image = data['Cards'][0]['images'][0]['url']
         except:
@@ -212,6 +213,8 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
+                
+    Emr_Crawlers_Logs(c_name,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
