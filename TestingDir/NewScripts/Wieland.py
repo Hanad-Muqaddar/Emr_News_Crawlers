@@ -137,7 +137,7 @@ try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Base_url = "https://www.wieland.com/en/about/news"
     Main_url = "https://www.wieland.com"
-    page = requests.get(Base_url)
+    page = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(page.content , 'lxml')
     news_links = []
 

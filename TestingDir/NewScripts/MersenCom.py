@@ -160,10 +160,11 @@ else:
 # *****************************************************************************
 
 try:
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Optimization_links = []
     for i in range(0,12):
         main_page_link = 'https://www.mersen.com/news-media/events-news?page={}'.format(i)
-        result = requests.get(main_page_link)
+        result = requests.get(main_page_link,headers=headers)
         data = Selector(result)
         news = data.css(".home-news__item")
 
@@ -199,7 +200,7 @@ try:
                 continue
             
             try:
-                result2 = requests.get(news_weblink)
+                result2 = requests.get(news_weblink,headers=headers)
                 data2 = Selector(result2)
             except:
                 data2 = ""

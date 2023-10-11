@@ -158,7 +158,8 @@ else:
 # *****************************************************************************
 
 try:
-    result = requests.get("https://www.mersen.us/sitemap.xml")
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    result = requests.get("https://www.mersen.us/sitemap.xml",headers=headers)
     soup = BeautifulSoup(result.content, 'lxml')
     data = soup.find_all('url')
     news_links = []
@@ -187,7 +188,7 @@ try:
             print("Already Crawled")
             continue
         else:
-            res = requests.get(j)
+            res = requests.get(j,headers=headers)
             soup = BeautifulSoup(res.content, 'lxml')
             try:
                 title = soup.find("meta", attrs={"property":"og:title"}).get("content")

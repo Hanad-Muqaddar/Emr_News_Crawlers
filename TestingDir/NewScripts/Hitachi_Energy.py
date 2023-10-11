@@ -229,7 +229,6 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         All_title_list.append(x['title'])
-
     Emr_Crawlers_Logs(c_name,links)
     for i in links:
         if i in db_list:
@@ -291,11 +290,11 @@ try:
                 company_news['videos']= ''
                 company_news['announcement']=announcement
                 company_news['historySubCategory']= sub_category
-                company_news['analysis'] = analysis
-                company_news['emrExecutive'] = emr_executive
-                company_news['emrEssential'] = emr_essentail
-                company_news['emrLite'] = emr_lite
-                company_news['News_Html'] = emr_html
+                # company_news['analysis'] = analysis
+                # company_news['emrExecutive'] = emr_executive
+                # company_news['emrEssential'] = emr_essentail
+                # company_news['emrLite'] = emr_lite
+                # company_news['News_Html'] = emr_html
                 try:
                     collection.insert_one(company_news)
                     total_crwalled_links += 1

@@ -157,8 +157,9 @@ else:
 # *****************************************************************************
 
 try:
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     link = "https://www.niedax-group.com/en/corporate-group/press-news/news/"
-    result = requests.get(link)
+    result = requests.get(link,headers=headers)
     soup = BeautifulSoup(result.content, 'lxml')
     data = soup.find_all("div", class_='link-holder')
 
@@ -176,7 +177,7 @@ try:
             print("Already Crawled")
             continue
         else:
-            res = requests.get(news_weblink)
+            res = requests.get(news_weblink,headers=headers)
             soup1 = BeautifulSoup(res.content, 'lxml')
             try:
                 title = soup1.find("h1",attrs = {"class":"pt-2__0 pb-2__0"}).text

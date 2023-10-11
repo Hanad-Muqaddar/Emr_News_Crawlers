@@ -161,6 +161,7 @@ else:
 
 # *****************************************************************************
 try:
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
@@ -170,7 +171,7 @@ try:
             'http': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280',
             'https': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280'
           }
-    response = requests.get("https://www.signify.com/content/signify/en_AA/our-company/news/n13-press-releases.feeds.json", proxies=proxies)
+    response = requests.get("https://www.signify.com/content/signify/en_AA/our-company/news/n13-press-releases.feeds.json", proxies=proxies,headers=headers)
 
     data = json.loads(response.text)
     print(data)
@@ -215,7 +216,7 @@ try:
             
             try:
                 ann = []
-                resp = requests.get(news_weblink, proxies=proxies).content
+                resp = requests.get(news_weblink, proxies=proxies,headers=headers).content
                 for p in BeautifulSoup(resp,'lxml').find_all('span',class_ = 'p-body-copy-02'):
                     ann.append(p.text.strip())
                 announcement = '\n'.join(ann)

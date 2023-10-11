@@ -166,20 +166,15 @@ try:
     print("working")
     soup = BeautifulSoup(result.content, 'lxml')
     links = soup.find_all('loc')
-    # print(links)
     final_links = [link.text for link in links if "/news/" in link.text or "/case-stories/" in link.text]
     
     final_links.remove('https://www.danfoss.com/en/service-and-support/case-stories/')
     final_links.remove('https://www.danfoss.com/en/about-danfoss/news/')
 
-    print(final_links)
-    print(len(final_links))
-
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-    print(final_links)
     for i in final_links:
         Emr_Crawlers_Logs(c_name,i)
         if i in db_list:

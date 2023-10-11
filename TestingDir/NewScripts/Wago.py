@@ -165,7 +165,7 @@ try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Base_url = "https://www.wago.com/wagoapi/v2/global-wago/blog/Homepage/entries?lang=en_GG&articleTypes=ContentArticleInterviewPageTemplate,ContentArticleTopicPageTemplate,ContentArticleReferencePageTemplate,ContentArticleCompanyNewsPageTemplate,ContentArticlePracticalTipsPageTemplate,ContentArticleProductNewsPageTemplate&page=0"
     Main_url = "https://www.wago.com/global"
-    page = requests.get(Base_url)
+    page = requests.get(Base_url,headers=headers)
     json_result = page.json()
     news_links = []
 
