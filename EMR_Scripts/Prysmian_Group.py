@@ -139,9 +139,10 @@ else:
 
 # *****************************************************************************
 try:
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     links = ["https://www.prysmiangroup.com/en/media/news","https://www.prysmiangroup.com/en/media/press-releases"]
     for i in links:
-        result = requests.get(i)
+        result = requests.get(i,headers=headers)
         page_source = i
         soup = BeautifulSoup(result.content, 'lxml')
         all_links = soup.find_all("a", class_='btn btn-default btn-discover toggle-stick-to-bottom')
@@ -168,7 +169,7 @@ try:
                 print("Already Crawled")
                 continue
             else:
-                res = requests.get(k)
+                res = requests.get(k,headers=headers)
                 soup = BeautifulSoup(res.content, 'lxml')
                 try:
                     title = soup.find("meta", attrs = {"property":"og:title"}).get("content")

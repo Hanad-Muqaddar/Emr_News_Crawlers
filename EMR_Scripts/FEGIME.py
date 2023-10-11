@@ -87,6 +87,7 @@ else:
 total_crwalled_links = 0
 Already_exist = 0
 try:
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Optimization_links = []
     urls = ['https://www.fegime.com/news/page/1','https://www.fegime.com/news/page/2','https://www.fegime.com/news/page/3']
     # driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)
@@ -94,7 +95,7 @@ try:
     # driver.implicitly_wait(220)
     for url in urls:
         # driver.get(url)
-        main_resp = requests.get(url)
+        main_resp = requests.get(url,headers=headers)
         soup = BeautifulSoup(main_resp.content, 'lxml').find('section',class_= 'container section-content')
         for i in soup.find_all('article',attrs={'class':'card w-100','data-type':'post'}):
             website = i.find('link').get('href')
@@ -118,7 +119,7 @@ try:
                 analysis = i.find('div', attrs = {'class':'card-text','itemprop':'articleBody'}).text.strip()
                 analysis = analysis[:len(analysis)-1]
                 ann = ['']
-                resp = requests.get(website)
+                resp = requests.get(website,headers=headers)
                 sub_soup = BeautifulSoup(resp.content, 'lxml').find('div',attrs={'class':'article-body wysiwyg-content clearfix mb-2','itemprop':'articleBody'}).find_all('p')
                 for ps in sub_soup:
                     ann.append(ps.text.strip())

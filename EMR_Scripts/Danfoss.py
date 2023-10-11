@@ -50,6 +50,7 @@ import unicodedata
 
 # ================================================================================
 # Comment these lines when you are running locally
+
 import importlib.util
 # Specify the absolute path to Emr_Crawlers_Optimization.py
 module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
@@ -159,26 +160,35 @@ def parse_filtered_news(announcement):
 # *****************************************************************************
 
 try:
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Base_url = "https://www.danfoss.com"
-    result = requests.get("https://www.danfoss.com/sitemap.xml/en/")
+    result = requests.get("https://www.danfoss.com/sitemap.xml/en/",headers=headers)
+    print("working")
     soup = BeautifulSoup(result.content, 'lxml')
     links = soup.find_all('loc')
+    # print(links)
     final_links = [link.text for link in links if "/news/" in link.text or "/case-stories/" in link.text]
+    
     final_links.remove('https://www.danfoss.com/en/service-and-support/case-stories/')
     final_links.remove('https://www.danfoss.com/en/about-danfoss/news/')
+
+    print(final_links)
+    print(len(final_links))
+
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-
+    print(final_links)
     for i in final_links:
         Emr_Crawlers_Logs(c_name,i)
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1
+            print("Already Crawled")
             continue 
         elif "/news/" in i:
-            result1 = requests.get(i)
+            result1 = requests.get(i,headers=headers)
             response1 = Selector(result1)
             try:
                 news_date = response1.css('.sub-title ::text').get()

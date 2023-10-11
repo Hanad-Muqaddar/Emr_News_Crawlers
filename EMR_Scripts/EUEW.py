@@ -153,7 +153,8 @@ def parse_filtered_news(announcement):
         return new_data
     
 try:
-    result = requests.get("https://www.euew.org/news")
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    result = requests.get("https://www.euew.org/news",headers=headers)
     response = Selector(result)
     links = response.css(".pro-gallery .has-custom-focus ::attr(href)").getall()
     db_list = []

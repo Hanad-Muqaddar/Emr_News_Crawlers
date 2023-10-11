@@ -154,7 +154,8 @@ def parse_filtered_news(announcement):
         return new_data
     
 try:
-    result = requests.get("https://www.honeywell.com/us/en/press")
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    result = requests.get("https://www.honeywell.com/us/en/press",headers=headers)
     response = Selector(result)
     links = response.xpath('//div[@class="list-component__item-headline"]/parent::a/@href').getall()
     final_links = ["https://www.honeywell.com" + link if "https://www.honeywell.com" not in link else link for link in links[:10]]
@@ -173,7 +174,7 @@ try:
             print("Already Crawled")
             continue
         else:
-            result1 = requests.get(i)
+            result1 = requests.get(i,headers=headers)
             response1 = Selector(result1)
             try:
                 news_date = response1.css(".author-date__time::text").get()

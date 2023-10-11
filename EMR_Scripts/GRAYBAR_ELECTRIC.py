@@ -196,7 +196,7 @@ try:
             continue
         else:
             print("a gaya")
-            result1 = requests.get(i)
+            result1 = requests.get(i,headers=headers)
             response1 = Selector(result1)
             try:
                 news_date = dateparser.parse(j)

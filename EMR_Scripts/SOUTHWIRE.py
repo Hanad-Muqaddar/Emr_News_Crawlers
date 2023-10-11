@@ -138,7 +138,8 @@ else:
 # *****************************************************************************
 
 try:
-    result = requests.get("https://www.southwire.com/newsroom")
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    result = requests.get("https://www.southwire.com/newsroom",headers=headers)
     response = Selector(result)
     Base_Link = "https://www.southwire.com"
     links = response.css(".carousel-inner .active .card-shadow .card-img-top ::attr(href)").getall()
@@ -159,7 +160,7 @@ try:
             print("Already Crawled")
             continue
         else:
-            result1 = requests.get(i)
+            result1 = requests.get(i,headers=headers)
             response1 = Selector(result1)
             try:
                 news_date = response1.xpath("normalize-space(//div[@class='article-publishDate-content'])").get()

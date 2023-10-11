@@ -155,7 +155,8 @@ def parse_filtered_news(announcement):
         return new_data
 
 try:
-    result = requests.get("https://www.nexans.com/en/newsroom/news.html?currentPage=0")
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    result = requests.get("https://www.nexans.com/en/newsroom/news.html?currentPage=0",headers=headers)
     response = Selector(result)
     links = response.css(".list-news__title a ::attr(href)").getall()
     Base_Link = "https://www.nexans.com"
@@ -174,7 +175,7 @@ try:
             print("Already Crawled")
             continue
         else:
-            result1 = requests.get(i)
+            result1 = requests.get(i,headers=headers)
             response1 = Selector(result1)
             try:
                 news_date = response1.css(".news-page--cover__date ::text").get()

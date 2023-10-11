@@ -139,8 +139,9 @@ else:
 # *****************************************************************************
 
 try:
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Optimization_links = []
-    result = requests.get("https://www.ensto.com/api/collection/search?firstPageSize=80&id%5B%5D=289")
+    result = requests.get("https://www.ensto.com/api/collection/search?firstPageSize=80&id%5B%5D=289",headers=headers)
     data = json.loads(result.text)
     for i in range(len(data['Cards'])):
         try:

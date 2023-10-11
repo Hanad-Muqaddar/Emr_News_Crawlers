@@ -105,9 +105,10 @@ news_dict_template = {
         "historySubCategory" : "",
 }
 try:
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Optimization_links = []
     urls =['https://imelco.com/publications/press-releases']
-    resp = requests.get(urls[0])
+    resp = requests.get(urls[0],headers=headers)
     soup = BeautifulSoup(resp.text, 'lxml').find('div',class_='vc_row wpb_row vc_row-fluid slant-top slant-top-noshadow').find('div',class_='wpb_text_column wpb_content_element').find_all(['div','a'])
     news = []
     news_list = []

@@ -139,8 +139,9 @@ else:
 
 # *****************************************************************************
 try:
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     links_list = []
-    result = requests.get("https://www.rdm.com/news")
+    result = requests.get("https://www.rdm.com/news",headers=headers)
     # result = requests.get("https://www.rdm.com/news/page/1/?rdm_news_cat%5B0%5D=353")
     soup = BeautifulSoup(result.content, 'lxml')
     data = soup.find_all("div", class_='long-card col-12')
@@ -165,7 +166,7 @@ try:
             continue
         else:
             news_weblink = j
-            res = requests.get(news_weblink)
+            res = requests.get(news_weblink,headers=headers)
             soup = BeautifulSoup(res.content, 'lxml')
             try:
                 sub_category = soup.find("meta", attrs={"property":"og:type"}).get("content")

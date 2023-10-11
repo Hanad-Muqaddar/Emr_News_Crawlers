@@ -160,6 +160,7 @@ def parse_filtered_news(announcement):
 # *****************************************************************************
 
 try:
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
@@ -178,7 +179,7 @@ try:
             total_crwalled_links += 1
             continue
         else:
-            result1 = requests.get(i['link'])
+            result1 = requests.get(i['link'],headers=headers)
             response1 = Selector(result1)
             try:
                 news_date = i['published']

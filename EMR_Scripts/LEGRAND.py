@@ -159,8 +159,9 @@ def parse_filtered_news(announcement):
 
 
 try:
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Base_Url = "https://www.legrandgroup.com"
-    result = requests.get("https://www.legrandgroup.com/en/press/newsroom")
+    result = requests.get("https://www.legrandgroup.com/en/press/newsroom",headers=headers)
     response = Selector(result)
     links = response.css(".text a ::attr(href)").getall()
     all_links = []
@@ -181,7 +182,7 @@ try:
             print("Already Crawled")
             continue
         else:
-            result1 = requests.get(i)
+            result1 = requests.get(i,headers=headers)
             response1 = Selector(result1)
             try:
                 news_date = response1.xpath("//meta[@itemprop='datePublished']/@content").get()

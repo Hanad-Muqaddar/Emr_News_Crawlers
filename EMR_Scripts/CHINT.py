@@ -140,7 +140,8 @@ else:
 
 # *****************************************************************************
 try:
-    result = requests.get("https://chintglobal.com/news-center-14")
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    result = requests.get("https://chintglobal.com/news-center-14",headers=headers)
     response = Selector(result)
     links = response.css(".chint-news-item-title a ::attr(href)").getall()
     print(links)

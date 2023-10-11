@@ -136,7 +136,8 @@ else:
 # *****************************************************************************
 
 try:
-    result = requests.get("https://blog.naed.org/sitemap.xml")
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    result = requests.get("https://blog.naed.org/sitemap.xml",headers=headers)
     data = xmltodict.parse(result.text)
     db_list = []
     mydoc = collection.find()
@@ -151,7 +152,7 @@ try:
             print("Already Crawled")
             continue
         else:
-            result1 = requests.get(i['loc'])
+            result1 = requests.get(i['loc'],headers=headers)
             response1 = Selector(result1)
             try:
                 news_date =  i['lastmod']

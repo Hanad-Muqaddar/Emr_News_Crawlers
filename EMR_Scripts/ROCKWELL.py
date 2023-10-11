@@ -144,10 +144,10 @@ try:
 
     # feed = feedparser.parse("https://ir.rockwellautomation.com/rss/PressRelease.aspx")
     # print(feed)
-
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Bas_url = "https://www.rockwellautomation.com/en-us/sitemap.xml"
 
-    page = requests.get(Bas_url)
+    page = requests.get(Bas_url,headers=headers)
     soup = BeautifulSoup(page.content, "html.parser")
     # print(soup.prettify())
 
@@ -174,7 +174,7 @@ try:
             print("Already Crawled")
             continue
         else:
-            result1 = requests.get(i)
+            result1 = requests.get(i,headers=headers)
             response1 = Selector(result1)
             try:
                 ne_date = response1.xpath('//div[@class="hero-banner__subtitle-text"]/text()').get()

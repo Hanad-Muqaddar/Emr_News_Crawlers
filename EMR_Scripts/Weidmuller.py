@@ -141,7 +141,8 @@ else:
 # *****************************************************************************
 
 try:
-    result = requests.get("https://www.weidmuller.com/en/company/press/company_news/index.jsp")
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    result = requests.get("https://www.weidmuller.com/en/company/press/company_news/index.jsp",headers=headers)
     response = Selector(result)
     links = response.css(".text-image__buttons a::attr(href)").getall()
     final_links = [link for link in links if link != '']
@@ -160,7 +161,7 @@ try:
             print("Already Crawled")
             continue
         else:
-            res = requests.get(link)
+            res = requests.get(link,headers=headers)
             response2 = Selector(res)
             try:
                 title = response2.xpath('//h2[@class="text-image__heading text-left"]/text()').get()
