@@ -290,7 +290,7 @@ Emr_News_Cralers_Dict = {
     "OSRAM_new":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "OSRAM":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "PANDUIT":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
-    "Phoenix_Contact":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
+    # "Phoenix_Contact":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "Prysmian_Group":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "RDM":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "RITTAL":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
