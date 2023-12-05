@@ -45,7 +45,7 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 from newspaper import fulltext
-from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # ================================================================================
 # Comment these lines when you are running locally
 import importlib.util
