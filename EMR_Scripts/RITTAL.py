@@ -131,7 +131,9 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,final_links)
+    page_source = "https://www.rittal.com/com-en/News"
+    Emr_Crawlers_Logs(c_name,page_source,final_links)
+
     for i, date in zip(final_links, dates):
         
         if i in db_list:

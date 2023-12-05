@@ -163,8 +163,8 @@ try:
         last_time = last_insertion['Date']
 
     news_list = History_newsParser(url,db,c_name,running_sequence)
-    
-    Emr_Crawlers_Logs(c_name,news_list)
+    webpage = "https://www.acome.com/en/newsroom/telecom-networks-and-ftth/eu-doubles-anti-dumping-duties-chinese-optical-cables"
+    Emr_Crawlers_Logs(c_name,webpage,news_list)
     for i in news_list:
         weblink = i['News_Weblink']
         

@@ -49,7 +49,19 @@ from urllib.request import Request, urlopen
 from scrapy import Selector
 
 import unicodedata
-# ************************************************************************
+# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+
+# ================================================================================
+# Comment these lines when you are running locally
+import importlib.util
+# Specify the absolute path to Emr_Crawlers_Optimization.py
+module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
+# Load the module using the absolute path
+spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
+Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(Emr_Crawlers_Optimization)
+Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
+# ================================================================================
 
 running_Sequence = []
 
@@ -66,12 +78,12 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
 
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -148,27 +160,29 @@ def parse_filtered_news(announcement):
         return new_data
     
 try:
+    proxies = {'http': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280',
+            'https': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280'}
+    
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    proxies = {'http': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280',
-            'https': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280'}
-
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    result = requests.get("https://www.se.com/us/en/about-us/newsroom/news/", headers=headers, proxies=proxies)
+    # result = requests.get("https://www.se.com/us/en/about-us/newsroom/news/", headers=headers, proxies=proxies)
+    result = requests.get("https://www.se.com/us/en/about-us/newsroom/news/", headers=headers)
     res = Selector(result)
-    data = res.css(".sdl-wiztopic-press-releases_wiztopic-card .wiztopic-content")
-    for i in data:
-        try:
-            news_weblink = "https://www.se.com" + i.css("a::attr(href)").get()
-        except:
-            news_weblink = ""
+
+    # data = res.css(".sdl-wiztopic-press-releases_wiztopic-card .wiztopic-content")
+
+    News_Links = res.xpath('//div[contains(@class,"sdl-wiztopic-press-releases_wiztopic-card")]//div[@class="wiztopic-image "]/a/@href').getall()
+    f_News_Links = [ "https://www.se.com" + l for l in News_Links]
+    print(f_News_Links)
+
+    Web_Page = "https://www.se.com/us/en/about-us/newsroom/news/"
+    Emr_Crawlers_Logs(c_name+"_Second",Web_Page,f_News_Links)
+    for news_weblink in f_News_Links:
         
-        if news_weblink == "":
-            continue
-                    
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1

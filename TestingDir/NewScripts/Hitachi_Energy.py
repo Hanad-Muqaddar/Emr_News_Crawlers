@@ -229,7 +229,10 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         All_title_list.append(x['title'])
-    Emr_Crawlers_Logs(c_name,links)
+
+    page_source = "https://www.hitachienergy.com/media"
+    Emr_Crawlers_Logs(c_name,page_source,links)
+
     for i in links:
         if i in db_list:
             Already_exist += 1

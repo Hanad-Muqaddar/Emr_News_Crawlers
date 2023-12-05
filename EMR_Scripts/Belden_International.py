@@ -163,7 +163,9 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,links)
+    Web_Page = "https://www.belden.com/news#sort=%40contentpublisheddate%20descending"       
+    Emr_Crawlers_Logs(c_name,Web_Page,links)
+
     for j in links:
         
         if j in links_list:

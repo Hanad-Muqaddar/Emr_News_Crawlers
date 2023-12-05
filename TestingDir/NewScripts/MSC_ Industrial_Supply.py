@@ -176,8 +176,10 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
-        
-    Emr_Crawlers_Logs(c_name,total_links)
+    
+    page_source = "https://www.mscdirect.com/corporate/press-releases"
+    Emr_Crawlers_Logs(c_name,page_source,total_links)
+
     for i , N_Date, lin in zip(total_titles,total_dates, total_links):  
         
         if i in links_list:
@@ -206,7 +208,6 @@ try:
             except:
                 news_date = ""
 
-            page_source = "https://www.mscdirect.com/corporate/press-releases"
             news_weblink = lin
             # print(news_weblink)
             

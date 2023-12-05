@@ -157,10 +157,10 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
+    page_source = "https://www.mynewsdesk.com/fi/are/latest_news"
+    Emr_Crawlers_Logs(c_name,page_source,news_links)
 
-    Emr_Crawlers_Logs(c_name,news_links)
-    for n in news_links:   
-        
+    for n in news_links:      
         if n in links_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -207,7 +207,7 @@ try:
             except:
                 news_date = ""
 
-            page_source = "https://www.mynewsdesk.com/fi/are/latest_news"
+            
             news_weblink = n
             
             try:

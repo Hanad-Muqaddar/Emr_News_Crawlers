@@ -156,7 +156,8 @@ try:
         links_list.append(x['News_Weblink'])
 
     print(news_links)
-    Emr_Crawlers_Logs(c_name,news_links)
+    page_source = "https://harjuelekter.com/news/"
+    Emr_Crawlers_Logs(c_name,page_source,news_links)
     
     for i in news_links:
         if i in links_list:
@@ -195,7 +196,7 @@ try:
             except:
                 news_date = ""
 
-            page_source = "https://harjuelekter.com/news/"
+            
             
             try:            
                 html = requests.get(i).text

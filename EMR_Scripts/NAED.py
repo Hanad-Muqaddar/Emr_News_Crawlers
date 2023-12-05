@@ -203,7 +203,10 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    Emr_Crawlers_Logs(c_name,Optimization_links)
+
+    Web_page = "https://blog.naed.org/page/0"
+    Emr_Crawlers_Logs(c_name,Web_page,Optimization_links)
+
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

@@ -152,8 +152,8 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-
-    Emr_Crawlers_Logs(c_name,news_links)
+    page_source = "https://www.wieland.com/en/about/news"
+    Emr_Crawlers_Logs(c_name,page_source,news_links)
 
     for i in news_links:
         if i in db_list:
@@ -195,7 +195,7 @@ try:
             except:
                 news_date = ""
 
-            page_source = "https://www.wieland.com/en/about/news"
+            
             news_weblink = i
             print(news_weblink)
             

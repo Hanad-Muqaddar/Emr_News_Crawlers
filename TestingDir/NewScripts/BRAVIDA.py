@@ -160,7 +160,9 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,All_News_links)
+    page_source = "https://www.bravida.se/en/investors/financial-information/press-releases/"
+    Emr_Crawlers_Logs(c_name,page_source,All_News_links)
+    
     for i in All_News_links:
         
         try:

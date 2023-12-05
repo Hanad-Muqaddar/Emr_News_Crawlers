@@ -168,6 +168,7 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
     Optimization_links = []
+    page_source = "https://www.mennekes.org/company/press-section/news/"
     for i in data:
         news_weblink = "https://www.mennekes.org" + i.find("a", class_='teaser-topic__link').get("href")
         Optimization_links.append(news_weblink)
@@ -199,7 +200,7 @@ try:
                 analysis = i.find('p',"teaser-topic__detail").text.strip()
             except:
                 analysis = ""
-            page_source = "https://www.mennekes.org/company/press-section/news/"
+            
             language = "en"
             try:
                 result = requests.get(news_weblink)
@@ -233,7 +234,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    Emr_Crawlers_Logs(c_name,Optimization_links)
+    Emr_Crawlers_Logs(c_name,page_source,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

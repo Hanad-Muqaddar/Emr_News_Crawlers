@@ -179,7 +179,10 @@ try:
             dates.append(news_date)
         else:
             continue
-    Emr_Crawlers_Logs(c_name,news_links)
+
+    page_source = "https://www.mersen.us/news-media/events-news" 
+    Emr_Crawlers_Logs(c_name,page_source,news_links)
+    
     for j,k in zip(news_links, dates):
         
         if j in db_list:

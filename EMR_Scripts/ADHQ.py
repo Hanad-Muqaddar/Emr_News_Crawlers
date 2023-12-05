@@ -165,11 +165,14 @@ try:
                 news['Crawled_on'] = datetime.now()
                 total_crwalled_links +=1
                 collection.insert_one(news)
-        Emr_Crawlers_Logs(c_name,Optimization_links)
+        
         if Already_exist >=1:
             tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
         else:
             tmp_txt = ''
+
+        Web_Page = 'https://www.adhq.com/about/ad-news'
+        Emr_Crawlers_Logs(c_name,Web_Page,Optimization_links)
 
         running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
         ended_on = datetime.now()

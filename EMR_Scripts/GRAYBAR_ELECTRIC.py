@@ -45,7 +45,7 @@ from urllib.request import Request, urlopen
 from scrapy import Selector
 
 from newspaper import fulltext
-
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
@@ -61,7 +61,6 @@ Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
-# ************************************************************************
 running_Sequence = []
 
 started_on = datetime.datetime.now()
@@ -162,12 +161,18 @@ try:
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
-    opts.headless = False
+    opts.headless = True
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(version='114.0.5735.90').install()), options=opts)
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+    # service = Service("C:\Program Files (x86)\chromedriver.exe")
+    # driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+    # chrome_options = webdriver.ChromeOptions()
+
+    # driver = webdriver.Chrome(service=service, options=opts)
+
     driver.get("https://www.graybar.com/news")
-    time.sleep(10)
+    time.sleep(5)
 
     page_source = driver.page_source
         # print(page_source)
@@ -185,10 +190,9 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-        
-    Emr_Crawlers_Logs(c_name,final_links)
+    Web_Page = "https://www.graybar.com/news"
+    Emr_Crawlers_Logs(c_name,Web_Page,final_links)
     for i , j ,k , title in zip(final_links, dates, announcement_type, titles):
-        
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1
@@ -196,7 +200,7 @@ try:
             continue
         else:
             print("a gaya")
-            result1 = requests.get(i,headers=headers)
+            result1 = requests.get(i)
             response1 = Selector(result1)
             try:
                 news_date = dateparser.parse(j)

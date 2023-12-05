@@ -183,8 +183,9 @@ try:
 
             total_crwalled_links +=1
             collection.insert_one(news)
-            
-    Emr_Crawlers_Logs(c_name,Optimization_links)
+
+    Web_Page = 'https://global.abb/group/en/media/releases/group'        
+    Emr_Crawlers_Logs(c_name,Web_Page,Optimization_links)
 
 
 ########################### Stories #############################################################
@@ -194,7 +195,6 @@ try:
     total_page = json.loads(requests.get(url_api).text)
     for j in total_page['news'][:10]:
         n_link = 'https://global.abb/'+ j['path']
-        Emr_Crawlers_Logs(c_name,n_link)
         l = False
         for k in collection.find({ 'News_Weblink' : str('https://global.abb/'+j['path']) }):
             if k:

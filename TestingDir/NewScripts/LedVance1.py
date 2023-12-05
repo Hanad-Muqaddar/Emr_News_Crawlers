@@ -151,7 +151,9 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,all_links)
+    page_source = "https://www.ledvance.com/professional/company/newsroom/press-releases"
+    Emr_Crawlers_Logs(c_name+"_Second",page_source,all_links)
+
     for i in all_links:
         if i in db_list:
             Already_exist += 1
@@ -192,7 +194,7 @@ try:
             except:    
                 announcement_type = "PRESS RELEASE"
             language = "en-US"
-            page_source = "https://www.ledvance.com/professional/company/newsroom/press-releases"
+            
             crawled_date = datetime.datetime.now()
 
             company_news = {}

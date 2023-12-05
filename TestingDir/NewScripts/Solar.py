@@ -60,6 +60,7 @@ Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
 
 # ************************************************************************
+# ************************************************************************
 running_Sequence = []
 
 started_on = datetime.datetime.now()
@@ -75,12 +76,12 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
 
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -142,8 +143,8 @@ try:
     proxies_list = ['us-wa','fr','jp','au','de']
     import random
     p = random.choice(proxies_list)
-    proxies = {'http': f"http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280",
-            'https': f"http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280"}
+    proxies = {'http': f"http://waleeProxy:Cheeta@1@de.proxymesh.com:31280",
+            'https': f"http://waleeProxy:Cheeta@1@de.proxymesh.com:31280"}
     headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -160,7 +161,7 @@ try:
             "ToDate" : str(to_date)
             })
     # response = requests.request("POST", url, verify=False, headers=headers, data=payload, proxies=proxies, timeout=20)
-    response = requests.request("POST", url, headers=headers, data=payload, proxies=proxies, timeout=20)
+    response = requests.request("POST", url, headers=headers, data=payload,  timeout=20)
 
     data = json.loads(response.text)
     # print(data)
@@ -169,13 +170,14 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Optimization_links = []
-
+    Web_Page = "https://www.solar.eu/investor/news/"
+    Emr_Crawlers_Logs(c_name,Web_Page,data)
+    
     for i in data:
         id = i['Id']
         news_web_link = f"https://www.solar.eu/investor/news/news-page/?pressId={id}&lang=en"
+        print(news_web_link)
         
-        Optimization_links.append(news_web_link)
         if news_web_link in db_list:
             Already_exist += 1
             total_crwalled_links += 1
@@ -233,8 +235,6 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-                
-    Emr_Crawlers_Logs(c_name,Optimization_links)
     
     if Already_exist >= 1:
 

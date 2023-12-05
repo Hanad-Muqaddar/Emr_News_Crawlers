@@ -283,8 +283,8 @@ try:
         # if skip_next:
         #     break
 
-    
-    Emr_Crawlers_Logs(c_name,Optimization_links)
+    Web_page = "https://www.osram.com/cb/news/index.jsp"
+    Emr_Crawlers_Logs(c_name,Web_page,Optimization_links)
     if Already_exist >=1:
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
     else:

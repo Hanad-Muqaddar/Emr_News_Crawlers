@@ -45,8 +45,19 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 from newspaper import fulltext
+# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
-# ************************************************************************
+# ================================================================================
+# Comment these lines when you are running locally
+import importlib.util
+# Specify the absolute path to Emr_Crawlers_Optimization.py
+module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
+# Load the module using the absolute path
+spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
+Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(Emr_Crawlers_Optimization)
+Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
+# ================================================================================
 # defining variables
 
 running_Sequence = []
@@ -64,12 +75,12 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
 
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -129,15 +140,15 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://www.phoenixcontact.com"
-    Base_url = "https://www.phoenixcontact.com/en-pc/events-and-news"
+    Base_url = "https://www.phoenixcontact.com/en-pc/events-and-news/news"
 
-    proxies = {'http': 'http://waleeProxy:Cheeta@1@ch.proxymesh.com:31280',
-            'https': 'http://waleeProxy:Cheeta@1@ch.proxymesh.com:31280'}
-
+    proxies = {'http': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280',
+                'https': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280'}
+    
     print("First step done")
     try:
-        result = requests.get(Base_url,headers=headers, proxies=proxies)
-        # result = requests.get(Base_url,headers=headers)
+        # result = requests.get(Base_url,headers=headers, proxies=proxies)
+        result = requests.get(Base_url,headers=headers)
     except Exception as e:
         print(e)
     print("Second step done")
@@ -145,7 +156,7 @@ try:
     
     news_links = []
 
-    links = soup.find_all('a',{ "class" : "ex-grid-teaser"})   
+    links = soup.find_all('a',{ "class" : "ex-do-item"})   
     for link in links:
         news_link = Main_url + link.get('href')
         if news_link not in news_links:
@@ -160,16 +171,24 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    for i in news_links:
+    Web_Page = "https://www.phoenixcontact.com/en-pc/events-and-news"
+    Emr_Crawlers_Logs(c_name,Web_Page,news_links)
+    
+    for i in news_links:  
+                
         if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
-            print("Already Crawled")
+            print("already crawled")
             continue
-        else:        
-            response = requests.get(i, headers=headers, proxies=proxies)
-            data = BeautifulSoup(response.content, 'lxml')
 
+        else:
+            try:
+                response = requests.get(i, headers=headers)
+                data = BeautifulSoup(response.content, 'lxml')
+            except:
+                print("error")
+                
             try:
                 title = data.find('title').get_text()
                 print(title)
@@ -211,7 +230,8 @@ try:
                 announcement = ""
             
             date = datetime.now()
-       
+            
+
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -233,6 +253,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
+        
     
     if Already_exist >= 1:
 

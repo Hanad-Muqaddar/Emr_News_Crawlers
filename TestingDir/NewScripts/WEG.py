@@ -160,6 +160,7 @@ try:
         db_list.append(x['News_Weblink'])
     
     Optimization_links = []
+    page_source = "https://www.weg.net/institutional/US/en/all-news/list"
     
     for i in range(len(urls)):
         try:
@@ -202,7 +203,7 @@ try:
                 title = ""
             crawled_on_date = datetime.datetime.now()
             analysis = ""
-            page_source = "https://www.weg.net/institutional/US/en/all-news/list"
+            
 
             company_news = {}
             company_news['companyId'] = ''
@@ -227,7 +228,7 @@ try:
                 print(e)
                 running_Sequence.append(e)
     
-    Emr_Crawlers_Logs(c_name,Optimization_links)
+    Emr_Crawlers_Logs(c_name,page_source,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

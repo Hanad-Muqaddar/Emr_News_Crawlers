@@ -177,7 +177,9 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,pdf_set)
+    page_source = "https://imelco.com/publications/press-releases" 
+    Emr_Crawlers_Logs(c_name,page_source,pdf_set)
+
     for i , N_Date, p in zip(news_Titles,news_dates,pdf_set):
         
         if p in links_list:
@@ -200,8 +202,7 @@ try:
                 # print(news_date)
             except:
                 news_date = ""
-
-            page_source = "https://imelco.com/publications/press-releases" 
+            
             news_weblink = p      
             announcement = ""
             

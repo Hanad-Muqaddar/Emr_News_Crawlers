@@ -60,8 +60,6 @@ Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
-
-# ************************************************************************
 # defining variables
 
 running_Sequence = []
@@ -161,7 +159,10 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,news_links)
+    Web_Page = "https://press.siemens-energy.com/global/en/press-search"
+
+    Emr_Crawlers_Logs(c_name,Web_Page,news_links)
+    
     for n in news_links:   
         if n in links_list:
             total_crwalled_links += 1

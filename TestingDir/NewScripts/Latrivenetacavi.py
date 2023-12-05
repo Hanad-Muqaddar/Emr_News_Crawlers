@@ -176,6 +176,9 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
     Optimization_links = []
+
+    page_source = "http://blog.latrivenetacavi.com/en/company-news"
+
     for i in all_news:
         try:
             news_weblink = i.find("a").get("href")
@@ -216,7 +219,7 @@ try:
                 sub_category = soup1.find("meta", attrs={"property":"og:type"}).get("content")
             except:
                 sub_category = ""
-            page_source = "http://blog.latrivenetacavi.com/en/company-news"
+            
             crawled_date = datetime.datetime.now()
             announcement_type = "COMPANY NEWS"
             try:
@@ -248,7 +251,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    Emr_Crawlers_Logs(c_name,Optimization_links)
+    Emr_Crawlers_Logs(c_name,page_source,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

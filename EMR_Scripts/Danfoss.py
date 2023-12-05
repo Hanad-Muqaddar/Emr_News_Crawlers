@@ -176,7 +176,9 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,final_links)
+    Web_Page = "https://www.danfoss.com/en/about-danfoss/news/?sort=startDate_desc"       
+    Emr_Crawlers_Logs(c_name,Web_Page,final_links)
+
     for i in final_links:       
         
         if i in db_list:

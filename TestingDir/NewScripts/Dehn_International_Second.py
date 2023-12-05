@@ -162,7 +162,9 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,news_links)
+    page_source = "https://www.mynewsdesk.com/fi/are/latest_news"
+    Emr_Crawlers_Logs(c_name+"_Second",page_source,news_links)
+    
     for n in news_links:   
         if n in links_list:
             total_crwalled_links += 1
@@ -205,7 +207,7 @@ try:
             except:
                 news_date = ""
 
-            page_source = "https://www.mynewsdesk.com/fi/are/latest_news"
+            
             news_weblink = n
             
             try:

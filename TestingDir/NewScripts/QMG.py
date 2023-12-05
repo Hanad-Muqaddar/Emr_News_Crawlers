@@ -176,7 +176,9 @@ try:
     All_title_list = []
     for x in mydoc:
         All_title_list.append(x['title'])
-    Emr_Crawlers_Logs(c_name,news_links)
+
+    page_source = "https://quattromikentigroup.fi/"
+    Emr_Crawlers_Logs(c_name,page_source,news_links)
     for i , N_Date in zip(news_links,news_dates): 
         
         if i in links_list:
@@ -234,7 +236,7 @@ try:
                 except:
                     news_date = ""
 
-                page_source = "https://quattromikentigroup.fi/"
+                
                 news_weblink = i
                 
                 try:

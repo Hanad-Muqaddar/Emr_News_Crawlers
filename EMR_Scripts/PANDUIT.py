@@ -54,6 +54,7 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+
 # ================================================================================
 # Comment these lines when you are running locally
 import importlib.util
@@ -65,8 +66,6 @@ Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
-
-# ************************************************************************
 
 running_Sequence = []
 
@@ -160,10 +159,12 @@ try:
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
-    opts.headless = False
+    opts.headless = True
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(version='114.0.5735.90').install()), options=opts)
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+    
+    
     driver.get("https://www.panduit.com/en/about/media-resources.html")
     Main_url = "https://www.panduit.com"
 
@@ -191,9 +192,10 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,news_links)
+    Web_Page = "https://www.panduit.com/en/about/media-resources.html"
+    Emr_Crawlers_Logs(c_name,Web_Page,news_links)
+    
     for news_link , d in zip(news_links,news_dates):
-        
 
     # headers = {
     #     'Cookie': 'AWSALB=JbCkIr+AtI72m9HbLWNw7bktd7WB3btj/faED/qYUQeUgoe+/I+HDkbmL65o1ounCii6QADP+k7lK3Ot2vZTuah5pBapeDyGaq4aj84Y2jWINxGXdTDife5ObF3E; AWSALBCORS=JbCkIr+AtI72m9HbLWNw7bktd7WB3btj/faED/qYUQeUgoe+/I+HDkbmL65o1ounCii6QADP+k7lK3Ot2vZTuah5pBapeDyGaq4aj84Y2jWINxGXdTDife5ObF3E',

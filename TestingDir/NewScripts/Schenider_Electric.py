@@ -48,7 +48,19 @@ from urllib.request import Request, urlopen
 
 from scrapy import Selector
 import unicodedata
-# ************************************************************************
+# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+
+# ================================================================================
+# Comment these lines when you are running locally
+import importlib.util
+# Specify the absolute path to Emr_Crawlers_Optimization.py
+module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
+# Load the module using the absolute path
+spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
+Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(Emr_Crawlers_Optimization)
+Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
+# ================================================================================
 
 running_Sequence = []
 
@@ -129,7 +141,6 @@ else:
 # *****************************************************************************
 def parse_filtered_news(announcement):
     api_url = "https://admin.new.emr-online.com/api/history/filterbody"
-    # api_url = "https://admin.dev.emr-online.com/api/history/filterbody"
     # api_url = "http://192.168.60.105:3000/api/history/filterbody"
     payload = json.dumps({
                             "originalBody": announcement
@@ -137,7 +148,6 @@ def parse_filtered_news(announcement):
     headers = {
                 'Content-Type': 'application/json'
                 }
-    options={'timeout':60000}
     return_response = requests.request("POST", api_url, headers=headers, data=payload)
     new_data = return_response.text
     new_data = json.loads(new_data)
@@ -148,29 +158,26 @@ def parse_filtered_news(announcement):
         new_data =  ""
         return new_data
 try:
+    proxies = {'http': 'http://waleeProxy:Cheeta@1@au.proxymesh.com:31280',
+            'https': 'http://waleeProxy:Cheeta@1@au.proxymesh.com:31280'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    proxies = {'http': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280',
-            'https': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280'}
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    # print("first step pa aagya ha")
     result = requests.get("https://www.se.com/ww/en/about-us/newsroom/news/", headers=headers, proxies=proxies)
-    # print("idr sa guzar gya ha")
     res = Selector(result)
-    data = res.css(".sdl-wiztopic-press-releases_wiztopic-card .wiztopic-content")
-    # print(data)
-    for i in data:
-        try:
-            news_weblink = "https://www.se.com" + i.css("a::attr(href)").get()
-        except:
-            news_weblink = ""
-        
-        if news_weblink == "":
-            continue
-                    
+
+    News_Links = res.xpath('//div[contains(@class,"sdl-wiztopic-press-releases_wiztopic-card")]//div[@class="wiztopic-image "]/a/@href').getall()
+    f_News_Links = [ "https://www.se.com" + l for l in News_Links]
+    print(f_News_Links)
+
+    Web_Page = "https://www.se.com/ww/en/about-us/newsroom/news/"
+    Emr_Crawlers_Logs(c_name,Web_Page,f_News_Links)
+
+    for news_weblink in f_News_Links:
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -207,7 +214,7 @@ try:
             except:
                 announcement_type = ""
             try:
-                announcement = response1.css("article.sdl-wiztopic-press-release .sdl-component-wrap").get()
+                announcement = response1.css(".sdl-wiztopic-press-release .sdl-component-wrap").get()
                 replace1 = response1.xpath("//div[@class='sdl-component-wrap']/div").get()
                 replace2 = response1.css(".sdl-wiztopic-press-release_download-pdf-button").get()
                 try:
@@ -227,7 +234,6 @@ try:
                 emr_html = return_data['emrHtmlText']
 
             except Exception as e:
-                print(e)
                 announcement = ""
                 emr_essentail = ""
                 emr_executive = ""

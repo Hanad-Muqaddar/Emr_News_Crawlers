@@ -167,7 +167,9 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
     
-    Emr_Crawlers_Logs(c_name,final_links)
+    Web_page = "https://www.nexans.com/en/newsroom/news.html?currentPage=0"
+    Emr_Crawlers_Logs(c_name,Web_page,final_links)
+
     for i in final_links:
         if i in db_list:
             Already_exist += 1

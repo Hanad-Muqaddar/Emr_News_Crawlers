@@ -145,8 +145,10 @@ try:
                 news['Crawled_on'] = datetime.now()
                 total_crwalled_links +=1
                 collection.insert_one(news)
-                
-    Emr_Crawlers_Logs(c_name,Optimization_links)
+
+    web_page = 'https://imelco.com/publications/press-releases'
+    Emr_Crawlers_Logs(c_name,web_page,Optimization_links)
+
     if Already_exist >=1:
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
     else:

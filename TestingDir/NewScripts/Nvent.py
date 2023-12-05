@@ -169,7 +169,8 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,links)
+    page_source = "https://investors.nvent.com/press-releases/default.aspx"
+    Emr_Crawlers_Logs(c_name,page_source,links)
     for j in links:
         news_weblink = j
         
@@ -205,7 +206,7 @@ try:
             announcement_type = "Press Release"
             language = "en-US"
             crawled_on_date = datetime.datetime.now()
-            page_source = "https://investors.nvent.com/press-releases/default.aspx"
+            
             image = ""
             company_news = {}
             company_news['companyId'] = ''

@@ -89,7 +89,8 @@ Already_exist = 0
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Optimization_links = []
-    urls = ['https://www.fegime.com/news/page/1','https://www.fegime.com/news/page/2','https://www.fegime.com/news/page/3']
+    urls = ['https://www.fegime.com/news/page/1']
+    # urls = ['https://www.fegime.com/news/page/1','https://www.fegime.com/news/page/2','https://www.fegime.com/news/page/3']
     # driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver',options=opts)
     # driver.set_page_load_timeout(220)
     # driver.implicitly_wait(220)
@@ -148,6 +149,9 @@ try:
         running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
         ended_on = datetime.now()
         # driver.quit()
+
+    Web_Page = "https://www.fegime.com/news/page/1"        
+    Emr_Crawlers_Logs(c_name,Web_Page,Optimization_links)
 except Exception as e:
     # driver.quit()
     Error_Time =  datetime.now()

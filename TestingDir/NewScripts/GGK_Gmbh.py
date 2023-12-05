@@ -190,7 +190,7 @@ try:
             des = ""
             des_list.append(des)
             
-    Emr_Crawlers_Logs(c_name,title_list)
+    Emr_Crawlers_Logs(c_name,Base_url,title_list)
     for N_title, img, dat, des in zip(title_list,image_list,date_list,des_list): 
         
         if N_title in All_title_list:

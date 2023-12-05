@@ -155,7 +155,9 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,news_links)
+    page_source = "https://www.rittal.com/com-en/Company/Presse/Pressemeldungen" 
+    Emr_Crawlers_Logs(c_name+"_Second",page_source,news_links)
+    
     for n in news_links:   
         
         if n in links_list:

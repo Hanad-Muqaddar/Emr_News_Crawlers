@@ -176,6 +176,7 @@ try:
     data = json.loads(response.text)
     print(data)
     Optimization_links = []
+    page_source = "https://www.signify.com/global/our-company/news/press-releases"
     for i in data:
         try:
             news_weblink = i['link']
@@ -225,7 +226,7 @@ try:
 
            
             language = "en"
-            page_source = "https://www.signify.com/global/our-company/news/press-releases"
+            
             crawled_date = datetime.datetime.now()
 
             company_news = {}
@@ -250,7 +251,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    Emr_Crawlers_Logs(c_name,Optimization_links)
+    Emr_Crawlers_Logs(c_name,page_source,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

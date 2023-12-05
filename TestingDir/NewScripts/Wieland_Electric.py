@@ -178,7 +178,8 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,news_links)
+    page_source = 'https://www.wieland-electric.com/en/company/news/public-relations/'
+    Emr_Crawlers_Logs(c_name,page_source,news_links)
     for i, d, img in zip(news_links,date_list,image_list):
         
         if i in db_list:
@@ -222,7 +223,7 @@ try:
             except:
                 news_date = ""
 
-            page_source = 'https://www.wieland-electric.com/en/company/news/public-relations/'
+            
             news_weblink = i
             print(news_weblink)
             

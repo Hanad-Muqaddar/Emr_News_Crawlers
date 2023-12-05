@@ -161,7 +161,9 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,news_links)
+    page_source = "https://merten.de/ueber-uns/presse.html" 
+    Emr_Crawlers_Logs(c_name+"_Second",page_source,news_links)
+
     for i in news_links:
         
         if i in db_list:
@@ -211,7 +213,7 @@ try:
             except:
                 news_date = datetime.now()
 
-            page_source = "https://merten.de/ueber-uns/presse.html" 
+           
             news_weblink = i
             
             try:

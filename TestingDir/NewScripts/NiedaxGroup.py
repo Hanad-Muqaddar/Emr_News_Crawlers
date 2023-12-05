@@ -168,6 +168,9 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
     Optimization_links = []
+
+    page_source = "https://www.niedax-group.com/en/corporate-group/press-news/news/"
+
     for i in data:
         news_weblink = "https://www.niedax-group.com" + i.find("a").get("href")
         Optimization_links.append(news_weblink)
@@ -202,7 +205,7 @@ try:
                 # print(news_date)
             except:
                 news_date = ""
-            page_source = "https://www.niedax-group.com/en/corporate-group/press-news/news/"
+            
             language = "en"
             announcement_type = "News"
             try:
@@ -232,7 +235,7 @@ try:
             except Exception as e:
                 running_Sequence.append(e)
                 
-    Emr_Crawlers_Logs(c_name,Optimization_links)
+    Emr_Crawlers_Logs(c_name,page_source,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

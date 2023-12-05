@@ -158,8 +158,8 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-
-    Emr_Crawlers_Logs(c_name,news_links)
+    page_source = 'https://www.nvent.com/en-us/about-nvent/newsroom'
+    Emr_Crawlers_Logs(c_name+"_Second",page_source,news_links)
 
     for i in news_links:
         
@@ -209,7 +209,6 @@ try:
                 except:
                     news_date = ""
 
-            page_source = 'https://www.nvent.com/en-us/about-nvent/newsroom'
             news_weblink = i
             print(news_weblink)
             

@@ -173,6 +173,7 @@ try:
     # for x in mydoc:
     #     All_title_list.append(x['title'])
     Optimization_links = []
+    page_source = 'https://www.mersen.com/publications'
     for i in News_data:
         Optimization_links.append(i['link'])
         if i['link'] in db_list:
@@ -199,8 +200,7 @@ try:
                 print(news_date)
             except:
                 news_date = ""
-
-            page_source = 'https://www.mersen.com/publications'
+            
             news_weblink = i['link']
             print(news_weblink)
 
@@ -229,7 +229,7 @@ try:
             except Exception as e:
                 running_Sequence.append(e)
                 
-    Emr_Crawlers_Logs(c_name,Optimization_links)
+    Emr_Crawlers_Logs(c_name+"_Second",page_source,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

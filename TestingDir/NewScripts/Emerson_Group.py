@@ -94,7 +94,8 @@ try:
     print(news_links)
     print(news_dates)
 
-    Emr_Crawlers_Logs(c_name,f_news_links)
+    page_source = "https://www.emerson.com/en-us/news/search?cmFacetId=34014"
+    Emr_Crawlers_Logs(c_name,page_source,f_news_links)
 
     for i, L_date in zip(f_news_links, news_dates):
         if i in links_list:
@@ -137,7 +138,7 @@ try:
                 # print(news_date)
             except:
                 news_date = ""
-            page_source = "https://www.emerson.com/en-us/news/search?cmFacetId=34014"
+            
             news_weblink = i
             try:
                 announcement = data.find('div', class_="col-xs-12").find("div", class_="padded-container").get_text(strip=True)

@@ -154,7 +154,9 @@ try:
         news_weblink = "https://www.rittal.com" + i.find('a').get("href")
         links_list.append(news_weblink)
 
-    Emr_Crawlers_Logs(c_name,links_list)
+    Web_Page = "https://www.rittal.com/com-en/News"
+    Emr_Crawlers_Logs(c_name,Web_Page,links_list)
+
     for j in links_list:
         
         if j in db_list:

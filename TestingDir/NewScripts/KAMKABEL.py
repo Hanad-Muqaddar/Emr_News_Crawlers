@@ -165,7 +165,9 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,news_links)
+    page_source = "https://www.kamkabel.ru/press/news/"
+    Emr_Crawlers_Logs(c_name,page_source,news_links)
+
     for i in news_links:
         
         if i in links_list:
@@ -222,7 +224,7 @@ try:
                 news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
                 # print(news_date)
 
-            page_source = "https://www.kamkabel.ru/press/news/"
+           
             news_weblink = i
             
             try:

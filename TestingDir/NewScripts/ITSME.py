@@ -162,7 +162,8 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,news_links) 
+    page_source = "https://www.itsmenederland.nl/itsme/en/EUR/content/news/list"
+    Emr_Crawlers_Logs(c_name,page_source,news_links) 
     for i, L_date in zip(news_links, news_dates):     
         
         if i in links_list:

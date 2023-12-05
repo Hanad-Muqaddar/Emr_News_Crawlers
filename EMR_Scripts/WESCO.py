@@ -159,7 +159,7 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,f_links)
+    Emr_Crawlers_Logs(c_name,page_source,f_links)
     
     for i in f_links:
         if i in db_list:

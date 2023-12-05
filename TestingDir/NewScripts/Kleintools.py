@@ -166,6 +166,9 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
     Optimization_links = []
+
+    page_source = "https://www.kleintools.com/press-releases"
+
     for i in data:
         news_weblink = i.find("a").get("href")
         Optimization_links.append(news_weblink)
@@ -205,7 +208,7 @@ try:
             except:
                 image = ""
             announcement_type = "Press Releases" 
-            page_source = "https://www.kleintools.com/press-releases"
+            
             crawled_date = datetime.datetime.now()
             language = "en"
             company_news = {}
@@ -228,7 +231,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)    
-    Emr_Crawlers_Logs(c_name,Optimization_links)
+    Emr_Crawlers_Logs(c_name,page_source,Optimization_links)
     
     if Already_exist >= 1:
 

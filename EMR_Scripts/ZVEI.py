@@ -121,8 +121,9 @@ try:
         else:
             break
     # print('Link out')
-
-    Emr_Crawlers_Logs(c_name,news_link)
+    Web_Page = 'https://www.zvei.org/en/press-media/pressarea'
+    Emr_Crawlers_Logs(c_name,Web_Page,news_link)
+    
     for url in news_link:
         n_link = url['link']
         

@@ -167,6 +167,8 @@ try:
     result = requests.get("https://www.esylux.com/press/#c787")
     soup = BeautifulSoup(result.content, 'lxml')
     data = soup.find_all("div", class_="row pressemitteilung")
+
+    page_source = "https://www.esylux.com/press/#c787"
     # print(data)
     for i in data:
         
@@ -203,7 +205,7 @@ try:
             announcement = ""
             announcement_type = "PRESS RELEASES"
             language = "en-US"
-            page_source = "https://www.esylux.com/press/#c787"
+            
             crawled_date = datetime.datetime.now()
             company_news = {}
             company_news['companyId'] = ''
@@ -226,7 +228,8 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    Emr_Crawlers_Logs(c_name,Optimization_links)
+    
+    Emr_Crawlers_Logs(c_name,page_source,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

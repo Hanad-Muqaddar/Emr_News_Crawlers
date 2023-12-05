@@ -175,6 +175,7 @@ mydoc = collection.find()
 for x in mydoc:
     db_list.append(x['News_Weblink'])
 Optimization_links = []
+page_source = 'https://www.opple.com/en/news'
 try:
     for i in range(17):
         main_url = "https://www.opple.com/en/news?page={}".format(i)
@@ -218,7 +219,7 @@ try:
                     image = ""
                 sub_category = ""
                 announcement_type = 'News'
-                page_source = 'https://www.opple.com/en/news'
+                
                 language = 'en-US'
                 crawled_on_date = datetime.datetime.now()
                 company_news = {}
@@ -243,7 +244,7 @@ try:
                 except Exception as e:
                     running_Sequence.append(e)
                     
-    Emr_Crawlers_Logs(c_name,Optimization_links)   
+    Emr_Crawlers_Logs(c_name,page_source,Optimization_links)   
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

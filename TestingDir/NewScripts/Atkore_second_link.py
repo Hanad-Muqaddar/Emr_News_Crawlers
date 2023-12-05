@@ -165,6 +165,8 @@ try:
     driver.get("https://investors.atkore.com/events-and-presentations/default.aspx")
     time.sleep(5)
 
+    page_source = "https://investors.atkore.com/events-and-presentations/default.aspx"
+
     news_titles = []
     news_dates = []
 
@@ -220,7 +222,7 @@ try:
             except:
                 news_date = ""
 
-            page_source = "https://investors.atkore.com/events-and-presentations/default.aspx"
+            
             
             date = datetime.now()
                     
@@ -245,8 +247,8 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-                
-    Emr_Crawlers_Logs(c_name,Optimization_links)
+    
+    Emr_Crawlers_Logs(c_name+"_Second",page_source,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

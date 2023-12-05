@@ -46,6 +46,10 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from newspaper import fulltext
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from googletrans import Translator
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -59,15 +63,13 @@ Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
-
-# ************************************************************************
 # defining variables
 
 running_Sequence = []
 
 started_on = datetime.now()
 
-c_name = 'Lapp_Group' # Name of the Collection
+c_name = 'Lapp_Group'
 
 total_crwalled_links = 0
 
@@ -137,87 +139,108 @@ else:
 
 # *****************************************************************************
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    
-    Main_url = "https://lappconnecto.lappgroup.com"
-    Base_url = "https://lappconnecto.lappgroup.com/en/news.html"
-     
-    result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
-    
-    news_links = []
 
-    links = soup.find("div",{ "class" : "row show-grid"}).find_all('a',{ "class" : "clean"})
+     # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = True
+
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+
+    # service = Service("C:\Program Files (x86)\chromedriver.exe")
+    # chrome_options = webdriver.ChromeOptions()
+
+    # driver = webdriver.Chrome(service=service, options=opts)
+
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+    driver.get("https://www.lappkabel.com/news/current-news.html")
+    time.sleep(10)
+ 
+    news_links = []
+    N_dates = []
+    links = driver.find_elements(By.XPATH, "//lapp-tile-teaser")
     for link in links:
-        news_link = Main_url + link.get('href')
-        if news_link not in news_links:
-            news_links.append(news_link)
+        news_link = link.find_element(By.XPATH, ".//cx-generic-link/a").get_attribute('href')
+        news_links.append(news_link)
+        try:
+            dat = link.find_element(By.XPATH, '//div[@class="tile_text"]/h3').text
+            N_dates.append(dat)
+        except:
+            dat = ""
+            N_dates.append(dat)
 
     print(news_links)
+    print(len(news_links))
 
-    # Creating a list of links already avilable in database
-    links_list = []
+    db_list = []
     mydoc = collection.find()
     for x in mydoc:
-        links_list.append(x['News_Weblink'])
+        db_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,news_links)
-    for i in news_links:  
-        
-        if i in links_list:
+    Web_Page = "https://www.lapp.com/en/de/news/press-news/company-news/e/000411"
+    Emr_Crawlers_Logs(c_name,Web_Page,news_links)
+
+    for i,d in zip(news_links,N_dates):
+        if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
-        else:
-
-            response = requests.get(i, headers=headers)
-            data = BeautifulSoup(response.content, 'lxml')
+        else:        
+            try:
+                driver.get(i)
+                time.sleep(15)
+            except Exception as e:
+                print(e)
 
             try:
-                title = data.find("h1",{ "class" : "text-uppercase"}).text
+                title = driver.find_element(By.XPATH, '//lapp-text//h1').text
                 print(title)
             except:
                 title = ""
             
+            announcement_type = "News"
             language = "en-us"
-            
+
             try:
-                image = "https://lappconnecto.lappgroup.com" + data.find('div',{ "class" : "intrinsic"}).find('img',{ "class" : "lazyload img-fluid  img-thumbnail"}).get('data-src')
+                image = driver.find_element(By.XPATH, '//lapp-media/img[@class="img-fluid"]').get_attribute('src')
                 print(image)
             except:
                 image = ""
 
-            announcement_type = "News"
-            
             sub_category = ""
             
             try:
-                analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-                # print(analysis)
+                analysis = driver.find_element(By.XPATH, "//meta[@property='og:description']").get_attribute('content')
             except:
                 analysis = ""
             try:
-                news_date = datetime.now()
-                # print(news_date)
+                news_date = dateparser.parse(d,  settings={'DATE_ORDER': 'DMY'})
+                print(news_date)
             except:
-                news_date = ''
+                news_date = ""
 
-            page_source = "https://lappconnecto.lappgroup.com/en/news.html"
+            page_source = "https://www.lapp.com/en/de/news/press-news/company-news/e/000411"
             news_weblink = i
-            
+            print(news_weblink)
             
             try:
-                html = requests.get(i).text
-                announcement = fulltext(html)
-                announcement = announcement.replace('\n','<br>')
-                # print(announcement)
-                
+                announcement = driver.find_element(By.XPATH, '//cx-page-slot/lapp-text/div[contains(@class,"lappComponent lappText slot50")]').text
+                print(announcement)
             except:
                 announcement = ""
             
             date = datetime.now()
-        
+            # Creating a list of links already avilable in database
+            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -230,7 +253,7 @@ try:
             company_news['Source'] = page_source
             company_news['News_Weblink'] = news_weblink
             company_news['photo']= image
-            company_news['videos']= ''
+            company_news['videos']= ""
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
@@ -295,4 +318,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'None'
 
-error_logs.insert_one(log)
+# error_logs.insert_one(log)

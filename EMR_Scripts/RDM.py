@@ -155,8 +155,10 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-    
-    Emr_Crawlers_Logs(c_name,links_list)
+
+    page_source = "https://www.rdm.com/news"
+    Emr_Crawlers_Logs(c_name,page_source,links_list)
+
     for j in links_list:
         
         if j in db_list:

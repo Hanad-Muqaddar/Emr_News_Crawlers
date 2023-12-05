@@ -60,8 +60,6 @@ Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
-
-# ************************************************************************
 # defining variables
 
 running_Sequence = []
@@ -162,9 +160,9 @@ try:
     print("Starting a script")
     
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
-               "Content-Type": "text/html; charset=UTF-8"              
+               "Content-Type": "text/html; charset=UTF-8",
+                
                }
-    
     Base_url = "https://www.leviton.com/sites/Satellite?pagename=LC/Utilities/GetAllPressReleases&d=Default&id=1469251297323"
     Main_url = "https://www.leviton.com"
     try:
@@ -199,8 +197,11 @@ try:
     print(news_links)
     print(news_dates)
 
-    Emr_Crawlers_Logs(c_name,news_links)
+    Web_Page = "https://www.leviton.com/en/company/news-events/press-releases"
+    Emr_Crawlers_Logs(c_name,Web_Page,news_links)
+
     for i,d in zip(news_links, news_dates):
+        
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1

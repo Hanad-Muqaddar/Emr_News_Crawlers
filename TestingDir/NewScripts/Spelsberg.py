@@ -149,7 +149,8 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,final_links)
+    page_source = "https://www.spelsberg.com/news/news-press/"
+    Emr_Crawlers_Logs(c_name,page_source,final_links)
 
     for i in final_links:
         if i in db_list:
@@ -185,7 +186,7 @@ try:
                 announcement = ""
             announcement_type = "News and Press"
             language = "en-US"
-            page_source = "https://www.spelsberg.com/news/news-press/"
+            
             crawled_date = datetime.datetime.now()
 
             company_news = {}

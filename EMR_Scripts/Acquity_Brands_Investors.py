@@ -188,7 +188,10 @@ def get_newsweblinks(collection):
 try:
     links, dates, error_l, no_news = get_all_links_and_dates()
     main_news_list = get_newsweblinks(collection)
-    Emr_Crawlers_Logs(c_name,links)
+    
+    webpage = "https://www.investors.acuitybrands.com/news-releases"
+    Emr_Crawlers_Logs(c_name,webpage,links)
+
     for i,j in zip(links,dates):
         
         if i in main_news_list:

@@ -1,5 +1,4 @@
 # Packages to be imported
-from ast import expr_context
 import requests
 
 import time
@@ -47,9 +46,11 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from newspaper import fulltext
-
 from scrapy import Selector
-import unicodedata
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from googletrans import Translator
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -63,16 +64,13 @@ Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
-
-# ************************************************************************
 # defining variables
 
 running_Sequence = []
 
 started_on = datetime.now()
 
-# c_name = 'SIEMENS_Testing' # Name of the Collection
-c_name = 'SIEMENS' # Name of the Collection
+c_name = 'SIEMENS_ENERGY' # Name of the Collection
 
 total_crwalled_links = 0
 
@@ -132,25 +130,6 @@ else:
 
     Crwl_time = last_insertion['Date']
 
-def parse_filtered_news(announcement):
-    api_url = "https://admin.new.emr-online.com/api/history/filterbody"
-    # api_url = "http://192.168.60.105:3000/api/history/filterbody"
-    payload = json.dumps({
-                            "originalBody": announcement
-                            })
-    headers = {
-                'Content-Type': 'application/json'
-                }
-    return_response = requests.request("POST", api_url, headers=headers, data=payload)
-    new_data = return_response.text
-    new_data = json.loads(new_data)
-    status = new_data['statusCode']
-    if status == 200:
-        return new_data
-    else:
-        new_data =  ""
-        return new_data
-
 # ****************************************************************************
 
 ####################################################
@@ -161,238 +140,100 @@ def parse_filtered_news(announcement):
 
 # *****************************************************************************
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'}
-    Main_url = "https://press.siemens.com"
-    Base_url = "https://press.siemens.com/global/en/press-search"
-    result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
-    
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+     # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = True
+
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+
+    # service = Service("C:\Program Files (x86)\chromedriver.exe")
+    # chrome_options = webdriver.ChromeOptions()
+    # driver = webdriver.Chrome(service=service, options=opts)
+
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+    driver.get("https://www.siemens-energy.com/global/en/home/press-releases.html?")
+    time.sleep(10)
+    Main_url = "https://www.siemens-energy.com"
+
     news_links = []
-
-    links = soup.find_all("div", {"class" : re.compile('press-search-results-view-row')})
+    links = driver.find_elements(By.XPATH, '//div[@class="aem-results__press-container"]/div[@class="aem-results__press-item"]//a[@class="aem-results__press-item__title"]')
     for link in links:
-        news_link = Main_url + link.find('div',{ "class" : "views-field views-field-title"}).find('a').get('href')
-        if news_link not in news_links:
-            news_links.append(news_link)
-    print(news_links)
+        news_link = link.get_attribute('href')
+        news_links.append(news_link)
 
-     # Creating a list of links already avilable in database
+    print(news_links)
+    print(len(news_links))
+
+    # Creating a list of links already avilable in database
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,news_links)
-    for i in news_links:
-        if i in links_list:
+    Web_Page = "https://www.siemens-energy.com/global/en/home/press-releases.html?"
+    Emr_Crawlers_Logs(c_name,Web_Page,news_links)
+    
+    for n in news_links:   
+        if n in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
-        else:
-                
-            response = requests.get(i, headers=headers)
-            data = BeautifulSoup(response.content, 'lxml')
-            res = Selector(response)
+        else:     
+            result2 = requests.get(n, headers=headers)
+            response2 = Selector(result2)
+            
             try:
-                title = data.find('meta',attrs = {'name':'og:title'}).get('content')
+                title = response2.xpath('//div[@class="aem-press-header__title col-sm-11"]/h1/text()').get()
                 print(title)
             except:
-                title = ""
+                title = response2.xpath('///meta[@name="og:title"]/@content').get()
+                print(title)
             
-            announcement_type = "Press Release"
             language = "en-us"
+            
+            image = ""
 
+            announcement_type = "News"
             try:
-                image = data.find('meta',attrs = {'name':'og:image'}).get('content')
-                # print(image)
-            except:
-                image = ""
-
-            try:
-                sub_category = data.find('meta', attrs = {"name":"og:type"}).get("content")
-                # print(sub_category)
+                sub_category = response2.xpath('//meta[@property="og:type"]/@content').get()
             except:
                 sub_category = ""
             
             try:
-                analysis = data.find('meta', attrs = {"name":"og:description"}).get("content")
-                # print(analysis)
+                analysis = response2.xpath('//meta[@property="og:description"]/@content').get()
+                print(analysis)
             except:
                 analysis = ""
-            try:            
-                date = data.find('span', {"class":"Date"}).get("data-original")
-                # print(date)
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'MDY'} )
-                # print(news_date)            
+            try:
+                N_date = response2.xpath('normalize-space(//div[@class="aem-press-header__date"])').get()
+                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
+                print(news_date)
             except:
                 news_date = ""
 
-            page_source = "https://press.siemens.com/global/en/press-search"
-            news_weblink = i
+            page_source = "https://www.siemens-energy.com/global/en/home/press-releases.html?"
+            news_weblink = n
             
             try:
-                annc = res.css(".c2-ct-press-release").get()
-                replace1 = res.css(".nts-notifications").get()
-                replace2 = res.xpath("//section[@class='MetaData Press Release container']").get()
-                replace3 = res.xpath("//h1").get()
-                replace4 = res.css(".mobile-summary").get()
-                replace5 = res.css(".mobile-Introtext").get()
-                replace6 = res.css(".MetaData").get()
-                replace7 = res.css(".nts-primary-teaser-slide-box-container").get()
-                replace8 = res.css(".addeventatc").get()
-                replace9 = res.css(".content .hidden-sm").get()
-                replace10 = res.css(".fsi-row-sm-level h1").get()
-                replace11 = res.xpath("//div[@class='col col-xs-12 col-sm-12 col-md-6']").get()
-                replace12 = res.css(".hasVideo").getall()
-                replace14 = res.css(".nts-notifications").get()
-                replace15 = res.css(".Contact").get()
-                replace16 = res.css(".slick-list").get()
-                replace17 = res.xpath('//section[contains(@class, "VisibleCols3")]//div[not (contains (@class, "noPic")) and contains(@class, "caption")]').getall()
-                replace18 = res.xpath('//section[contains(@class, "VisibleCols1")]//div[not (contains (@class, "noPic")) and contains(@class, "caption")]').getall()
-                replace30 = res.xpath('//section[contains(@class, "VisibleCols2")]//div[not (contains (@class, "noPic")) and contains(@class, "caption")]').getall()
-                replace19 = res.xpath('//section[@class="container Row"]//div[@class="col-md-12"]').get()
-                replace20 = res.css(".filterResults").get()
-                replace21 = res.css(".footer").get()
-                replace22 = res.css(".RelatedRow").get()
-                replace23 = res.css(".Boilerplate").getall()
+                announcement = fulltext(result2.text)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
                 
-                for video in replace12:
-                    try:
-                        annc = annc.replace(video, "")
-                    except:
-                        pass
-                for caption in replace17:
-                    try:
-                        annc = annc.replace(caption, "")
-                    except:
-                        pass
-                for caption1 in replace18:
-                    try:
-                        annc = annc.replace(caption1, "")
-                    except:
-                        pass
-                for caption2 in replace30:
-                    try:
-                        annc = annc.replace(caption2, "")
-                    except:
-                        pass
-                for boiler in replace23:
-                    try:
-                        annc = annc.replace(boiler, "")
-                    except:
-                        pass
-                    
-                try:
-                    annc = annc.replace(replace1,"")
-                except:
-                    pass
-                try:
-                    annc = annc.replace(replace2, "")
-                except:
-                    pass
-                try:
-                    annc = annc.replace(replace3,"")
-                except:
-                    pass
-                try:
-                    annc = annc.replace(replace4,"")
-                except:
-                    pass
-                try:
-                    annc = annc.replace(replace5,"")
-                except:
-                    pass
-                try:
-                    annc = annc.replace(replace6, "")
-                except:
-                    pass
-                try:
-                    annc = annc.replace(replace7, "")
-                except:
-                    pass
-                try:
-                    annc = annc.replace(replace8,"")
-                except:
-                    pass
-                try:
-                    annc = annc.replace(replace9,"")
-                except:
-                    pass
-                try:
-                    annc = annc.replace(replace10,"")
-                except:
-                    pass
-                try:
-                    annc = annc.replace(replace11,"")
-                except:
-                    pass
-                try:
-                    annc = annc.replace(replace12,"")
-                except:
-                    pass
-                try:
-                    annc = annc.replace(replace14,"")
-                except:
-                    pass
-                try:
-                    annc = annc.replace(replace15,"")
-                except:
-                    pass
-                try:
-                    annc = annc.replace(replace16,"")
-                except:
-                    pass
-                # try:
-                #     annc = annc.replace(replace17,"")
-                # except:
-                #     pass
-                try:
-                    annc = annc.replace(replace19,"")
-                except:
-                    pass
-                try:
-                    annc = annc.replace(replace20,"")
-                except:
-                    pass
-                try:
-                    annc = annc.replace(replace21,"")
-                except:
-                    pass
-                try:
-                    annc = annc.replace(replace22,"")
-                except:
-                    pass
-                try:
-                    annc = annc.replace("<!--[isInTeaser: true][maxLength: 130][hasImage: true][shortenList:true]-->", "")
-                except:
-                    pass
-                try:
-                    annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
-                    annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
-                    annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
-                    annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
-                    annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: true][shortenList:false]-->", "")
-                    annc = annc.replace("<!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
-                    annc = annc.replace("<article xmlns:php=\"http://php.net/xsl\"><section data-partialxcmsid=\"\"><span><!--[isInTeaser: false][maxLength: ][hasImage: false][shortenList:false]-->", "")
-                except:
-                    pass
-                return_data = parse_filtered_news(annc)
-                annc = return_data['filteredBody']
-                emr_essentail = return_data['emrEssential']
-                emr_executive = return_data['emrExecutive']
-                emr_lite = return_data['emrLite']
-                emr_html = return_data['emrHtmlText']
-            except Exception as e:
-                print(e)
-                annc = ""
-                emr_essentail = ""
-                emr_executive = ""
-                emr_lite = ""
-                emr_html = ""
+            except:
+                announcement = ""
             
             date = datetime.now()
-            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -406,18 +247,13 @@ try:
             company_news['News_Weblink'] = news_weblink
             company_news['photo']= image
             company_news['videos']= ''
-            company_news['announcement']=annc
+            company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
-            company_news['emrExecutive'] = emr_executive
-            company_news['emrEssential'] = emr_essentail
-            company_news['emrLite'] = emr_lite
-            company_news['News_Html'] = emr_html
             try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
-                print(e)
                 running_Sequence.append(e)
     
     if Already_exist >= 1:
@@ -475,4 +311,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'None'
 
-# error_logs.insert_one(log)
+error_logs.insert_one(log)

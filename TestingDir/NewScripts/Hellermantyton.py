@@ -167,8 +167,10 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
     Optimization_links = []
-    for i in links:
-        
+
+    page_source = "https://www.hellermanntyton.com/news"
+
+    for i in links:    
         news_weblink = "https://www.hellermanntyton.com" + i.get("href")
         Optimization_links.append(news_weblink)
         if news_weblink in db_list:
@@ -205,7 +207,7 @@ try:
                 announcement_type =""
                 
             language = "en-US"
-            page_source = "https://www.hellermanntyton.com/news"
+            
             crawled_date = datetime.datetime.now()
             sub_category = ""
         
@@ -230,7 +232,8 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    Emr_Crawlers_Logs(c_name,Optimization_links)
+
+    Emr_Crawlers_Logs(c_name,page_source,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

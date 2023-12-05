@@ -46,7 +46,7 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
-
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
@@ -62,8 +62,6 @@ Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
-
-# ************************************************************************
 # defining variables
 # opts = Options()
 # opts.add_argument("--window-size=190,100")
@@ -177,13 +175,19 @@ try:
     opts.headless = True
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(version='105.0.5195.125').install()), options=opts)
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+    # service = Service("C:\Program Files (x86)\chromedriver.exe")
+    # chrome_options = webdriver.ChromeOptions()
+
+    # driver = webdriver.Chrome(service=service, options=opts)
+
     driver.get("https://www.pipelife.com/service/news-and-projects.html")
+    time.sleep(10)
     Main_url = "https://www.pipelife.com"
 
 
     news_links = []
-    links = driver.find_elements(By.XPATH, '//div[contains(@class,"browser--newslist")]//article//a[@class="teaser-item__asset"]')
+    links = driver.find_elements(By.XPATH, '//div[contains(@class,"browser--newslist")]//article[not(@class)]//a[@class="teaser-item__asset"]')
     for link in links:
         news_link = link.get_attribute('href')
         news_links.append(news_link)
@@ -196,15 +200,18 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
+    Web_Page = "https://www.pipelife.com/service/news-and-projects.html"
+    Emr_Crawlers_Logs(c_name,Web_Page,news_links)
+
     for news_weblink in news_links:
-        Emr_Crawlers_Logs(c_name,news_weblink)
+        
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
         else:
-            res = requests.get(news_weblink)
+            res = requests.get(news_weblink,headers=headers)
             soup2 = BeautifulSoup(res.content, 'lxml')
             try:
                 title = soup2.find("h1", class_="intro__headline").text
@@ -260,6 +267,7 @@ try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
+                print(e)
                 running_Sequence.append(e)
         
     if Already_exist >= 1:
@@ -321,5 +329,5 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'Chrome'
 
-error_logs.insert_one(log)
+# error_logs.insert_one(log)
 

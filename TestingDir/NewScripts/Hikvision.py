@@ -177,7 +177,9 @@ try:
         news_links.append(url) 
     print(news_links)
 
-    Emr_Crawlers_Logs(c_name,news_links)
+    page_source = "https://www.hikvision.com/en/newsroom/latest-news/"
+    Emr_Crawlers_Logs(c_name,page_source,news_links)
+    
     for l in news_links:
         if l in db_list:
             total_crwalled_links += 1
@@ -235,7 +237,7 @@ try:
                 announcement = ""
 
             language = "en"
-            page_source = "https://www.hikvision.com/en/newsroom/latest-news/"
+            
             crawled_date = datetime.datetime.now()
             company_news = {}
             company_news['companyId'] = ''

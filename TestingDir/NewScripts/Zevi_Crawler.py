@@ -184,7 +184,8 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,final_links)
+    page_source = "https://www.zvei.org/presse-medien/pressebereich"
+    Emr_Crawlers_Logs(c_name,page_source,final_links)
     for i in final_links[:5]:
         if i == "":
             continue
@@ -229,7 +230,7 @@ try:
                 announcement = ""
                 
             
-            page_source = "https://www.zvei.org/presse-medien/pressebereich"
+            
             crawled_date = datetime.datetime.now()
 
             company_news = {}

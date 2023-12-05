@@ -180,7 +180,8 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,links)
+    page_source = "https://www.rexel.com/en/medias/press-releases/"
+    Emr_Crawlers_Logs(c_name,page_source,links)
 
     for i in links:
         try:
@@ -229,7 +230,7 @@ try:
             except:
                 announcement = ""
             language = "en-US"
-            page_source = "https://www.rexel.com/en/medias/press-releases/"
+            
             crawled_date = datetime.datetime.now()
             company_news = {}
             company_news['companyId'] = ''

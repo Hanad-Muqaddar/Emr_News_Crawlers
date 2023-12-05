@@ -178,7 +178,9 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,news_links)
+    page_source = 'https://ao.dk/om-ao/nyheder-og-presse/pressemeddelelser'
+    Emr_Crawlers_Logs(c_name+"_Second",page_source,news_links)
+
     for i, d in zip(news_links,date_list):
         
         if i in db_list:
@@ -224,7 +226,7 @@ try:
             except:
                 news_date = ""
 
-            page_source = 'https://ao.dk/om-ao/nyheder-og-presse/pressemeddelelser'
+            
             news_weblink = i
             print(news_weblink)
             

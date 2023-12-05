@@ -159,6 +159,7 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])                                                                                                    
     Optimization_links = []
+    page_source = "https://www.trilux.com/en/blog/" 
     for n in news_links:   
         n = Main_url + remove_empty_lines(n)
         print(n)
@@ -205,7 +206,7 @@ try:
             except:
                 news_date = ""
 
-            page_source = "https://www.trilux.com/en/blog/" 
+            
             news_weblink = n
             
             try:
@@ -240,7 +241,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    Emr_Crawlers_Logs(c_name,Optimization_links)
+    Emr_Crawlers_Logs(c_name,page_source,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

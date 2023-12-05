@@ -48,6 +48,8 @@ from urllib.request import Request, urlopen
 from newspaper import fulltext
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
+
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -61,8 +63,6 @@ Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
-
-# ************************************************************************
 # defining variables
 
 running_Sequence = []
@@ -154,7 +154,13 @@ try:
     opts.headless = True
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(version='114.0.5735.90').install()), options=opts)
+    # service = Service("C:\Program Files (x86)\chromedriver.exe")
+    # chrome_options = webdriver.ChromeOptions()
+    # # chrome_options.add_argument('--proxy-server=http://%s' % PROXY)
+
+    # driver = webdriver.Chrome(service=service, options=opts)
+
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
     driver.get("https://investor.belden.com/overview/default.aspx")
     time.sleep(10)
     Main_url = "https://investor.belden.com"
@@ -168,13 +174,16 @@ try:
     print(news_links)
     print(len(news_links))
 
+    Web_Page = "https://investor.belden.com/overview/default.aspx"
+    Emr_Crawlers_Logs(c_name+"_Second",Web_Page,news_links)
+
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-
-    Emr_Crawlers_Logs(c_name,news_links)
+    
     for i in news_links:
+        
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -191,7 +200,9 @@ try:
             
             announcement_type = "News"
             language = "en-us"
+
             image = ""
+
             sub_category = ""
             
             try:
@@ -239,6 +250,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
+
     
     if Already_exist >= 1:
 

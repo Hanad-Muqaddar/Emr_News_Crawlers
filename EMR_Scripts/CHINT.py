@@ -150,8 +150,10 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
+        
+    Web_Page = "https://chintglobal.com/news-center-14"       
+    Emr_Crawlers_Logs(c_name,Web_Page,links)
 
-    Emr_Crawlers_Logs(c_name,links)
     for i in links:
         if i in db_list:
             Already_exist += 1

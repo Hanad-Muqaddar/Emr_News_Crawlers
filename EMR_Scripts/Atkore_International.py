@@ -163,7 +163,9 @@ try:
     for news_l in links:
         N_links.append(news_l.text)
 
-    Emr_Crawlers_Logs(c_name,N_links)
+    Web_Page = "https://www.atkore.com/news/"        
+    Emr_Crawlers_Logs(c_name,Web_Page,N_links)
+
     for i in N_links:
         
         if i in links_list:

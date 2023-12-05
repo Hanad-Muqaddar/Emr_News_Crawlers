@@ -209,8 +209,9 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-                
-    Emr_Crawlers_Logs(c_name,Optimization_links)
+    
+    page_source = "https://pressroom.grainger.com/news/default.aspx"
+    Emr_Crawlers_Logs(c_name,page_source,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

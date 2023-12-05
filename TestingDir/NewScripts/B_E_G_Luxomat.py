@@ -179,8 +179,9 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-
-    Emr_Crawlers_Logs(c_name,purified_links)
+    web_Page = "https://www.beg-luxomat.com/en-in/service/news/ + https://www.beg-luxomat.com/en/the-company/press/"
+    Emr_Crawlers_Logs(c_name,web_Page,purified_links)
+    
     for k in purified_links:
         
         news_weblink = k

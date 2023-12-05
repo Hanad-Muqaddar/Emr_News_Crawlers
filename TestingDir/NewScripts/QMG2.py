@@ -166,7 +166,8 @@ try:
     for x in mydoc:
         All_title_list.append(x['title'])
 
-    Emr_Crawlers_Logs(c_name,news_links)
+    page_source = "https://qmg.fi/artikkelit"
+    Emr_Crawlers_Logs(c_name+"_Second",page_source,news_links)
     for i in news_links:
         
         if i in db_list:
@@ -221,8 +222,8 @@ try:
                 except:
                     news_date = ""
 
+         
                 
-                page_source = "https://qmg.fi/artikkelit"
                 news_weblink = i
                 
                 try:

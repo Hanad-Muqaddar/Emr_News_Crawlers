@@ -161,9 +161,10 @@ try:
     print(len(news_links))
     print(news_links)
 
-    Emr_Crawlers_Logs(c_name,news_links)
+    page_source = "https://investors.atkore.com/news/default.aspx"
+    Emr_Crawlers_Logs(c_name+"_Third",page_source,news_links)
+
     for i in news_links:
-        
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -206,7 +207,7 @@ try:
             except:
                 news_date = ""
 
-            page_source = "https://investors.atkore.com/news/default.aspx"
+            
             news_weblink = i
             print(news_weblink)
             

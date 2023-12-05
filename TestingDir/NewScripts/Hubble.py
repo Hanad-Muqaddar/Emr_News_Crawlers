@@ -169,7 +169,7 @@ try:
         db_list.append(x['News_Weblink'])
     
     Optimization_links = []
-
+    page_source = "https://hubbell.gcs-web.com/"
     for i in f_data:
         try:
             news_weblink = i['link']
@@ -215,7 +215,7 @@ try:
             except:
                 announcement = ""
             language = "en"
-            page_source = "https://hubbell.gcs-web.com/"
+            
             crawled_date = datetime.datetime.now()
             company_news = {}
             company_news['companyId'] = ''
@@ -239,7 +239,7 @@ try:
             except Exception as e:
                 running_Sequence.append(e)
                 
-    Emr_Crawlers_Logs(c_name,Optimization_links)
+    Emr_Crawlers_Logs(c_name,page_source,Optimization_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
