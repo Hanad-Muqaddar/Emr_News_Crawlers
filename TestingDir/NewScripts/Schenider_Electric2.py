@@ -149,7 +149,7 @@ def parse_filtered_news(announcement):
     headers = {
                 'Content-Type': 'application/json'
                 }
-    return_response = requests.request("POST", api_url, headers=headers, data=payload)
+    return_response = requests.request("POST", api_url, headers=headers, data=payload, proxies=proxies)
     new_data = return_response.text
     new_data = json.loads(new_data)
     status = new_data['statusCode']
@@ -160,8 +160,8 @@ def parse_filtered_news(announcement):
         return new_data
     
 try:
-    proxies = {'http': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280',
-            'https': 'http://waleeProxy:Cheeta@1@jp.proxymesh.com:31280'}
+    proxies = {'http': 'http://waleeProxy:Cheeta@1@au.proxymesh.com:31280',
+            'https': 'http://waleeProxy:Cheeta@1@au.proxymesh.com:31280'}
     
     db_list = []
     mydoc = collection.find()
@@ -170,7 +170,7 @@ try:
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     # result = requests.get("https://www.se.com/us/en/about-us/newsroom/news/", headers=headers, proxies=proxies)
-    result = requests.get("https://www.se.com/us/en/about-us/newsroom/news/", headers=headers)
+    result = requests.get("https://www.se.com/us/en/about-us/newsroom/news/", headers=headers, proxies=proxies)
     res = Selector(result)
 
     # data = res.css(".sdl-wiztopic-press-releases_wiztopic-card .wiztopic-content")
