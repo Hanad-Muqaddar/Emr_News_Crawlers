@@ -161,7 +161,7 @@ try:
 
     Web_Page = "https://press.siemens-energy.com/global/en/press-search"
 
-    Emr_Crawlers_Logs(c_name,Web_Page,news_links)
+    Emr_Crawlers_Logs(c_name+"_Second",Web_Page,news_links)
     
     for n in news_links:   
         if n in links_list:

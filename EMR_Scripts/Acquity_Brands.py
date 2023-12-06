@@ -146,7 +146,7 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    webpage = "https://www.euew.org/news"
+    webpage = "https://www.investors.acuitybrands.com/news-releases"
     Emr_Crawlers_Logs(c_name,webpage,FINAL_links)
 
     for i in FINAL_links:
@@ -183,7 +183,7 @@ try:
                 announcement = ""
             announcement_type = "News"
             language = "en-US"
-            page_source = "https://www.euew.org/news"
+            page_source = "https://www.investors.acuitybrands.com/news-releases"
             crawled_date = datetime.datetime.now()
 
             company_news = {}

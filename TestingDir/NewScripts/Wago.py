@@ -186,7 +186,7 @@ try:
         All_title_list.append(x['title'])
 
     page_source = "https://www.wago.com/global/blog"
-    Emr_Crawlers_Logs(c_name,page_source,news_links)
+    Emr_Crawlers_Logs(c_name,pagje_source,news_links)
     for i in news_links:
         
         if i in db_list:

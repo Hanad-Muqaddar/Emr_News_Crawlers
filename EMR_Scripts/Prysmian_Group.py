@@ -159,9 +159,6 @@ try:
         mydoc = collection.find()
         for x in mydoc:
             db_list.append(x['News_Weblink'])
-
-        Web_page = "https://www.prysmiangroup.com/en/media/news + https://www.prysmiangroup.com/en/media/press-releases"
-        Emr_Crawlers_Logs(c_name,Web_page,links_list)
         
         for k,l in zip(links_list, dates_list):
             
@@ -230,6 +227,9 @@ try:
                     total_crwalled_links += 1
                 except Exception as e:
                     running_Sequence.append(e)
+
+    Web_page = "https://www.prysmiangroup.com/en/media/news + https://www.prysmiangroup.com/en/media/press-releases"
+    Emr_Crawlers_Logs(c_name,Web_page,links_list)
     
     if Already_exist >= 1:
 

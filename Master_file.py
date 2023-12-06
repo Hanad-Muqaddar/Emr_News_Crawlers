@@ -274,7 +274,7 @@ Emr_News_Cralers_Dict = {
     "ABB" : "/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "ACOME" : "/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "Acquity_Brands_Investors":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
-    "Acquity_Brands":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
+    # "Acquity_Brands":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "ADHQ":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",    
     "Ensto_Group":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "EUEW":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
