@@ -184,7 +184,7 @@ try:
             print("Already Crawled")
             continue
         else:
-            result2 = requests.get(news_weblink, headers=headers)
+            result2 = requests.get(news_weblink, headers=headers, proxies=proxies)
             response1 = Selector(result2)
             date_get = response1.css(".sdl-wiztopic-press-release_publication-data p:nth-child(2) span").xpath("normalize-space()").get()
             location = response1.css('.sdl-wiztopic-press-release_publication-data p:nth-child(1) span').xpath("normalize-space()").get()
