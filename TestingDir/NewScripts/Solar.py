@@ -161,7 +161,7 @@ try:
             "ToDate" : str(to_date)
             })
     # response = requests.request("POST", url, verify=False, headers=headers, data=payload, proxies=proxies, timeout=20)
-    response = requests.request("POST", url, headers=headers, data=payload,  timeout=20)
+    response = requests.request("POST", url, headers=headers, data=payload, proxies=proxies, timeout=20)
 
     data = json.loads(response.text)
     # print(data)
@@ -184,7 +184,7 @@ try:
             print("Already Crawled")
             continue
         else:
-            result1 = requests.get(news_web_link)
+            result1 = requests.get(news_web_link,proxies=proxies)
             response1 = Selector(result1)
             try:
                 news_date = i['PublishedDateTime']
