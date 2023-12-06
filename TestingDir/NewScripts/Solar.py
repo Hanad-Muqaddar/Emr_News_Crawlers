@@ -161,7 +161,7 @@ try:
             "ToDate" : str(to_date)
             })
     # response = requests.request("POST", url, verify=False, headers=headers, data=payload, proxies=proxies, timeout=20)
-    response = requests.request("POST", url, headers=headers, data=payload, proxies=proxies, timeout=20)
+    response = requests.request("POST", url, headers=headers, data=payload, proxies=proxies, timeout=20, verify=False)
 
     data = json.loads(response.text)
     # print(data)
