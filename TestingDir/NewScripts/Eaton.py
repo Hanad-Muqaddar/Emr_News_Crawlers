@@ -53,18 +53,18 @@ from newspaper import Article
 import feedparser
 
 import unicodedata
-# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
-# Comment these lines when you are running locally
-import importlib.util
-# Specify the absolute path to Emr_Crawlers_Optimization.py
-module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
-# Load the module using the absolute path
-spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
-Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(Emr_Crawlers_Optimization)
-Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
+# # Comment these lines when you are running locally
+# import importlib.util
+# # Specify the absolute path to Emr_Crawlers_Optimization.py
+# module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
+# # Load the module using the absolute path
+# spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
+# Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
+# spec.loader.exec_module(Emr_Crawlers_Optimization)
+# Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
 
 # ************************************************************************
@@ -187,8 +187,8 @@ try:
                 'Accept-Encoding': 'gzip, deflate, br',
                 'Accept-Language': 'en-US,en;q=0.9'
                 }
-    result = requests.get("https://www.eaton.com/us/en-us/company/news-insights/news-releases.html", headers=headers, proxies=proxies, timeout=20)
-    # result = requests.get("https://www.eaton.com/us/en-us/company/news-insights/news-releases.html", headers=headers, timeout=20)
+    # result = requests.get("https://www.eaton.com/us/en-us/company/news-insights/news-releases.html", headers=headers, proxies=proxies, timeout=20)
+    result = requests.get("https://www.eaton.com/us/en-us/company/news-insights/news-releases.html", headers=headers, timeout=20)
     # print(result)
     response = Selector(result)
     # print(response)
@@ -221,7 +221,7 @@ try:
         else:
             # news, image = parse_newspaper_data(news_weblink)
             # print("Comes here at first point")
-            result1 = requests.get(news_weblink , headers=headers, proxies=proxies,)
+            result1 = requests.get(news_weblink , headers=headers)
             result1.encoding = 'utf-8'
             response1 = Selector(result1)
             # print("reach to point 2")
@@ -412,4 +412,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'Chrome'
 
-error_logs.insert_one(log)
+# error_logs.insert_one(log)
