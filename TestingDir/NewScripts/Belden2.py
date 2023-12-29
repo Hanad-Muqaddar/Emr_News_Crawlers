@@ -63,8 +63,8 @@ Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
-# defining variables
 
+# defining variables
 running_Sequence = []
 
 started_on = datetime.now()
@@ -154,28 +154,22 @@ try:
     opts.headless = True
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    # service = Service("C:\Program Files (x86)\chromedriver.exe")
-    # chrome_options = webdriver.ChromeOptions()
-    # # chrome_options.add_argument('--proxy-server=http://%s' % PROXY)
-
-    # driver = webdriver.Chrome(service=service, options=opts)
+    
 
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
-    driver.get("https://investor.belden.com/overview/default.aspx")
+    Web_Page = "https://investor.belden.com/overview/default.aspx"
+    driver.get(Web_Page)
     time.sleep(10)
     Main_url = "https://investor.belden.com"
 
     news_links = []
-    links = driver.find_elements(By.XPATH, '//span[@class="ContentPaneDiv3"]//div[@class="module_headline"]/a')
+    links = driver.find_elements(By.XPATH, '//div[@class="module_headline"]/a[@class="module_headline-link"]')
     for link in links:
         news_link = link.get_attribute('href')
         news_links.append(news_link)
 
     print(news_links)
     print(len(news_links))
-
-    Web_Page = "https://investor.belden.com/overview/default.aspx"
-    Emr_Crawlers_Logs(c_name+"_Second",Web_Page,news_links)
 
     db_list = []
     mydoc = collection.find()
@@ -193,7 +187,7 @@ try:
             driver.get(i)
 
             try:
-                title = driver.find_element(By.XPATH, "//h3[@class='module-details_title']/span").text
+                title = driver.find_element(By.XPATH, '//h3[contains(@class,"evergreen-news-title")]/span').text
                 print(title)
             except:
                 title = ""
@@ -210,18 +204,17 @@ try:
             except:
                 analysis = ""
             try:
-                N_date = driver.find_element(By.XPATH, "//div[@class='module_date-time']/span").text
+                N_date = driver.find_element(By.XPATH, '//div[contains(@class,"evergreen-news-date-time")]/span[@class="evergreen-news-date-text"]').text
                 print(N_date)
                 news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
                 print(news_date)
             except:
                 news_date = ""
 
-            page_source = "https://investor.belden.com/overview/default.aspx"
             news_weblink = i
             print(news_weblink)
             try:
-                announcement = driver.find_element(By.XPATH, '//div[@class="module_body"]').text
+                announcement = driver.find_element(By.XPATH, '//div[@class="evergreen-news-body"]').text
                 print(announcement)
             except:
                 announcement = ""
@@ -238,7 +231,7 @@ try:
             company_news['title']=title
             company_news['Language']= language
             company_news['announcementType']= announcement_type
-            company_news['Source'] = page_source
+            company_news['Source'] = Web_Page
             company_news['News_Weblink'] = news_weblink
             company_news['photo']= image
             company_news['videos']= ""
@@ -251,7 +244,7 @@ try:
             except Exception as e:
                 running_Sequence.append(e)
 
-    
+    Emr_Crawlers_Logs(c_name+"_Second",Web_Page,news_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

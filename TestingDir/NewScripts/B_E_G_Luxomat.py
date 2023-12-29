@@ -42,9 +42,9 @@ import dateparser
 import datetime
 
 from bson.objectid import ObjectId
-
+from newspaper import fulltext
 from urllib.error import HTTPError
-
+from scrapy import Selector
 from urllib.request import Request, urlopen
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
@@ -60,25 +60,7 @@ spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
 
-# ************************************************************************
-# defining variables
-# opts = Options()
-# opts.add_argument("--window-size=190,100")
-# opts.add_argument("--disable-automation")
-# opts.add_argument("--no-sandbox")
-# opts.add_argument('--profile-directory=Default')
-# opts.add_argument("start-maximized")
-# opts.add_argument("disable-infobars")
-# opts.add_argument("--lang=en")
-# opts.add_argument("--enable-javascript")
-# opts.add_argument("--enable-cookies")
-# lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-# prefs = {
-#   "translate_whitelists": lang_dict,
-#   "translate":{"enabled":"true"}
-# }
-# opts.add_experimental_option("prefs", prefs)
-# opts.headless = True
+
 
 running_Sequence = []
 
@@ -158,85 +140,70 @@ else:
 # *****************************************************************************
 
 try:
-    links= ["https://www.beg-luxomat.com/en-in/service/news/", "https://www.beg-luxomat.com/en/the-company/press/"]
-    purified_links = []
-    for i in links:
-        result = requests.get(i)
-        soup = BeautifulSoup(result.content, 'lxml')
-        data = soup.find_all("div", class_='newslist-item')
-        for j in data:
-            link = j.find("a").get("href") 
-            if "https:" in link:
-                continue
-            else:
-                link = "https://www.beg-luxomat.com/" + link
-            if ".pdf" in link:
-                continue
-            else:
-                purified_links.append(link)
+    Base_url = "https://www.beg-luxomat.com/"
+    web_Page = "https://www.beg-luxomat.com/en-in/media-center/news/"
 
+    result = requests.get(web_Page)
+    response = Selector(result)
+    n_links = response.xpath('//div[@class="mod_newslist block"]//div[contains(@class,"layout_default list-inside")]//p/a/@href').getall()
+    f_links = ["https://www.beg-luxomat.com/"+l for l in n_links]
+    print(f_links)
+ 
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-    web_Page = "https://www.beg-luxomat.com/en-in/service/news/ + https://www.beg-luxomat.com/en/the-company/press/"
-    Emr_Crawlers_Logs(c_name,web_Page,purified_links)
     
-    for k in purified_links:
-        
-        news_weblink = k
-        
+    for k in f_links:
+        news_weblink = k        
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
+
         else:
             response = requests.get(news_weblink)
             soup = BeautifulSoup(response.content, 'lxml')
             try:
-                news_date = soup.find("meta", attrs = {"name":"date"}).get("content")
+                news_date = datetime.datetime.now().strftime("%d/%m/%Y")
                 news_date = dateparser.parse(news_date)
+                print(news_date)
             except:
                 news_date = ""
+
             try:
-                title = soup.find("meta", attrs={"property":"og:title"}).get("content")
+                title = soup.find("div", attrs={"class":"c_headline"}).find("h1").text
+                print(title)
             except:
                 try:
-                    title = soup.find("h1", attrs={"itemprop":"headline"}).text
+                    title = soup.find("title").text
                 except:
-                    try:
-                        title = soup.find("h2").text
-                    except:
-                        try:
-                            title = news_weblink.replace("https://www.beg-luxomat.com/en-in/","").split("/")[-2].replace("-", " ").capitalize()
-                        except:
-                            title = ""
+                    title = ""
             try:
-                sub_category = soup.find("meta", attrs={"property":"og:type"}).get("content")
+                sub_category = soup.find("meta", attrs={"name":"type"}).get("content")
             except:
                 sub_category = ""
             try:
-                analysis = soup.find("meta", attrs={"property":"og:description"}).get("content")
+                analysis = soup.find("meta", attrs={"name":"description"}).get("content")
             except:
                 analysis = ""
+            
+            image = ""
+
             try:
-                image = soup.find("meta", attrs={"property":"og:image"}).get("content")
-            except:
-                image = ""
-            try:
-                announcement = soup.find("div", id="main").text.strip()
-            except:
+                announcement = fulltext(response.text)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
+            except :
                 announcement = ""
+
             if "press" in news_weblink:
                 announcement_type = "Press Release"
             else:
                 announcement_type = "News"
-            language = "en-US"
-            if "press" in news_weblink:
-                page_source = links[1]
-            else:
-                page_source = links[0]
+
+            language = "en-US"            
             date = datetime.datetime.now()
 
             company_news = {}
@@ -248,7 +215,7 @@ try:
             company_news['title']=title
             company_news['Language']= language
             company_news['announcementType']= announcement_type
-            company_news['Source'] = page_source
+            company_news['Source'] = web_Page
             company_news['News_Weblink'] = news_weblink
             company_news['photo']= image
             company_news['videos']= ''
@@ -260,7 +227,9 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    
+
+    Emr_Crawlers_Logs(c_name,web_Page,f_links)
+
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

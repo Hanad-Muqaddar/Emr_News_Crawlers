@@ -144,23 +144,26 @@ try:
     response1 = Selector(text=result.content)
 
     news_links = []
-
+    
     News_list = response1.xpath('//section[contains(@class,"nv-layout--three-col")]//div[@class="nvent-block"]//a[@class="card__link"]')
     for news in News_list:
         link = news.xpath('./@href').get()
-        news_links.append(link)
-         
-    print(news_links)
+        if "/en-us/" in link:
+            f_link = Main_url + link
+        else:
+            f_link = link
+        news_links.append(f_link)
+        
+    # print(news_links)
     print(len(news_links))
-    
+        
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
     page_source = 'https://www.nvent.com/en-us/about-nvent/newsroom'
-    Emr_Crawlers_Logs(c_name+"_Second",page_source,news_links)
-
+    
     for i in news_links:
         
         if i in db_list:
@@ -243,7 +246,8 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    
+
+    Emr_Crawlers_Logs(c_name+"_Second",page_source,news_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

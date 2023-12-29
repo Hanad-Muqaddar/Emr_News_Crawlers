@@ -44,6 +44,11 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
+from scrapy import Selector
+
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -136,6 +141,19 @@ else:
 
 # *****************************************************************************
 try:
+      # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = True
+
     cookie = "_ga=GA1.2.48214244.1618300802; _fbp=fb.1.1618300804846.1549346976; cookielawinfo-checkbox-necessary=yes; cookielawinfo-checkbox-non-necessary=yes; visitor_id912931=37938159; visitor_id912931-hash=39db0b029cefdcf52ac71dd400c4318403a9dfc692e57a92dfee15afe35d1dd24939d672209096cfaa42d506f5b670a6da133ed7; CookieLawInfoConsent=eyJuZWNlc3NhcnkiOnRydWUsIm5vbi1uZWNlc3NhcnkiOnRydWV9; viewed_cookie_policy=yes; _gid=GA1.2.57467576.1623049451; _gat_gtag_UA_39634549_1=1"
     headers = {"accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
     "accept-encoding": "gzip, deflate, br",
@@ -151,20 +169,29 @@ try:
     "upgrade-insecure-requests": "1",
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36}"
             }
-    result = requests.get("https://www.atkore.com/post-sitemap.xml",headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
+
+    Web_Page = "https://investors.atkore.com/news/default.aspx"      
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+
+    driver.get(Web_Page)
+    time.sleep(4)
+
+    N_links = []
+    links = driver.find_elements(By.XPATH, '//div[@id="newsList"]//div[@class="module_item-container"]//a[@class="module_headline-link"]')
+    for link in links:
+        news_link = link.get_attribute('href')
+        N_links.append(news_link)
+
+    print(N_links)
+
+
     # Creating a list of links already avilable in database
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
-    N_links = []
-    links = soup.find_all("loc")
-    for news_l in links:
-        N_links.append(news_l.text)
-
-    Web_Page = "https://www.atkore.com/news/"        
-    Emr_Crawlers_Logs(c_name,Web_Page,N_links)
+      
+    # Emr_Crawlers_Logs(c_name,Web_Page,N_links)
 
     for i in N_links:
         

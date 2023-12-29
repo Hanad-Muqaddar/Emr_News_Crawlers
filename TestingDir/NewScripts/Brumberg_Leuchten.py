@@ -155,10 +155,7 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
-
-    page_source = "https://www.brumberg.com/en/news-events/news/news-and-press/"
-    Emr_Crawlers_Logs(c_name,page_source,news_links)
-    
+   
     for i in news_links:  
         
         if i in links_list:
@@ -212,7 +209,7 @@ try:
             company_news['title']=title
             company_news['Language']= language
             company_news['announcementType']= announcement_type
-            company_news['Source'] = page_source
+            company_news['Source'] = Base_url
             company_news['News_Weblink'] = news_weblink
             company_news['photo']= image
             company_news['videos']= ''
@@ -224,11 +221,11 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    
+
+    Emr_Crawlers_Logs(c_name,Base_url,news_links)
+
     if Already_exist >= 1:
-
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
-
     else:
 
         tmp_txt = ''

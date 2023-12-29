@@ -42,10 +42,11 @@ from datetime import datetime
 from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
-
+from scrapy import Selector
 from urllib.request import Request, urlopen
 from newspaper import fulltext
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+
 # ================================================================================
 # Comment these lines when you are running locally
 import importlib.util
@@ -137,33 +138,20 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://www.bravida.se" 
-    Base_url = "https://www.bravida.se/en/investors/financial-information/press-releases/" 
-    result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
+    Web_url = "https://www.bravida.se/en/press/press-releases/" 
+
+    result = requests.get(Web_url,headers=headers)
+    response = Selector(result)
+    n_links = response.xpath('//ul[contains(@class,"js-resultlist")]/li//a[contains(@class,"stretched-link")]/@href').getall()
     
-    years_news_links = []
-    All_News_links = []
-    try:
-        links = soup.find('ul',{ "class" : "js-resultlist row justify-content-center mt-8"}).find_all('li')
-        for link in links:
-            news_link = link.find('a').get('href')
-            if news_link not in years_news_links:
-                All_News_links.append(news_link)
-    except Exception as e:
-        print(e)
-
-    print(All_News_links)
-    print(len(All_News_links))
-
+    print(n_links)
+     
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
-        links_list.append(x['News_Weblink'])
-
-    page_source = "https://www.bravida.se/en/investors/financial-information/press-releases/"
-    Emr_Crawlers_Logs(c_name,page_source,All_News_links)
+        links_list.append(x['News_Weblink'])   
     
-    for i in All_News_links:
+    for i in n_links:
         
         try:
             if i in links_list:
@@ -203,14 +191,13 @@ try:
                 except:
                     analysis = ""
                 try:
-                    date = data.find('tim', {"class":"mr-7 text-capitalize"}).get_text(strip=True)
+                    date = data.find('time', {"class":"mr-7 text-capitalize"}).get_text(strip=True)
                     print(date)
                     news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
                     print(news_date)
                 except:
                     news_date = ""
 
-                page_source = "https://www.bravida.se/en/investors/financial-information/press-releases/" 
                 news_weblink = i
                 
                 try:            
@@ -233,7 +220,7 @@ try:
                 company_news['title']=title
                 company_news['Language']= language
                 company_news['announcementType']= announcement_type
-                company_news['Source'] = page_source
+                company_news['Source'] = Web_url
                 company_news['News_Weblink'] = news_weblink
                 company_news['photo']= image
                 company_news['videos']= ''
@@ -247,13 +234,12 @@ try:
                     running_Sequence.append(e)
         except Exception as e:
             print(e)
-    
+
+    Emr_Crawlers_Logs(c_name,Web_url,n_links)
+
     if Already_exist >= 1:
-
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
-
     else:
-
         tmp_txt = ''
 
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)

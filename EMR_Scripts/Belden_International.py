@@ -46,6 +46,12 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
+
+from newspaper import fulltext
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from googletrans import Translator
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -141,32 +147,39 @@ else:
 # *****************************************************************************
 
 try:
-    try:
-        result = requests.get("https://www.belden.com/sitemap.xml")
-        soup = BeautifulSoup(result.content, 'lxml')
-    except Exception as e:
-        running_Sequence.append(e)
-    data = soup.find_all("loc")
-    links = []
-    for j in data:
-        if "News" in j.text:
-            if "2023" in j.text:
-                links.append(j.text)
-            else:
-                continue
-        else:
-            continue
-    links = links[1:]
-    
+      # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = True
+
+
+    Web_Page = "https://www.belden.com/news#sort=%40contentpublisheddate%20descending"    
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+    driver.get(Web_Page)
+    time.sleep(4)
+
+    N_links = []
+    links = driver.find_elements(By.XPATH, '//div[@class="CoveoResultList"]//div[@class="coveo-list-layout CoveoResult"]//a')
+    for link in links:
+        news_link = link.get_attribute('href')
+        N_links.append(news_link)
+
+    print(N_links)
+
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    Web_Page = "https://www.belden.com/news#sort=%40contentpublisheddate%20descending"       
-    Emr_Crawlers_Logs(c_name,Web_Page,links)
-
-    for j in links:
+    for j in N_links:
         
         if j in links_list:
             total_crwalled_links += 1
@@ -234,6 +247,7 @@ try:
             except Exception as e:
                 running_Sequence.append(e)
 
+    Emr_Crawlers_Logs(c_name,Web_Page,N_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

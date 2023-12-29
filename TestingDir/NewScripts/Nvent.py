@@ -47,38 +47,25 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+
 from selenium.webdriver.support.ui import Select
-# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
-# ================================================================================
-# Comment these lines when you are running locally
-import importlib.util
-# Specify the absolute path to Emr_Crawlers_Optimization.py
-module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
-# Load the module using the absolute path
-spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
-Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(Emr_Crawlers_Optimization)
-Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
-# ================================================================================
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+# # ================================================================================
+# # Comment these lines when you are running locally
+# import importlib.util
+# # Specify the absolute path to Emr_Crawlers_Optimization.py
+# module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
+# # Load the module using the absolute path
+# spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
+# Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
+# spec.loader.exec_module(Emr_Crawlers_Optimization)
+# Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
+# # ================================================================================
 # ************************************************************************
-# defining variables
-opts = Options()
-opts.add_argument("--window-size=190,100")
-opts.add_argument("--disable-automation")
-opts.add_argument("--no-sandbox")
-opts.add_argument('--profile-directory=Default')
-opts.add_argument("start-maximized")
-opts.add_argument("disable-infobars")
-opts.add_argument("--lang=en")
-opts.add_argument("--enable-javascript")
-opts.add_argument("--enable-cookies")
-lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-prefs = {
-  "translate_whitelists": lang_dict,
-  "translate":{"enabled":"true"}
-}
-opts.add_experimental_option("prefs", prefs)
-opts.headless = True
+ 
 
 running_Sequence = []
 
@@ -95,12 +82,12 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
 
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
     running_Sequence.append('Connected to DB Server')
 
 except:
@@ -158,20 +145,49 @@ else:
 # *****************************************************************************
 
 try:
+     # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = False
+
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    result = requests.get("https://investors.nvent.com/rss/PressRelease.aspx?LanguageId=1&CategoryWorkflowId=1cb807d2-208f-4bc3-9133-6a9ad45ac3b0&tags=",headers=headers).content
-    soup = BeautifulSoup(result, 'lxml')
-    links = [ "https:" +item.text.split('https:')[1].split('.aspx')[0] +".aspx" for item in soup.find_all('item') ]
-    print(links)
+
+    page_source = "https://investors.nvent.com/press-releases/default.aspx"
+
+    # result = requests.get("https://investors.nvent.com/rss/PressRelease.aspx?LanguageId=1&CategoryWorkflowId=1cb807d2-208f-4bc3-9133-6a9ad45ac3b0&tags=",headers=headers).content
+    # soup = BeautifulSoup(result, 'lxml')
+    # links = [ "https:" +item.text.split('https:')[1].split('.aspx')[0] +".aspx" for item in soup.find_all('item') ]
+    # print(links)
+
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+
+    driver.get(page_source)
+    time.sleep(6)
+
+    N_links = []
+    links = driver.find_elements(By.XPATH, '//div[contains(@class,"evergreen-news-content-list")]/div[contains(@class,"evergreen-item evergreen-news")]//a[contains(@class,"evergreen-item-title")]')
+    for link in links:
+        news_link = link.get_attribute('href')
+        N_links.append(news_link)
+
+    print(N_links)
+
 
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-
-    page_source = "https://investors.nvent.com/press-releases/default.aspx"
-    Emr_Crawlers_Logs(c_name,page_source,links)
-    for j in links:
+    
+    
+    for j in N_links:
         news_weblink = j
         
         if news_weblink in db_list:
@@ -229,6 +245,8 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)  
+
+    Emr_Crawlers_Logs(c_name,page_source,N_links)
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
