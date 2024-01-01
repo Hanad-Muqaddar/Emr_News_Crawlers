@@ -47,7 +47,14 @@ from urllib.request import Request, urlopen
 from newspaper import fulltext
 from scrapy.selector import Selector
 from googletrans import Translator
+
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+
+from selenium.webdriver.support.ui import Select
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+
 # ================================================================================
 # Comment these lines when you are running locally
 import importlib.util
@@ -137,108 +144,97 @@ else:
 
 # *****************************************************************************
 try:
+     # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = True
+
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    Main_url = "https://ao.dk"
-    Base_url = "https://ao.dk/om-ao/nyheder-og-presse/pressemeddelelser"
-    result = requests.get(Base_url,headers=headers)
 
-    translator = Translator()
+    page_source = "https://ao.dk/om-ao/investor-relations/selskabsmeddelelser"
 
-    def translate(Trans):
-        Trans_text = translator.translate(Trans,dest='en')
-        return Trans_text.text
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
 
-    response1 = Selector(text=result.content)
+    driver.get(page_source)
+    time.sleep(6)
 
-    date_list = []
-    news_links = []
+    w_cookies = driver.find_element(By.XPATH, '//div[@id="coiPage-1"]//div[@class="coi-button-group"][1]//button[@class="coi-banner__accept"]').click()
+    time.sleep(6)
+    
+    # Your XPath to locate the element
+    xpath = '(//div[@class="standard-page-menu"]//div[contains(@class,"qa-item")])[1]/a'
+    # Find the element
+    element = driver.find_element(By.XPATH, xpath)
+    # Click on the element
+    element.click()
+    time.sleep(6)
 
-    press_list = response1.xpath('//div[@class="content-panel"]')
+    N_links = []
+    N_title = []
+    links = driver.find_elements(By.XPATH, '(//div[@class="standard-page-menu"]//div[contains(@class,"qa-item")])[1]/div[contains(@class,"panel-body loadingElementContainer")]/p/a')
+    for link in links:
+        news_link = link.get_attribute('href')
+        N_links.append(news_link)
+        N_title.append(link.text)
 
-    for press in press_list:
 
-        try:
-            link = Main_url + press.xpath('.//a/@href').get()
-            news_links.append(link)
-        except:
-            link = ""
-            news_links.append(link)
-        try: 
-            N_date = press.xpath('.//div[@class="content-body"]/div[2]/text()').get().strip()
-            date_list.append(N_date)
-        except:
-            N_date = ""
-            date_list.append(N_date)
-            
-    print(news_links)
-    print(len(date_list))
+    print(N_links)
+    print(N_title)
+
 
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    page_source = 'https://ao.dk/om-ao/nyheder-og-presse/pressemeddelelser'
-    Emr_Crawlers_Logs(c_name+"_Second",page_source,news_links)
+    Emr_Crawlers_Logs(c_name+"_Second",page_source,N_links)
 
-    for i, d in zip(news_links,date_list):
+    for i, t in zip(N_links,N_title):
         
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("already crawled")
             continue
-
         else:    
-            try:    
-                resp = requests.get(i, headers=headers)
-                response2 = Selector(text=resp.content)
-            except:
-                print("error")
-
+            
             try:
-                title = response2.xpath('//meta[@property="og:title"]/@content').get()
-                title = translate(title)
-                # print(title)
+                title = t
+                print(title)
             except:
-                title = response2.xpath('//meta[@property="og:title"]/@content').get()
+                title = ""
             
             announcement_type = "News"
             language = "en-us"
 
             image = ""
 
+            sub_category = ""
+                      
+            analysis = ""
+
             try:
-                sub_category = response2.xpath('//meta[@property="og:type"]/@content').get()
-                sub_category = translate(sub_category)
-            except:
-                sub_category = ""
-            
-            try:
-                analysis = response2.xpath('//meta[@property="og:description"]/@content').get()
-                analysis = translate(analysis)
-            except:
-                analysis = ""
-            try:
-                
-                news_date = dateparser.parse(d,  settings={'DATE_ORDER': 'DMY'})
-                print(news_date)
-            except:
+                # print(t)
+                N_date = t.split('Nr.')[0]
+                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'YMD'})
+                print("the date is ",news_date)
+            except Exception as e:
+                print(e)
                 news_date = ""
 
             
             news_weblink = i
             print(news_weblink)
-            
-            try:
-                announcement = fulltext(resp.content)
-                announcement = announcement.replace('\n','<br>')
-                announcement = translate(announcement)
-                print(announcement)
-            except:
-                announcement = fulltext(resp.content)
-                announcement = announcement.replace('\n','<br>')
-                announcement = ""
+        
+            announcement = ""
             
             date = datetime.now()
             # Creating a list of links already avilable in database
