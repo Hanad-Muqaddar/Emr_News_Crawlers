@@ -164,9 +164,7 @@ try:
     driver.get("https://www.lapp.com/en/de/news/press/e/000143")
     time.sleep(10)
     
-    # //app-lapp-list/div[contains(@class,"lappComponent lappList")]/div[@class="listItem"]//div[contains(@class,"tile_action")]//a
-
-
+     
     news_links = []
     N_dates = []
     links = driver.find_elements(By.XPATH, '//app-lapp-list/div[contains(@class,"lappComponent lappList")]/div[@class="listItem"]')
@@ -188,8 +186,9 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Web_Page = "https://www.lapp.com/en/de/news/press/e/000143"
-    Emr_Crawlers_Logs(c_name+"_Second",Web_Page,news_links)
+    page_source = "https://www.lapp.com/en/de/news/press/e/000143"
+
+    Emr_Crawlers_Logs(c_name,Web_Page,news_links)
 
     for i,d in zip(news_links,N_dates):
         if i in db_list:
@@ -231,7 +230,6 @@ try:
             except:
                 news_date = ""
 
-            page_source = "https://www.lapp.com/en/de/news/press/e/000143"
             news_weblink = i
             print(news_weblink)
             

@@ -164,6 +164,7 @@ try:
     Emr_Crawlers_Logs(c_name,page_source,news_links)
     
     for i in news_links: 
+        print(i)
         if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -216,8 +217,7 @@ try:
             news_weblink = i
             
             try:
-                html = requests.get(i).text
-                announcement = fulltext(html)
+                announcement = fulltext(response.content)
                 announcement = announcement.replace('\n','<br>')
                 print(announcement)
                 

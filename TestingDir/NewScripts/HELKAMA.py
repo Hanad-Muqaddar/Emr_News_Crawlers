@@ -42,7 +42,7 @@ from datetime import datetime
 from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
-
+from scrapy.selector import Selector
 from urllib.request import Request, urlopen
 from newspaper import fulltext
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
@@ -138,18 +138,11 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://helkamabica.com"
-    Base_url = "https://helkamabica.com/about-helkama/news-references/"
-    result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
+    page_source = "https://helkamabica.com/news/"
+    result = requests.get(page_source,headers=headers)
+    response = Selector(text=result.content)
     
-    news_links = []
-
-    links = soup.find('div',{ "class" : "row newsListing"}).find_all('div',{ "class" : "newsImageBlock"})
-    for link in links:
-        news_link = link.find('a',{ "class" : "fullCoverLink"}).get('href')
-        if news_link not in news_links:
-            news_links.append(news_link)
-
+    news_links = response.xpath('//div[@class="article-items"]/div[contains(@class,"card-post")]//a/@href').getall()
     print(news_links)
     print(len(news_links))
 
@@ -159,7 +152,6 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    page_source = "https://helkamabica.com/about-helkama/news-references/"
     Emr_Crawlers_Logs(c_name,page_source,news_links)
     for i in news_links:   
         
@@ -184,7 +176,7 @@ try:
             language = "en-us"
 
             try:
-                image = Main_url + data.find('div', {'class':'col article_featured_image'}).find('img').get('src')
+                image = data.find('meta', attrs = {"property":"og:image"}).get("content") 
                 print(image)
             except:
                 image = ""
@@ -200,12 +192,13 @@ try:
             except:
                 analysis = ""
             try:
-                news_date = dateparser.parse(datetime.now(),  settings={'DATE_ORDER': 'YMD'} )
+                n_date = data.find('div', {'class':'post-meta'}).get_text(strip=True)
+                news_date = dateparser.parse(n_date,  settings={'DATE_ORDER': 'YMD'} )
                 print(news_date)
             except:
-                news_date = ""
+                news_date = dateparser.parse(datetime.now(),  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
 
-            
             news_weblink = i
             
             try:

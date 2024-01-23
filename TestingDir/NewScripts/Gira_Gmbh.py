@@ -42,9 +42,11 @@ from datetime import datetime
 from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
+from scrapy.selector import Selector
 
 from urllib.request import Request, urlopen
 from newspaper import fulltext
+from googletrans import Translator
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -138,21 +140,21 @@ else:
 
 # *****************************************************************************
 try:
+    def translate(Trans):
+        translator = Translator()
+        Trans_text = translator.translate(Trans,dest='en')
+        return Trans_text.text
+
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    Main_url = "https://www.gira.com"
-    Base_url = "https://www.gira.com/en/en/sitemap.xml"
-    result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
+   
+    Main_url = "https://partner.gira.de/service/"
+    page_source = "https://partner.gira.de/service/presse.html"
+    result = requests.get(page_source,headers=headers)
+    response = Selector(text=result.content)
     
-    news_links = []
-
-    links = soup.find_all("loc")
-    for link in links:
-        news_link = link.text
-        if "company/news/" in news_link and news_link not in news_links:
-            news_links.append(news_link)
-
-    print(news_links)
+    news_links = response.xpath('//div[contains(@class,"swiper-slide")]/div[@class="cms-teaser"]//p/a/@href').getall()
+    f_link = [Main_url + l for l in news_links]
+    print(f_link)
 
     # Creating a list of links already avilable in database
     links_list = []
@@ -160,10 +162,9 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    page_source = "https://www.gira.com/en/en/company#"
-    Emr_Crawlers_Logs(c_name,page_source,news_links)
+    Emr_Crawlers_Logs(c_name,page_source,f_link)
     
-    for i in news_links:  
+    for i in f_link:  
         if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -174,10 +175,12 @@ try:
             data = BeautifulSoup(response.content, 'lxml')
 
             try:
-                title = data.find('meta', attrs = {"property":"og:title"}).get("content")
+                title = data.find('div', attrs = {"class":"cms-teaser cms-teaser-headline"}).find('h1').get_text(strip=True)
+                title = translate(title)
                 # print(title)
             except:
                 title = data.find('title').get_text(strip=True)
+                title = translate(title)
                 # print(title)
             
             announcement_type = "News"
@@ -185,21 +188,25 @@ try:
             language = "en-us"
 
             try:
-                image = data.find('meta', attrs = {"property":"og:image"}).get("content")
+                image = data.find('meta', attrs = {"name":"image"}).get("content")
             except:
                 image = ""
             
             try:
-                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+                sub_category = data.find('meta', attrs = {"name":"category"}).get("content")
+                sub_category = translate(sub_category)
             except:
                 sub_category = ""
             
             try:
-                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+                analysis = data.find('meta', attrs = {"name":"description"}).get("content")
+                analysis = translate(analysis)
             except:
                 analysis = ""
             try:
-                news_date = dateparser.parse(datetime.now(),  settings={'DATE_ORDER': 'YMD'} )
+                N_date = data.find('div', attrs = {"class":"cms-teaser cms-teaser-headline"}).find('div').get_text(strip=True)
+                N_date = translate(N_date)
+                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'YMD'} )
                 # print(news_date)
             except:
                 news_date = ""
@@ -207,9 +214,9 @@ try:
             
             news_weblink = i
             
-            try:
-                
-                announcement = data.find('div',{"class":"gi-page gi-company-content-page"}).get_text(strip=True)
+            try:                
+                announcement = data.find('div',{"class":"cmt-teaser-text"}).get_text(strip=True)
+                announcement = translate(announcement)
                 # print(announcement)
                 
             except:

@@ -1,4 +1,5 @@
 # Packages to be imported
+from functools import total_ordering
 import requests
 
 import time
@@ -13,17 +14,38 @@ from pymongo import MongoClient
 
 from bs4 import BeautifulSoup
 
+from selenium import webdriver
+
+# from webdriver_manager.chrome import ChromeDriver
+
+from selenium.webdriver.chrome.options import Options
+
+from selenium.webdriver.support.ui import WebDriverWait
+
+from selenium.webdriver.common.keys import Keys
+
+from selenium.webdriver.support import expected_conditions
+
+from selenium.webdriver.common.by import By
+
+from urllib.parse import urlparse
+
+import re
+
 import traceback
+
+import urllib
 
 import dateparser
 
-import datetime
+from datetime import datetime
 
-from urllib.request import Request, urlopen
+from bson.objectid import ObjectId
 
+from urllib.error import HTTPError
 from scrapy import Selector
 
-from newspaper import fulltext
+from urllib.request import Request, urlopen
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -37,13 +59,15 @@ Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
-
 # ************************************************************************
+# defining variables
+
 running_Sequence = []
 
-started_on = datetime.datetime.now()
+started_on = datetime.now()
 
 c_name = 'RITTAL' # Name of the Collection
+
 
 total_crwalled_links = 0
 
@@ -54,12 +78,12 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
     running_Sequence.append('Connected to DB Server')
 
 except:
@@ -94,9 +118,9 @@ except:
 
 if last_insertion == None:
 
-    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
 
-    Crwl_time = datetime.datetime.now()
+    Crwl_time = datetime.now()
 
 else:
 
@@ -118,73 +142,80 @@ else:
 
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    result = requests.get("https://www.rittal.com/com-en/News",headers=headers)
-    response = Selector(result)
-    links = response.css(".teaser-headline a ::attr(href)").getall()
-    Base_Link = "https://www.rittal.com"
-    final_links = [Base_Link + link for link in links if "https" not in link]
-    print(final_links)
-    dates = response.css(".teaser-title ::text").getall()
 
-    db_list = []
+    page_source = "https://www.rittal.com/com-en/Company/Presse/"
+    result = requests.get(page_source,headers=headers)
+    links_list = []
+
+    response = Selector(result)
+    links = response.xpath('//div[@class="article-content"]/div[@class="article-block --grey"][1]//a[@class="teaser-image"]/@href').getall()
+    F_links = ["https://www.rittal.com" + l for l in links]
+    print(F_links)
+ 
+
+    # Creating a list of links already avilable in database
+    links_list = []
     mydoc = collection.find()
     for x in mydoc:
-        db_list.append(x['News_Weblink'])
+        links_list.append(x['News_Weblink'])
 
-    page_source = "https://www.rittal.com/com-en/News"
-    Emr_Crawlers_Logs(c_name,page_source,final_links)
-
-    for i, date in zip(final_links, dates):
+    Emr_Crawlers_Logs(c_name,page_source,F_links)
+    current_date = datetime.now().date()
+    for j in F_links:
         
-        if i in db_list:
-            Already_exist += 1
+        if j in links_list:
             total_crwalled_links += 1
+            Already_exist += 1
             print("Already Crawled")
             continue
+            
         else:
-            result1 = requests.get(i,headers=headers)
-            response1 = Selector(result1)
+            result = requests.get(j)
+            soup = BeautifulSoup(result.content, 'lxml')
             try:
-                news_date = dateparser.parse(date)
-            except:
-                news_date = ""
-            try:
-                title = response1.css(".detail-intro h1::text").get()
+                title = soup.find("meta", attrs={"property":"og:title"}).get("content")
                 print(title)
             except:
                 title = ""
             try:
-                analysis = response1.xpath("//meta[@name='description']/@content").get()
+                analysis = soup.find("meta", attrs={"name":"description"}).get("content")
             except:
                 analysis = ""
             try:
-                image = response1.css(".image-wrapper img::attr(src)").get()
-                if "https" not in image:
-                    image = Base_Link + image
+                sub_category = soup.find("meta", attrs={"property":"og:type"}).get("content")
+            except:
+                sub_category = ""
+            try:
+                image = soup.find("meta", attrs={"property":"og:image"}).get("content")
             except:
                 image = ""
-            sub_category = ""
             try:
-                announcement = fulltext(result1.text)
-                announcement = announcement.replace('\n','<br>')
+                news_date = soup.find("div", class_="intro-title").find("p").text.strip()
+                news_date = dateparser.parse(news_date,  settings={'DATE_ORDER': 'MDY'} )
+            except:
+                news_date = dateparser.parse(current_date,  settings={'DATE_ORDER': 'MDY'} )
+            try:
+                announcement = soup.find("div", id="content").text
             except:
                 announcement = ""
-            announcement_type = "News"
-            language = "en-US"
-            page_source = "https://www.rittal.com/com-en/News"
-            crawled_date = datetime.datetime.now()
 
+            announcement_type = "Company News"
+            language = "en-US"
+            
+            date = datetime.now()
+            news_weblink = j
+            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
             company_news['comment']=''
             company_news['Date']= news_date
-            company_news['Crawled_on']=crawled_date
+            company_news['Crawled_on']=date
             company_news['title']=title
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = i
+            company_news['News_Weblink'] = news_weblink
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement
@@ -192,31 +223,24 @@ try:
             company_news['analysis'] = analysis
             try:
                 collection.insert_one(company_news)
-                total_crwalled_links += 1
+                print("Successfully Inserted Record.")
             except Exception as e:
                 running_Sequence.append(e)
-    
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
+
     else:
 
         tmp_txt = ''
 
-    running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
+        running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
-    ended_on = datetime.datetime.now()
-except Exception as e:
-    Error_Time =  datetime.datetime.now()
+        ended_on = datetime.now()
+except:
+    Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
-
-    running_Sequence.append(e)
-
-
-# **************************************************************************
-
-# **************************************************************************
 
 # **************************************************************************
 rep = ''
@@ -253,6 +277,6 @@ log['Links_Skipped'] = Already_exist
 
 log['Last_news_crawl_time'] = last_time
 
-log['Browser'] = 'Chrome'
+log['Browser'] = 'None'
 
-# error_logs.insert_one(log)
+error_logs.insert_one(log)

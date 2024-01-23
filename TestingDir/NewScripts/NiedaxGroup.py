@@ -57,26 +57,8 @@ spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', modul
 Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
-# ================================================================================
-# ************************************************************************
-# defining variables
-# opts = Options()
-# opts.add_argument("--window-size=190,100")
-# opts.add_argument("--disable-automation")
-# opts.add_argument("--no-sandbox")
-# opts.add_argument('--profile-directory=Default')
-# opts.add_argument("start-maximized")
-# opts.add_argument("disable-infobars")
-# opts.add_argument("--lang=en")
-# opts.add_argument("--enable-javascript")
-# opts.add_argument("--enable-cookies")
-# lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-# prefs = {
-#   "translate_whitelists": lang_dict,
-#   "translate":{"enabled":"true"}
-# }
-# opts.add_experimental_option("prefs", prefs)
-# opts.headless = True
+# # ================================================================================
+ 
 
 running_Sequence = []
 
@@ -158,8 +140,8 @@ else:
 
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    link = "https://www.niedax-group.com/en/corporate-group/press-news/news/"
-    result = requests.get(link,headers=headers)
+    page_source = "https://www.niedax-group.com/en/news-events/"
+    result = requests.get(page_source,headers=headers)
     soup = BeautifulSoup(result.content, 'lxml')
     data = soup.find_all("div", class_='link-holder')
 
@@ -169,8 +151,7 @@ try:
         db_list.append(x['News_Weblink'])
     Optimization_links = []
 
-    page_source = "https://www.niedax-group.com/en/corporate-group/press-news/news/"
-
+    
     for i in data:
         news_weblink = "https://www.niedax-group.com" + i.find("a").get("href")
         Optimization_links.append(news_weblink)

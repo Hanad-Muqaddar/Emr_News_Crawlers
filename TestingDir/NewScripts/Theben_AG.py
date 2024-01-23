@@ -45,19 +45,23 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 from newspaper import fulltext
-# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
-# ================================================================================
-# Comment these lines when you are running locally
-import importlib.util
-# Specify the absolute path to Emr_Crawlers_Optimization.py
-module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
-# Load the module using the absolute path
-spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
-Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(Emr_Crawlers_Optimization)
-Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
-# ================================================================================
+
+# # ================================================================================
+# # Comment these lines when you are running locally
+# import importlib.util
+# # Specify the absolute path to Emr_Crawlers_Optimization.py
+# module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
+# # Load the module using the absolute path
+# spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
+# Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
+# spec.loader.exec_module(Emr_Crawlers_Optimization)
+# Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
+# # ================================================================================
 
 # ************************************************************************
 # defining variables
@@ -136,30 +140,44 @@ else:
 
 # *****************************************************************************
 try:
+     # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = True
+
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+
     Main_url = "https://www.theben.de"
-    Base_url = "https://www.theben.de/home-en-gb/"
-    result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
+    page_source = "https://www.theben.de/the-company-en-gb/topical-themes/press/"
     
+    driver.get(page_source)
+    time.sleep(10)
+
     news_links = []
-
-    links = soup.find_all('div',{ "class" : "news-preview__column__inner"})
+    links = driver.find_elements(By.XPATH, '//div[@id="filtered-engagement"]/section[@class="section section--white"]//a[text()="Learn more"]')
     for link in links:
-        news_link = Main_url + link.find('a').get('href')
-        if news_link not in news_links:
-            news_links.append(news_link)
+        news_link = link.get_attribute('href')
+        news_links.append(news_link)
+        
 
-    print(news_links)
     print(len(news_links))
-
-     # Creating a list of links already avilable in database
+    print(news_links)
+        
+      
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    page_source = "https://www.theben.de/home-en-gb/"
     Emr_Crawlers_Logs(c_name,page_source,news_links)
     for i in news_links:  
         
@@ -207,9 +225,7 @@ try:
                 analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
             except:
                 analysis = ""
-            
-
-            
+                        
             news_weblink = i
             
             try:
@@ -256,7 +272,8 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.now()
-except:
+except Exception as e:
+    print(e)
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()

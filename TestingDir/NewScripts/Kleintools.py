@@ -44,6 +44,8 @@ import datetime
 from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
+from scrapy.selector import Selector
+from newspaper import fulltext
 
 from urllib.request import Request, urlopen
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
@@ -60,25 +62,7 @@ spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
 
-# ************************************************************************
-# defining variables
-# opts = Options()
-# opts.add_argument("--window-size=190,100")
-# opts.add_argument("--disable-automation")
-# opts.add_argument("--no-sandbox")
-# opts.add_argument('--profile-directory=Default')
-# opts.add_argument("start-maximized")
-# opts.add_argument("disable-infobars")
-# opts.add_argument("--lang=en")
-# opts.add_argument("--enable-javascript")
-# opts.add_argument("--enable-cookies")
-# lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-# prefs = {
-#   "translate_whitelists": lang_dict,
-#   "translate":{"enabled":"true"}
-# }
-# opts.add_experimental_option("prefs", prefs)
-# opts.headless = True
+ 
 
 running_Sequence = []
 
@@ -93,7 +77,6 @@ Already_exist = 0
 # *************************************************************************
 
 # trying to connect with mongodb
-
 try:
     # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
     # data = json.load(file)
@@ -158,55 +141,81 @@ else:
 # *****************************************************************************
 
 try:
-    response = requests.get("https://www.kleintools.com/press-releases")
-    soup = BeautifulSoup(response.content, 'lxml')
-    data = soup.find_all("td", class_='views-field views-field-title')
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    Main_url = "https://www.kleintools.com"
+    page_source = "https://www.kleintools.com/press-releases"
+
+    result = requests.get(page_source,headers=headers)
+    response = Selector(text=result.content)
+
+    news_links = []
+    news_dates = []
+
+    News = response.xpath('//div[contains(@class,"press-release-list")]//table//tbody/tr') 
+    for n in News:
+        link = n.xpath('./td[@headers="view-title-table-column"]/a/@href').get()
+        news_links.append(link)
+        try:
+            n_Date = n.xpath('./td[@headers="view-created-table-column"]/text()').get()
+            news_dates.append(n_Date.strip())
+        except:
+            n_Date = ""
+            news_dates.append(n_Date)
+
+    print(news_links)
+    print(news_dates)
+    
+
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
     Optimization_links = []
 
-    page_source = "https://www.kleintools.com/press-releases"
 
-    for i in data:
-        news_weblink = i.find("a").get("href")
-        Optimization_links.append(news_weblink)
-        if news_weblink in db_list:
+    for i,d in zip(news_links,news_dates):
+        if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already crawled")
             continue
         else:
-            result = requests.get(news_weblink)
-            soup = BeautifulSoup(result.content, 'lxml')
+            result1 = requests.get(i,headers=headers)
+            response1 = Selector(text=result1.content)
             try:
-                title = soup.find("title").text
+                title = response1.xpath('//meta[@property="og:title"]/@content').get()
                 print(title)
             except:
                 title = ""
-            print(title)
             try:
-                analysis = soup.find("meta", attrs={"name":"description"}).get("content")
+                analysis = response1.xpath('//meta[@property="og:description"]/@content').get()
             except:
                 analysis = ""
             try:
-                news_date = soup.find("meta", attrs={"name":"dcterms.date"}).get("content")
-                news_date = dateparser.parse(news_date)
+                news_date = dateparser.parse(d,  settings={'DATE_ORDER': 'DMY'} )
+                print(news_date)
             except:
                 news_date = ""
             try:
-                sub_category = soup.find("meta", attrs={"name":"dcterms.type"}).get("content")
+                sub_category = response1.xpath('//meta[@property="og:type"]/@content').get()
             except:
                 sub_category = ""
+            
             try:
-                announcement = soup.find("div", id="main-area").text.strip()
+                html = requests.get(i).text
+                announcement = fulltext(html)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
+                
             except:
                 announcement = ""
+
             try:
-                image = "https://www.kleintools.com" + soup.find("div", id="main-area").find("img").get("src")
+                image = Main_url + response1.xpath('//article//img[@class="image-style-large"]/@src').get()
+                print(image)
             except:
                 image = ""
+
             announcement_type = "Press Releases" 
             
             crawled_date = datetime.datetime.now()
@@ -215,12 +224,12 @@ try:
             company_news['companyId'] = ''
             company_news['location']=''
             company_news['comment']=''
-            company_news['Date']= news_date
+            company_news['Date']= d
             company_news['Crawled_on']=crawled_date
             company_news['title']= title
             company_news['Language']= language
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
+            company_news['News_Weblink'] = i
             company_news['announcementType']= announcement_type
             company_news['photo']= image
             company_news['videos']= ''
@@ -231,7 +240,8 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)    
-    Emr_Crawlers_Logs(c_name,page_source,Optimization_links)
+
+    Emr_Crawlers_Logs(c_name,page_source,news_links)
     
     if Already_exist >= 1:
 
@@ -244,6 +254,7 @@ try:
 
     ended_on = datetime.datetime.now()
 except Exception as e:
+    print(e)
     Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()

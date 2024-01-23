@@ -46,6 +46,7 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from newspaper import fulltext
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+
 # ================================================================================
 # Comment these lines when you are running locally
 import importlib.util
@@ -136,7 +137,7 @@ else:
 # *****************************************************************************
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    Base_url = "https://www.harting.com/DE/en-gb/news"
+    page_source = "https://www.harting.com/DE/en-gb/news"
     Main_url = "https://www.harting.com"
     page = requests.get(Base_url)
     soup = BeautifulSoup(page.content , 'lxml')
@@ -155,8 +156,7 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    page_source = "https://www.harting.com/DE/en-gb/news"
-    Emr_Crawlers_Logs(c_name,page_source,news_links)
+    # Emr_Crawlers_Logs(c_name,page_source,news_links)
     for i in news_links:
         if i in db_list:
             total_crwalled_links += 1
@@ -190,7 +190,6 @@ try:
             try:
                 date = data.find('article', {"role":"article"}).find('div', {"class":"node-article-full__submitted width--content"}).get_text(strip=True)
                 f_date = date.replace('on','').split('at')[0].strip()
-                # print(f_date)
                 news_date = dateparser.parse(f_date,  settings={'DATE_ORDER': 'DMY'})
                 # print(news_date)
             except:
@@ -227,7 +226,7 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                collection.insert_one(company_news)
+                # collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

@@ -46,6 +46,7 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from newspaper import fulltext
+from googletrans import Translator
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -137,8 +138,14 @@ else:
 
 # *****************************************************************************
 try:
+
+    def translate(Trans):
+        translator = Translator()
+        Trans_text = translator.translate(Trans,dest='en')
+        return Trans_text.text
+
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    Base_url = "https://www.draka-cable.com/?lang=en"
+    Base_url = "https://www.draka-cable.com/en/"
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
     
@@ -152,15 +159,18 @@ try:
 
     print(news_links)
 
+    print("still running")
+
     # Creating a list of links already avilable in database
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    page_source = "https://www.draka-cable.com/"
+    page_source = "https://www.draka-cable.com/en/"
     Emr_Crawlers_Logs(c_name,page_source,news_links)
-
+    current_date = datetime.now().date()
+    
     for i in news_links: 
         
         if i in links_list:
@@ -175,9 +185,11 @@ try:
 
             try:
                 title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-                title = title.replace('- Draka Comteq Germany - Data cables','')
+                title = title.replace('- Draka Comteq Germany - Datenkabel','')
+                title = translate(title)
             except:
                 title = data.find('title').get_text(strip=True)  
+                title = translate(title)
             print(title)
             try:
                 language = data.find('meta', attrs = {"property":"og:locale"}).get("content")
@@ -185,7 +197,8 @@ try:
                 language = "en-us"
             
             try:
-                image = data.find('meta', attrs = {"property":"og:image"}).get("content")            
+                image = data.find('meta', attrs = {"property":"og:image"}).get("content")       
+                print(img)     
             except:
                 image = data.find('div', attrs = {"class":"featured-image page-header-image-single grid-container grid-parent"}).find("img").get('src')
 
@@ -194,11 +207,13 @@ try:
 
             try:
                 sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+                sub_category = translate(sub_category)
             except:
                 sub_category = ""
             
             try:
                 analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+                analysis = translate(analysis)
             except:
                 analysis = ""
             try:
@@ -206,8 +221,7 @@ try:
                 news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
                 # print(news_date)
             except:
-                date = data.find('meta', attrs = {"property":"article:published_time"}).get("content")
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                news_date = dateparser.parse(current_date,  settings={'DATE_ORDER': 'YMD'} )
                 # print(news_date)
 
             
@@ -216,11 +230,14 @@ try:
             
             try:
                 announcement = data.find("div", class_="entry-content").get_text(strip=True)
-
+                announcement = translate(announcement)
+                # print(announcement)
             except:
                 html = requests.get(i).text
                 announcement = fulltext(html)
                 announcement = announcement.replace('\n','<br>')
+                announcement = translate(announcement)
+                # print(announcement)
 
             
             date = datetime.now()

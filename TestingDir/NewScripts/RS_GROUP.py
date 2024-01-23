@@ -46,19 +46,19 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from newspaper import fulltext
 from scrapy import  Selector 
-# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
-# ================================================================================
-# Comment these lines when you are running locally
-import importlib.util
-# Specify the absolute path to Emr_Crawlers_Optimization.py
-module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
-# Load the module using the absolute path
-spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
-Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(Emr_Crawlers_Optimization)
-Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
-# ================================================================================
+# # ================================================================================
+# # Comment these lines when you are running locally
+# import importlib.util
+# # Specify the absolute path to Emr_Crawlers_Optimization.py
+# module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
+# # Load the module using the absolute path
+# spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
+# Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
+# spec.loader.exec_module(Emr_Crawlers_Optimization)
+# Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
+# # ================================================================================
 
 # ************************************************************************
 # defining variables
@@ -176,7 +176,7 @@ try:
         db_list.append(x['News_Weblink'])
 
     page_source = "https://www.rsgroup.com/media/press-releases/year/all" 
-    Emr_Crawlers_Logs(c_name,page_source,news_links)
+    # Emr_Crawlers_Logs(c_name,page_source,news_links)
 
     for i in news_links:
         if i in db_list:
@@ -264,7 +264,7 @@ try:
             company_news['emrLite'] = emr_lite
             company_news['News_Html'] = emr_html
             try:
-                collection.insert_one(company_news)
+                # collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

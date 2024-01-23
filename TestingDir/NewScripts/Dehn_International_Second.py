@@ -138,23 +138,28 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://www.dehn-international.com"
-    Base_url = "https://www.dehn-international.com/en/press"
-    result = requests.get(Base_url,headers=headers)
+    page_source = "https://www.dehn-international.com/en/press"
+    result = requests.get(page_source,headers=headers)
     response = Selector(result)
     
     news_links = []
     news_dates = []
 
-    News = response.xpath('//a[contains(text() ,"Read more")]/@href').getall()
+    News = response.xpath('//div[contains(@class,"dehn-chapter-counter")]//div[@class="grid-container"]//a[contains(text() ,"Read more")]/ancestor::div[@class="grid-container"]')
     for n in News:
-        f_news_links = Main_url + n
-        print(f_news_links)
+        f_news_links = Main_url + n.xpath('.//a[contains(text() ,"Read more")]/@href').get()
         news_links.append(f_news_links)
+        try:
+            n_date = n.xpath('./div[contains(@class,"grid-margin-x")]/h2[contains(@class,"dehn-chapter--headline")]/text()').get()
+            news_dates.append(n_date)
+        except:
+            n_date = ""
+            news_dates.append(n_date)
 
-    print(news_links)
-    print(news_dates)
-    print(len(news_links))
-    print(len(news_dates))
+    # print(news_links)
+    # print(news_dates)
+    # print(len(news_links))
+    # print(len(news_dates))
 
     # Creating a list of links already avilable in database
     links_list = []
@@ -162,10 +167,9 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    page_source = "https://www.mynewsdesk.com/fi/are/latest_news"
     Emr_Crawlers_Logs(c_name+"_Second",page_source,news_links)
     
-    for n in news_links:   
+    for n,d in zip(news_links,news_dates):   
         if n in links_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -176,7 +180,7 @@ try:
             response2 = Selector(result2)
             
             try:
-                title = response2.xpath('//div[@class="dehn--module dehn--module--text-only-and-or-headline dehn--module--text-only-and-or-headline__h1 paragraph paragraph--view-mode--default"]//h1/text()').get()
+                title = response2.xpath('//title/text()').get()
                 print(title)
             except:
                 title = ""
@@ -201,8 +205,7 @@ try:
             except:
                 analysis = ""
             try:
-                N_date = response2.xpath('//article[@class="panel"]//time/@datetime').get()
-                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
+                news_date = dateparser.parse(d,  settings={'DATE_ORDER': 'DMY'})
                 print(news_date)
             except:
                 news_date = ""

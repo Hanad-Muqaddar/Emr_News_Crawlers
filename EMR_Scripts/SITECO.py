@@ -141,8 +141,8 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = 'https://www.siteco.com'
-    Base_url = 'https://www.siteco.com/news'
-    result = requests.get(Base_url,headers=headers)
+    page_source = 'https://www.siteco.com/news'
+    result = requests.get(page_source,headers=headers)
     response = Selector(result)
 
     news_links = response.xpath('//div[@class="block"]//div[@class="textmedia__text"]//a/@href').getall()
@@ -155,9 +155,8 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])                                                                                                    
 
-    page_source = "https://www.siteco.com/news"
     Emr_Crawlers_Logs(c_name,page_source,news_links)
-
+    current_date = datetime.now().date()
     for n in news_links:           
         if n in links_list:
             total_crwalled_links += 1
@@ -194,14 +193,9 @@ try:
                 print(analysis)
             except:
                 analysis = ""
-            try:
-                N_date = datetime.now()
-                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
-                print(news_date)
-            except:
-                news_date = ""
+            
+            news_date = current_date
 
-            page_source = "https://www.siteco.com/news"
             news_weblink = n
             
             try:

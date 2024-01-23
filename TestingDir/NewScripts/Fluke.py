@@ -139,11 +139,12 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://www.fluke.com"
-    Base_url = "https://www.fluke.com/en/support/press-releases"
-    result = requests.get(Base_url,headers=headers)
+    page_source = "https://www.fluke.com/en-us/support/press-releases"
+    result = requests.get(page_source,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
     
     news_links = []
+    current_date = datetime.now().date()
 
     links = soup.find_all("p",{ "class" : "press-release-title"})
     for link in links:
@@ -159,7 +160,6 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    page_source = "https://www.fluke.com/en/support/press-releases"
     Emr_Crawlers_Logs(c_name,page_source,news_links)
     
     for i in news_links:   
@@ -193,13 +193,9 @@ try:
                 print(analysis)
             except:
                 analysis = ""
-            try:
-                news_date = datetime.now()
-                
-            except:
-                news_date = ""
 
-            
+            news_date = current_date             
+        
             news_weblink = i
             
             try:

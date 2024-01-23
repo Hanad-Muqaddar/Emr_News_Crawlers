@@ -140,8 +140,8 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://www.schuch.de"
-    Base_url = "https://www.schuch.de/en"
-    result = requests.get(Base_url,headers=headers)
+    page_source = "https://www.schuch.de/en"
+    result = requests.get(page_source,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
     
     news_links = []
@@ -162,7 +162,9 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    page_source = "https://www.schuch.de/en"
+    current_date = datetime.now().date()
+
+    
     Emr_Crawlers_Logs(c_name,page_source,news_links) 
 
     for i in news_links:  
@@ -204,13 +206,8 @@ try:
                 analysis = data.find('meta', attrs = {"name":"Description"}).get("content")
             except:
                 analysis = ""
-            try:
-                news_date = dateparser.parse(datetime.now(),  settings={'DATE_ORDER': 'YMD'} )
-                print(news_date)
-            except:
-                news_date = ""
-
             
+            news_date = current_date 
             news_weblink = i
             
             try:

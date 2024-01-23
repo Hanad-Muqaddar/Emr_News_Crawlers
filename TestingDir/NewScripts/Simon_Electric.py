@@ -166,14 +166,9 @@ def parse_filtered_news(announcement):
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://www.simonelectric.com"
-    Base_url = "https://www.simonelectric.com/intl/latest-releases"
-    result = requests.get(Base_url,headers=headers)
+    page_source = "https://www.simonelectric.com/intl/latest-releases"
+    result = requests.get(page_source,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
-
-    def translate(Trans):
-        translator = Translator()
-        Trans_text = translator.translate(Trans,dest='en')
-        return Trans_text.text
     
     news_links = []
     links = soup.find_all('div',{ "class" : "views-row"})
@@ -188,7 +183,6 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    page_source = "https://www.simonelectric.com/intl/latest-releases"
     Emr_Crawlers_Logs(c_name,page_source,news_links)
     for i in news_links:  
         if i in links_list:
@@ -205,10 +199,8 @@ try:
 
             try:
                 title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-                title = translate(title.replace('| Latest releases SIMON',''))
             except:
                 title = data.find('title').text
-                title = translate(title.replace('| Latest releases SIMON',''))
             
             announcement_type = "Press Release"
 
@@ -220,22 +212,21 @@ try:
                 image = ""
 
             try:
-                sub_category = translate(data.find('meta', attrs = {"property":"og:type"}).get("content"))
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
             except:
                 sub_category = ""
             
             try:
-                analysis = translate(data.find('meta', attrs = {"property":"og:description"}).get("content"))
+                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
             except:
                 analysis = ""
             try:
                 date = data.find('div', {"class":"field field--name-published-at field--type-published-at field--label-inline clearfix"}).find('div', {"class":"field__item"}).get_text().replace('de','')
-                date = translate(date)
                 news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                print(news_date)
             except:
                 news_date = ""
 
-            
             news_weblink = i
             
             try:
@@ -246,11 +237,11 @@ try:
                 except:
                     pass
                 return_data = parse_filtered_news(announcement)
-                announcement = translate(return_data['filteredBody'])
+                announcement = return_data['filteredBody']
                 announcement = unicodedata.normalize("NFKD",announcement)
-                emr_essentail = translate(return_data['emrEssential'])
-                emr_executive = translate(return_data['emrExecutive'])
-                emr_lite = translate(return_data['emrLite'])
+                emr_essentail = return_data['emrEssential']
+                emr_executive = return_data['emrExecutive']
+                emr_lite = return_data['emrLite']
                 emr_html = return_data['emrHtmlText']
                 
             except:

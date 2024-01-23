@@ -44,6 +44,10 @@ from urllib.request import Request, urlopen
 from scrapy import Selector
 
 from newspaper import fulltext
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+
 
 import unicodedata
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
@@ -214,12 +218,38 @@ try:
     # proxies = {'http': f"http://waleeProxy:Cheeta@1@{p}.proxymesh.com:31280",
     #         'https': f"http://waleeProxy:Cheeta@1@{p}.proxymesh.com:31280"}
 
-    # headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36'}
-    result = requests.get("https://www.hitachienergy.com/news/sitemap.xml", headers=headers)
-    response = Selector(result)
-    links = response.xpath("//loc/text()").getall()
+     # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = True
+
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+     
+    Main_url = "https://www.hitachienergy.com"
+    page_source = "https://www.hitachienergy.com/news"
+ 
+    driver.get(page_source)
+    time.sleep(10)
     
+    news_links = []
+    links = driver.find_elements(By.XPATH, '//ul[contains(@class,"cmp-newslist__news-list")]/li[@class="cmp-newslist__news-item"]')
+    for link in links:
+        news_link = link.find_element(By.XPATH, './a[@class="cmp-newslist__news-item-link"]').get_attribute('href')
+        news_links.append(news_link)
+
+    print(news_links)
+    print(len(news_links))
+
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
@@ -230,10 +260,11 @@ try:
     for x in mydoc:
         All_title_list.append(x['title'])
 
-    page_source = "https://www.hitachienergy.com/media"
+    
     Emr_Crawlers_Logs(c_name,page_source,links)
-
-    for i in links:
+    print("i  in in ")
+    for i in news_links:
+        print("i am in ")
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1
@@ -244,11 +275,12 @@ try:
             response1 = Selector(result1)
 
             title = response1.css("title ::text").get()
+            print(title)
             if title in All_title_list:
                 Already_exist += 1
                 total_crwalled_links += 1
                 print('Title Already Exist')
-                continue
+                # continue
             
             else:
                 try:
@@ -275,7 +307,7 @@ try:
                     emr_html = ""
                 announcement_type = "Press Release"
                 language = "en-US"
-                page_source = "https://www.hitachienergy.com/media"
+                
                 crawled_date = datetime.datetime.now()
 
                 company_news = {}

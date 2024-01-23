@@ -42,7 +42,7 @@ from datetime import datetime
 from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
-
+from googletrans import Translator
 from urllib.request import Request, urlopen
 from newspaper import fulltext
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
@@ -136,8 +136,8 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://www.walther-werke.de"
-    Base_url = "https://www.walther-werke.de/en/news/"
-    result = requests.get(Base_url,headers=headers)
+    page_source = "https://www.walther-werke.de/news/" 
+    result = requests.get(page_source,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
     
     news_links = []
@@ -151,12 +151,17 @@ try:
     print(news_links)
     print(len(news_links))
 
+    def translate(Trans):
+        translator = Translator()
+        Trans_text = translator.translate(Trans,dest='en')
+        return Trans_text.text
+
     # Creating a list of links already avilable in database
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
-    page_source = "https://www.walther-werke.de/en/news/"    
+       
     Emr_Crawlers_Logs(c_name,page_source,news_links)
     for i in news_links:    
         
@@ -171,6 +176,7 @@ try:
 
             try:
                 title = data.find('meta', attrs = {"property":"og:title"}).get("content")
+                title = translate(title)
                 print(title)
             except:
                 title = data.find('title').text
@@ -188,17 +194,18 @@ try:
 
             try:
                 sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+                sub_category = translate(sub_category)
             except:
                 sub_category = ""
             
             try:
                 analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+                analysis = translate(analysis)
             except:
                 analysis = ""
             try:
-                date = data.find('span', {"class":"news-list-date"}).find('time').get_text(strip=True)
-                print(date)
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                n_date = data.find('span', {"class":"news-list-date"}).find('time').get_text(strip=True)
+                news_date = dateparser.parse(n_date,  settings={'DATE_ORDER': 'YMD'} )
                 print(news_date)
             except:
                 news_date = ""
@@ -210,6 +217,7 @@ try:
                 html = requests.get(i).text
                 announcement = fulltext(html)
                 announcement = announcement.replace('\n','<br>')
+                announcement = translate(announcement)
                 print(announcement)
                 
             except:

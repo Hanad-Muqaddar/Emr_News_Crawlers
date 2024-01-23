@@ -159,7 +159,7 @@ try:
 
     for news in News_list:
         try:
-            title = news.xpath('.//div[@class="subheadline-v2"]/text()').get()
+            title = news.xpath('.//h4[@itemprop="name"]/text()').get()
             title_list.append(title)
             # print(title)
         except:
@@ -189,6 +189,8 @@ try:
         except:
             des = ""
             des_list.append(des)
+    
+    # print(title_list,image_list,date_list,des_list)
             
     Emr_Crawlers_Logs(c_name,Base_url,title_list)
     for N_title, img, dat, des in zip(title_list,image_list,date_list,des_list): 

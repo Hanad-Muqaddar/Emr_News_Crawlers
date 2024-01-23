@@ -137,8 +137,8 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://www.urmet.com"
-    Base_url = "https://www.urmet.com/en-us/news-and-events"
-    result = requests.get(Base_url, verify=False)
+    page_source = "https://www.urmet.com/en-us/news-and-events/news"
+    result = requests.get(page_source, verify=False)
     soup = BeautifulSoup(result.content , 'lxml')
     
     news_links = []
@@ -167,7 +167,6 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    page_source = "https://www.urmet.com/en-us/news-and-events"
     Emr_Crawlers_Logs(c_name,page_source,news_links)
 
     for i , N_Date in zip(news_links,news_dates):  

@@ -45,7 +45,14 @@ from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
 
+from scrapy import Selector
+
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from urllib.request import Request, urlopen
+from newspaper import fulltext
+
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -60,26 +67,7 @@ spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
 
-# ************************************************************************
-# defining variables
-# opts = Options()
-# opts.add_argument("--window-size=190,100")
-# opts.add_argument("--disable-automation")
-# opts.add_argument("--no-sandbox")
-# opts.add_argument('--profile-directory=Default')
-# opts.add_argument("start-maximized")
-# opts.add_argument("disable-infobars")
-# opts.add_argument("--lang=en")
-# opts.add_argument("--enable-javascript")
-# opts.add_argument("--enable-cookies")
-# lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-# prefs = {
-#   "translate_whitelists": lang_dict,
-#   "translate":{"enabled":"true"}
-# }
-# opts.add_experimental_option("prefs", prefs)
-# opts.headless = True
-
+ 
 running_Sequence = []
 
 started_on = datetime.datetime.now()
@@ -95,15 +83,16 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
-except:
+except Exception as e:
+    print(e)
 
     running_Sequence.append('Not Connected')
 
@@ -158,20 +147,50 @@ else:
 # *****************************************************************************
 
 try:
-    result = requests.get("https://www.hellermanntyton.com/news")
-    soup = BeautifulSoup(result.content, 'lxml')
-    links = soup.find_all("span", class_='ht-red show-news-link')
+
+     # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = True
+
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+
+    
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+     
+    Main_url = "https://www.aptiv.com/"
+    page_source = "https://www.aptiv.com/en/newsroom?categorytitle=Newsroom&newstypes=Press%20Release"
+ 
+    driver.get(page_source)
+    time.sleep(20)
+    
+
+    news_links = []
+    links = driver.find_elements(By.XPATH, '//div[@class="global-search-results global-search-results-landing"]/div[@class="result"]')
+    for link in links:
+        news_link = link.find_element(By.XPATH, './/a[@class="result-heading"]').get_attribute('href')
+        news_links.append(news_link)
+
+    print(news_links)
+    print(len(news_links))
     
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-    Optimization_links = []
 
-    page_source = "https://www.hellermanntyton.com/news"
 
-    for i in links:    
-        news_weblink = "https://www.hellermanntyton.com" + i.get("href")
+    Optimization_links = []   
+
+    for news_weblink in news_links:    
         Optimization_links.append(news_weblink)
         if news_weblink in db_list:
             total_crwalled_links += 1
@@ -190,21 +209,23 @@ try:
             except:
                 title = ""
             try:
-                news_date = dateparser.parse(soup.find("div", class_='intro_text').text.strip().replace("Date: ",""))
+                f_date = soup.find("strong", class_='date').text.strip()
+                news_date = dateparser.parse(f_date,  settings={'DATE_ORDER': 'DMY'})
+                print(news_date)
             except:
                 news_date = ""
             try:
-                analysis = soup.find("meta", attrs = {"name":"description"}).get("content")
+                analysis = soup.find("meta", attrs = {"property":"og:description"}).get("content")
             except:
                 analysis = title
             try:
-                announcement = soup.find("div", id='main_full').text.strip()
+                announcement = fulltext(response.content)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
             except:
                 announcement = ""
-            try:
-                announcement_type = news_weblink.replace("https://www.hellermanntyton.com/","").split('/')[0]
-            except:
-                announcement_type =""
+           
+            announcement_type ="Press Release"
                 
             language = "en-US"
             
@@ -244,7 +265,8 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.datetime.now()
-except Exception as e:
+except:
+     
     Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()
@@ -292,6 +314,5 @@ log['Links_Skipped'] = Already_exist
 log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'Chrome'
-
 error_logs.insert_one(log)
 

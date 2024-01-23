@@ -142,7 +142,6 @@ try:
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
 
-    
     def translate(Trans):
         translator = Translator()
         Trans_text = translator.translate(Trans,dest='en')
@@ -194,7 +193,7 @@ try:
 
             try:            
                 image = Main_url + data.find('div',attrs = {'class':'detailimage'}).find('img',attrs = {'class':'img-responsive'}).get('src')
-                # print(image)
+                print(image)
             except:
                 image = ""
                 # print(image)
@@ -214,7 +213,6 @@ try:
             try:
                 date = data.find('div',{'class':'period'}).find('span').get_text()
                 date = translate(date)
-                # print(date)
                 news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
                 # print(news_date)
             except:
@@ -223,7 +221,6 @@ try:
                 # print(date)
                 news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
                 # print(news_date)
-
            
             news_weblink = i
             

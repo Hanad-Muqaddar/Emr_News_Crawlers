@@ -42,6 +42,7 @@ from datetime import datetime
 from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
+from scrapy.selector import Selector
 
 from urllib.request import Request, urlopen
 from newspaper import fulltext
@@ -138,30 +139,24 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://www.glendimplex.com"
-    Base_url = "https://www.glendimplex.com/sitemap.xml"
-    result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
+    page_source = "https://www.glendimplex.com/en-ie"
+
+    result = requests.get(page_source,headers=headers)
+    response = Selector(text=result.content)
     
-    news_links = []
-
-    links = soup.find_all("loc")
-    for link in links:
-        news_link = link.text
-        if "en-ie/" in news_link and news_link not in news_links:
-            news_links.append(news_link)
-
-    print(news_links)
-    print(len(news_links))
+    news_links = response.xpath('//div[@class="container"]//article/a[@role="article"]/@href').getall()
+    f_link = [Main_url + l for l in news_links]
+    print(f_link)
+    # print(len(f_link))
 
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
     
-    page_source = "https://www.glendimplex.com/"
-    Emr_Crawlers_Logs(c_name,page_source,news_links)
+    Emr_Crawlers_Logs(c_name,page_source,f_link)
     
-    for i in news_links:  
+    for i in f_link:  
         if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -196,10 +191,9 @@ try:
             except:
                 analysis = ""
             try:
-                date = data.find('div', {"class":"l-just-gutter l-full-bleed"}).find('div', {"class":"date-sticker"}).get_text()
-                date = date.split('|')[0].strip()
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-                print(news_date)
+                n_date = data.find('time').get_text()
+                news_date = dateparser.parse(n_date,  settings={'DATE_ORDER': 'DMY'} )
+                # print(news_date)
             except:
                 news_date = ""
 
