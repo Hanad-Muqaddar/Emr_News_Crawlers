@@ -1,5 +1,4 @@
 # Packages to be imported
-from functools import total_ordering
 import requests
 
 import time
@@ -38,49 +37,34 @@ import urllib
 
 import dateparser
 
-# from datetime import datetime
-import datetime
+from datetime import datetime
 
 from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
-from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
-# # ================================================================================
-# # Comment these lines when you are running locally
-# import importlib.util
-# # Specify the absolute path to Emr_Crawlers_Optimization.py
-# module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
-# # Load the module using the absolute path
-# spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
-# Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
-# spec.loader.exec_module(Emr_Crawlers_Optimization)
-# Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
-# # ================================================================================
+
+from newspaper import fulltext
+from scrapy import Selector
+# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+# ================================================================================
+# Comment these lines when you are running locally
+import importlib.util
+# Specify the absolute path to Emr_Crawlers_Optimization.py
+module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
+# Load the module using the absolute path
+spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
+Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(Emr_Crawlers_Optimization)
+Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
+# ================================================================================
 # ************************************************************************
 # defining variables
-# opts = Options()
-# opts.add_argument("--window-size=190,100")
-# opts.add_argument("--disable-automation")
-# opts.add_argument("--no-sandbox")
-# opts.add_argument('--profile-directory=Default')
-# opts.add_argument("start-maximized")
-# opts.add_argument("disable-infobars")
-# opts.add_argument("--lang=en")
-# opts.add_argument("--enable-javascript")
-# opts.add_argument("--enable-cookies")
-# lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-# prefs = {
-#   "translate_whitelists": lang_dict,
-#   "translate":{"enabled":"true"}
-# }
-# opts.add_experimental_option("prefs", prefs)
-# opts.headless = True
 
 running_Sequence = []
 
-started_on = datetime.datetime.now()
+started_on = datetime.now()
 
 c_name = 'DEHN' # Name of the Collection
 
@@ -93,10 +77,6 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    # data = json.load(file)
-    # db_path = data[0]['Db_Path']
-    # client = MongoClient(db_path)
 
     client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
@@ -134,9 +114,9 @@ except:
 
 if last_insertion == None:
 
-    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
 
-    Crwl_time = datetime.datetime.now()
+    Crwl_time = datetime.now()
 
 else:
 
@@ -155,126 +135,131 @@ else:
 ####################################################
 
 # *****************************************************************************
-
 try:
-    url = "https://www.dehn-international.com/en/press-releases"
-    r = requests.get(url)
-    soup = BeautifulSoup(r.content, 'html.parser')
-    main = soup.find('main', id='main-content')
-    dates = main.find_all('h2')
-    images = main.find_all('img')
-    first_head = main.find_all('div', class_="dehn--module--content_right cell small-6 medium-6 large-auto")
-    a = []
-    for i in first_head:
-        h4 = i.find('h4')
-        a.append(h4)
-    h3head = main.find_all('h3', class_='cell large-9')
-    all_head = a[0:4] + h3head
-    paragraph = main.find_all('span', class_='text')
-    para = []
-    for i in paragraph:
-        z = i.find('p').text
-        para.append(z)
-    all_links = main.find_all('a', class_='dehn-button button internal')
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    Main_url = "https://www.dehn-international.com"
+    page_source = "https://www.dehn-international.com/en/press"
+    result = requests.get(page_source,headers=headers)
+    response = Selector(result)
+    
+    news_links = []
+    news_dates = []
 
-    db_list = []
+    News = response.xpath('//div[contains(@class,"dehn-chapter-counter")]//div[@class="grid-container"]//a[contains(text() ,"Read more")]/ancestor::div[@class="grid-container"]')
+    for n in News:
+        f_news_links = Main_url + n.xpath('.//a[contains(text() ,"Read more")]/@href').get()
+        news_links.append(f_news_links)
+        try:
+            n_date = n.xpath('./div[contains(@class,"grid-margin-x")]/h2[contains(@class,"dehn-chapter--headline")]/text()').get()
+            news_dates.append(n_date)
+        except:
+            n_date = ""
+            news_dates.append(n_date)
+
+    # print(news_links)
+    # print(news_dates)
+    # print(len(news_links))
+    # print(len(news_dates))
+
+    # Creating a list of links already avilable in database
+    links_list = []
     mydoc = collection.find()
     for x in mydoc:
-        db_list.append(x['News_Weblink'])
-    Optimization_links = []
-    for i,j,k,l,m in zip(dates,all_head, images,para,all_links):
-        
-        try:
-            news_weblink = "https://www.dehn-international.com" + m.get('href')
-        except:
-            news_weblink = ""
+        links_list.append(x['News_Weblink'])
 
-        Optimization_links.append(news_weblink)
-            
-        if news_weblink in db_list:
+    Emr_Crawlers_Logs(c_name+"_Second",page_source,news_links)
+    
+    for n,d in zip(news_links,news_dates):   
+        if n in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
-        else:
+        else:     
+            result2 = requests.get(n, headers=headers)
+            response2 = Selector(result2)
+            
             try:
-                date_news = i.text.strip()
-                date_news = dateparser.parse(date_news)
-            except:
-                date_news = ""
-            try:
-                title = j.text.strip()
+                title = response2.xpath('//title/text()').get()
+                print(title)
             except:
                 title = ""
+            
+            language = "en-us"
+            
             try:
-                image = "https://www.dehn-international.com" + k.get('src')
+                image = response2.xpath('//article[@class="panel"]//div[contains(@class,"panel__media")]/img/@srcset').get()
+                print(image)
             except:
                 image = ""
-            try:
-                analysis = l
-            except:
-                analysis = ""
 
+            announcement_type = "News"
             try:
-                response = requests.get(news_weblink)
-                soup = BeautifulSoup(response.content, 'lxml')
-            except Exception as e:
-                print(e)
-            try:
-                announcement = soup.find("main", id='main-content').text.strip()
-            except:
-                announcement = ""
-            try:
-                sub_category = soup.find("meta", attrs={"property":"og:type"}).get("content")
+                sub_category = response2.xpath('//meta[@property="og:type"]/@content').get()
             except:
                 sub_category = ""
-            language = "en-US"
-            crawled_date = datetime.datetime.now()
-            page_source = "https://www.dehn-international.com/en/press-releases"
+            
+            try:
+                analysis = response2.xpath('//meta[@property="og:description"]/@content').get()
+                print(analysis)
+            except:
+                analysis = ""
+            try:
+                news_date = dateparser.parse(d,  settings={'DATE_ORDER': 'DMY'})
+                print(news_date)
+            except:
+                news_date = ""
 
+            
+            news_weblink = n
+            
+            try:
+                announcement = fulltext(result2.text)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
+                
+            except:
+                announcement = response2.xpath('normalize-space(//article[@class="panel"]//div[@class="panel__text"])').get()
+            
+            date = datetime.now()
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
             company_news['comment']=''
-            company_news['Date']= date_news
-            company_news['Crawled_on']=crawled_date
-            company_news['title']= title
+            company_news['Date']= news_date
+            company_news['Crawled_on']=date
+            company_news['title']=title
             company_news['Language']= language
+            company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
             company_news['News_Weblink'] = news_weblink
             company_news['photo']= image
             company_news['videos']= ''
-            company_news['announcement'] = announcement
+            company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
+            company_news['analysis'] = analysis
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-
-    page_source = "https://www.dehn-international.com/en/press-releases"
-    Emr_Crawlers_Logs(c_name,page_source,Optimization_links)
+    
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
+
     else:
 
         tmp_txt = ''
 
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
-    ended_on = datetime.datetime.now()
-except Exception as e:
-    Error_Time =  datetime.datetime.now()
+    ended_on = datetime.now()
+except:
+    Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
 
-    running_Sequence.append(e)
-
-
-# **************************************************************************
-
-# **************************************************************************
 
 # **************************************************************************
 rep = ''
@@ -292,6 +277,7 @@ except Exception as e:
     rep = traceback.format_exc()
 
     pass
+
 
 log = {}
 
@@ -311,7 +297,6 @@ log['Links_Skipped'] = Already_exist
 
 log['Last_news_crawl_time'] = last_time
 
-log['Browser'] = 'Chrome'
+log['Browser'] = 'None'
 
 error_logs.insert_one(log)
-

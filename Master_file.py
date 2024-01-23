@@ -92,7 +92,6 @@ crawlerToCollectionMapping={
     "Cooper_Lighting":"Cooper_Lighting",
     "Deha_group":"Deha_Group",
     "Dehn_International":"DEHN",
-    "Dehn_International_Second":"DEHN",
     "Draka_Comteq":"Draka_Comteq",
     "Eaton":"EATON",
     "ELEKTROKABEL":"ELEKTROKABEL",
@@ -326,7 +325,6 @@ Emr_News_Cralers_Dict = {
     
     "Deha_group":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Dehn_International":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
-    "Dehn_International_Second":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Draka_Comteq":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "Eaton":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
     "ELEKTROKABEL":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/TestingDir/NewScripts/",
