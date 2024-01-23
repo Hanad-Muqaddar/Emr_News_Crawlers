@@ -9,11 +9,13 @@ from random import randint
 
 from bs4 import BeautifulSoup
 
-from pymongo import MongoClient, response
+from pymongo import MongoClient
 
 from bs4 import BeautifulSoup
 
 from selenium import webdriver
+
+# from webdriver_manager.chrome import ChromeDriver
 
 from selenium.webdriver.chrome.options import Options
 
@@ -25,6 +27,8 @@ from selenium.webdriver.support import expected_conditions
 
 from selenium.webdriver.common.by import By
 
+from urllib.parse import urlparse
+
 import re
 
 import traceback
@@ -33,17 +37,15 @@ import urllib
 
 import dateparser
 
-import datetime
+from datetime import datetime
 
 from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
-
-from scrapy import Selector
-
 from newspaper import fulltext
+from googletrans import Translator
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -59,11 +61,13 @@ Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
 
 # ************************************************************************
+# defining variables
+
 running_Sequence = []
 
-started_on = datetime.datetime.now()
+started_on = datetime.now()
 
-c_name = 'SPELSBERG' # Name of the Collection
+c_name = 'SPELSBERG'
 
 total_crwalled_links = 0
 
@@ -74,11 +78,8 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -114,9 +115,9 @@ except:
 
 if last_insertion == None:
 
-    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
 
-    Crwl_time = datetime.datetime.now()
+    Crwl_time = datetime.now()
 
 else:
 
@@ -135,73 +136,109 @@ else:
 ####################################################
 
 # *****************************************************************************
-
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    result = requests.get("https://www.spelsberg.com/news/news-press/",headers=headers)
-    response = Selector(result)
-    Base_Link = "https://www.spelsberg.com"
-    links = response.css(".article__teaser h3 a ::attr(href)").getall()
-    final_links = [Base_Link + link for link in links]
+    Main_url = 'https://www.spelsberg.de'
+    Base_url = 'https://www.spelsberg.de/aktuelles/neuigkeiten-presse/'
+    result = requests.get(Base_url,headers=headers)
+    soup = BeautifulSoup(result.content , 'lxml')
+
+    News_Links = []
+
+    def translate(Trans):
+        translator = Translator()
+        Trans_text = translator.translate(Trans,dest='en')
+        return Trans_text.text
+
+    links = soup.find('div', class_="news-list-view").find_all('div', class_="innerArticle")
+    for link in links:
+        news_link = Main_url + link.find('a').get('href')
+        News_Links.append(news_link)
+    
+    print(News_Links)
+    print(len(News_Links))
+    
 
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    page_source = "https://www.spelsberg.com/news/news-press/"
-    Emr_Crawlers_Logs(c_name,page_source,final_links)
+    page_source = 'https://www.spelsberg.de/aktuelles/neuigkeiten-presse/'
+    Emr_Crawlers_Logs(c_name+"_Second",page_source,News_Links)
 
-    for i in final_links:
+    for i in News_Links:
         if i in db_list:
-            Already_exist += 1
             total_crwalled_links += 1
+            Already_exist += 1
             print("Already Crawled")
             continue
-        else:
-            result1 = requests.get(i,headers=headers)
-            response1 = Selector(result1)
+
+        else:        
+            response = requests.get(i, headers=headers)
+            data = BeautifulSoup(response.content, 'lxml')
+
             try:
-                news_date = response1.xpath("//time[@itemprop='datePublished']/@datetime").get()
-                news_date = dateparser.parse(news_date,)
-            except:
-                news_date = ""
-            try:
-                title = response1.xpath("//h1[@itemprop='headline']/text()").get()
+                title = data.find('h1' , {"itemprop":"headline"}).get_text(strip=True)
+                title = translate(title)
+                print(title)
             except:
                 title = ""
+            
+            announcement_type = "News"
+            language = "en-us"
+
             try:
-                analysis = response1.xpath("//meta[@name='description']/@content").get()
+                image = Main_url + data.find('figure', class_="mediaelement mediaelement-image").find('img').get('src')
+                # print(image)
+            except:
+                image = ""
+
+            try:
+                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
+            except:
+                sub_category = ""
+            
+            try:
+                analysis = data.find('meta', attrs = {"name":"description"}).get("content")
             except:
                 analysis = ""
             try:
-                image = response1.xpath("//a[@rel='imagebox']/@href").get()
+                date = data.find('time').get_text(strip=True)
+                print(date)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'DMY'})
+                print(news_date)
             except:
-                image = ""
-            sub_category = ""
+                news_date = ""
+
+            
+            news_weblink = i
+            print(news_weblink)
+            
             try:
-                announcement = fulltext(result1.text)
+                announcement = fulltext(response.content)
                 announcement = announcement.replace('\n','<br>')
+                announcement = translate(announcement)
+                print(announcement)
             except:
                 announcement = ""
-            announcement_type = "News and Press"
-            language = "en-US"
             
-            crawled_date = datetime.datetime.now()
-
+            date = datetime.now()
+            # Creating a list of links already avilable in database
+            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
             company_news['comment']=''
             company_news['Date']= news_date
-            company_news['Crawled_on']=crawled_date
+            company_news['Crawled_on']=date
             company_news['title']=title
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = i
+            company_news['News_Weblink'] = news_weblink
             company_news['photo']= image
-            company_news['videos']= ''
+            company_news['videos']= ""
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
@@ -214,24 +251,19 @@ try:
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
+
     else:
 
         tmp_txt = ''
 
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
-    ended_on = datetime.datetime.now()
-except Exception as e:
-    Error_Time =  datetime.datetime.now()
+    ended_on = datetime.now()
+except:
+    Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
 
-    running_Sequence.append(e)
-
-
-# **************************************************************************
-
-# **************************************************************************
 
 # **************************************************************************
 rep = ''
@@ -249,6 +281,7 @@ except Exception as e:
     rep = traceback.format_exc()
 
     pass
+
 
 log = {}
 
@@ -268,6 +301,7 @@ log['Links_Skipped'] = Already_exist
 
 log['Last_news_crawl_time'] = last_time
 
-log['Browser'] = 'Chrome'
+log['Browser'] = 'None'
 
 # error_logs.insert_one(log)
+
