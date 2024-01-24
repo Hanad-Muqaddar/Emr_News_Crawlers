@@ -145,8 +145,8 @@ try:
         return Trans_text.text
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    Base_url = "https://www.draka-cable.com/en/"
-    result = requests.get(Base_url,headers=headers)
+    page_source = "https://www.draka-cable.com/en/"
+    result = requests.get(page_source,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
     
     news_links = []
@@ -167,7 +167,6 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    page_source = "https://www.draka-cable.com/en/"
     Emr_Crawlers_Logs(c_name,page_source,news_links)
     current_date = datetime.now().date()
     

@@ -204,7 +204,7 @@ try:
             except Exception as e:
                 running_Sequence.append(e)
 
-    Web_page = "https://blog.naed.org/page/0"
+    Web_page = "https://blog.naed.org/"
     Emr_Crawlers_Logs(c_name,Web_page,Optimization_links)
 
     if Already_exist >= 1:

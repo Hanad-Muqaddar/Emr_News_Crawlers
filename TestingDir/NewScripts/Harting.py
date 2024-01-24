@@ -45,7 +45,7 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 from newspaper import fulltext
-# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
 # Comment these lines when you are running locally
@@ -137,9 +137,9 @@ else:
 # *****************************************************************************
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    page_source = "https://www.harting.com/DE/en-gb/news"
+    page_source = "https://www.harting.com/DE/en-gb/news/company"
     Main_url = "https://www.harting.com"
-    page = requests.get(Base_url)
+    page = requests.get(page_source)
     soup = BeautifulSoup(page.content , 'lxml')
     news_links = []
 
@@ -156,7 +156,7 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    # Emr_Crawlers_Logs(c_name,page_source,news_links)
+    Emr_Crawlers_Logs(c_name,page_source,news_links)
     for i in news_links:
         if i in db_list:
             total_crwalled_links += 1
@@ -226,7 +226,7 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

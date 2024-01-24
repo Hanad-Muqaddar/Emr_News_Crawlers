@@ -165,7 +165,7 @@ try:
         db_list.append(x['News_Weblink'])
 
     page_source = 'https://www.spelsberg.de/aktuelles/neuigkeiten-presse/'
-    Emr_Crawlers_Logs(c_name+"_Second",page_source,News_Links)
+    Emr_Crawlers_Logs(c_name,page_source,News_Links)
 
     for i in News_Links:
         if i in db_list:
