@@ -91,10 +91,14 @@ def process_Email():
                 anouncement = Histories_Database.find({"companyId.value": company}, {"companyId.value": 1, "announcement.addedOn": 1}).sort("announcement.addedOn", -1)[0]
             except Exception as e:
                 print (e)
+        
+        last_crawl_date = anouncement["announcement"]["addedOn"].strftime("%Y-%m-%d")
 
+        last_crawl_day = datetime.strptime(last_crawl_date, "%Y-%m-%d")
+        Num_days = today_timestamp - last_crawl_day
 
         try:
-            Record = {"Company_Name": Company_Name["validatedObject"]["companyNameObject"],"Yesterday_News_In": News , "Last_3_Days": L_3_Days , "Last_7_Days": L_7_Days , "Last_30_Days": L_30_Days , "Last_Crawled":anouncement["announcement"]["addedOn"].strftime("%Y-%m-%d")}
+            Record = {"Company_Name": Company_Name["validatedObject"]["companyNameObject"], "Days": Num_days.days, "Yesterday_News_In": News , "Last_3_Days": L_3_Days , "Last_7_Days": L_7_Days , "Last_30_Days": L_30_Days , "Last_Crawled":last_crawl_date}
             Data.append(Record)
             # print(Record)
         except Exception as e:
@@ -131,11 +135,11 @@ def process_Email():
     for i, row in df.iterrows():
         excel_row = i + 2  # Adding 2 because Excel rows start at 1 and we skip the header row
         if row['Yesterday_News_In_green']:
-            sheet.cell(excel_row, 2).fill = green_fill
-        if row['Last_3_Days_green']:
             sheet.cell(excel_row, 3).fill = green_fill
+        if row['Last_3_Days_green']:
+            sheet.cell(excel_row, 4).fill = green_fill
         if row['Last_30_Days_red']:
-            sheet.cell(excel_row, 5).fill = red_fill
+            sheet.cell(excel_row, 6).fill = red_fill
 
     # Save the modified workbook
     excel_filename = f'EMR_Crawlers_Status_Sheet_Testing_{day}_{month}_{year}.xlsx'
@@ -156,7 +160,8 @@ def process_Email():
     message = Mail(
     from_email='info@emr-online.com',
     to_emails=['manuel.gielsdorf@emr-online.com','abdul.ghaffar@techletspk.com','salman.ansari@techletspk.com','muhammad.asad@techletspk.com'],
-    subject='EMR Crawlers Daily status V2 Excel Sheet',
+    # to_emails=['abdul.ghaffar@techletspk.com'],
+    subject='EMR Crawlers Daily status V2 Excel Sheet ',
     html_content=f'<strong>Kindly Download the Excel File From this link : </strong> {success}')
     try:
         sg = SendGridAPIClient("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")
