@@ -142,7 +142,7 @@ def process_Email():
             sheet.cell(excel_row, 6).fill = red_fill
 
     # Save the modified workbook
-    excel_filename = f'EMR_Crawlers_Status_Sheet_Testing_{day}_{month}_{year}.xlsx'
+    excel_filename = f'EMR_Crawlers_Status_Sheet_V2_{day}_{month}_{year}.xlsx'
     wb.save(excel_filename)
 
     success = upload_to_aws(excel_filename, 'data2images', excel_filename)
