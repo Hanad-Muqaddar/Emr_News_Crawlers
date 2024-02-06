@@ -145,14 +145,14 @@ else:
 
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    Bas_url = "https://investors.wesco.com/news-events/news-releases"
+    page_source = "https://investors.wesco.com/news-events/news-releases"
     main_url = "https://investors.wesco.com"
-    page = requests.get(Bas_url,headers=headers)
+    page = requests.get(page_source,headers=headers)
     response = scrapy.Selector(page)
-    links = response.xpath('//article[@role="article"]//div[@class="nir-widget--field nir-widget--news--headline"]//a/@href').getall()
+    links = response.xpath('//div[@class="nir-widget--list "]//article//div[contains(@class,"news--read-more")]/a/@href').getall()
     f_links = [main_url+l for l in links]
     print(f_links)
-    page_source = "https://investors.wesco.com/news-events/news-releases"
+    
    
     db_list = []
     mydoc = collection.find()
@@ -162,6 +162,7 @@ try:
     Emr_Crawlers_Logs(c_name,page_source,f_links)
     
     for i in f_links:
+        print(i)
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -171,10 +172,11 @@ try:
             res = requests.get(i,headers=headers)
             response1 = scrapy.Selector(res)
             try:
-                title = response1.xpath('//article[@role="article"]//div[@class="field field--name-field-nir-news-title field--type-string field--label-hidden"]/div[@class="field__item"]/text()').get()
-                print(title)
+                title = response1.xpath('//article//div[contains(@class,"field field--name-field-nir-news-title")]/div[@class="field__item"]/text()').get()
+                
             except:
-                title = ""
+                title = response1.xpath("//meta[@property='og:title']/@content").get()
+            print(title)
             try:
                 sub_category = ""
             except:
@@ -187,13 +189,13 @@ try:
             image = ""
             
             try:
-                n_date = response1.xpath('//article[@role="article"]//div[@class="field field--name-field-nir-news-date field--type-datetimezone field--label-hidden ndq-date"]/div[@class="field__item"]/text()').get()
+                n_date = response1.xpath('//article//div[contains(@class,"field field--name-field-nir-news-date")]/div[@class="field__item"]/text()').get()
                 news_date = dateparser.parse(n_date,  settings={'DATE_ORDER': 'YMD'} )
                 print(news_date)
             except:
-                news_date = ""
+                news_date = datetime.datetime.now()
             try:
-                announcement = response1.xpath('normalize-space(//article[@role="article"]//div[@class="full-release-body"])').get()
+                announcement = response1.xpath('normalize-space(//article//div[@class="full-release-body"])').get()
                 print(announcement)
 
             except:
@@ -240,7 +242,8 @@ try:
         running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
         # ended_on = datetime.datetime.now()
-except:
+except Exception as e:
+    print(e)
     Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()

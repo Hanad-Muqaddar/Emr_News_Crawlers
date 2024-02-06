@@ -188,8 +188,6 @@ try:
     # print(news_Dates)
     # print(len(news_Dates))
 
-        
-    Emr_Crawlers_Logs(c_name,Web_Page,news_links)
 
     db_list = []
     mydoc = collection.find()
@@ -273,6 +271,7 @@ try:
             except Exception as e:
                 running_Sequence.append(e)
 
+    Emr_Crawlers_Logs(c_name,Web_Page,news_links)
     
     if Already_exist >= 1:
 

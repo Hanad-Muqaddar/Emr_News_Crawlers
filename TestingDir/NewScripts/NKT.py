@@ -42,10 +42,11 @@ from datetime import datetime
 from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
-
+from scrapy import Selector
 from urllib.request import Request, urlopen
 from newspaper import fulltext
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+
 # ================================================================================
 # Comment these lines when you are running locally
 import importlib.util
@@ -138,18 +139,13 @@ try:
     Main_url = "https://www.nkt.com"
     Base_url = "https://www.nkt.com/news-press-releases"
     result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
-    
-    news_links = []
 
-    links = soup.find_all('div',{ "class" : "NewsList__NewsItem-sc-17d1yjo-2 gsKqmo"})
-    for link in links:
-        news_link = Main_url + link.find('a',{ "class" : "TextLink__TextLinkStyled-sc-17yt8vk-0 bFZJSi"}).get('href')
-        if news_link not in news_links:
-            news_links.append(news_link)
-
-    # print(news_links)
-    # print(len(news_links))
+    selector = Selector(text=result.text)
+    links = selector.xpath('//div[contains(@class,"NewsList__NewsListStyled")]//div[contains(@class,"NewsList__NewsItem")]//a[contains(@class,"TextLink__TextLink")]/@href').getall()
+    f_links = [Main_url + l for l in links]
+ 
+    print(f_links)
+    print(len(f_links))
 
     # Creating a list of links already avilable in database
     links_list = []
@@ -158,9 +154,9 @@ try:
         links_list.append(x['News_Weblink'])
 
     page_source = "https://www.nkt.com/news-press-releases"
-    Emr_Crawlers_Logs(c_name,page_source,links_list)
+    Emr_Crawlers_Logs(c_name,page_source,f_links)
 
-    for i in news_links:
+    for i in f_links:
         if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -173,7 +169,7 @@ try:
 
             try:
                 title = data.find('meta', attrs = {"property":"og:title"}).get("content")
-                # print(title)
+                print(title)
             except:
                 title = data.find('title').text
                 # print(title)
@@ -253,7 +249,8 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.now()
-except:
+except Exception as e:
+    print(e)
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()

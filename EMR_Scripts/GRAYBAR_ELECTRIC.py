@@ -140,17 +140,7 @@ else:
 # *****************************************************************************
 
 try:
-    # print("Running..............")
-    # headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    
-    # proxies = {'http': 'http://waleeProxy:Cheeta@1@sg.proxymesh.com:31280',
-    #         'https': 'http://waleeProxy:Cheeta@1@sg.proxymesh.com:31280'}
-
-    # url = "https://www.graybar.com/news"
-    # result = requests.get(url, proxies=proxies, headers=headers, timeout=20)
-
-
-     # defining variables
+  
     opts = Options()
     # opts.add_argument("--window-size=190,100")
     # opts.add_argument("--disable-automation")
@@ -165,13 +155,10 @@ try:
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
-    # service = Service("C:\Program Files (x86)\chromedriver.exe")
-    # driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
-    # chrome_options = webdriver.ChromeOptions()
+     
 
-    # driver = webdriver.Chrome(service=service, options=opts)
-
-    driver.get("https://www.graybar.com/news")
+    page_source = "https://www.graybar.com/news"
+    driver.get(page_source)
     time.sleep(5)
 
     page_source = driver.page_source
@@ -190,8 +177,9 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-    Web_Page = "https://www.graybar.com/news"
-    Emr_Crawlers_Logs(c_name,Web_Page,final_links)
+
+    Emr_Crawlers_Logs(c_name,page_source,final_links)
+
     for i , j ,k , title in zip(final_links, dates, announcement_type, titles):
         if i in db_list:
             Already_exist += 1
@@ -235,7 +223,7 @@ try:
                 announcement_type = ""
 
             language = "en-US"
-            page_source = "https://www.graybar.com/news"
+            
             crawled_date = datetime.datetime.now()
 
             company_news = {}

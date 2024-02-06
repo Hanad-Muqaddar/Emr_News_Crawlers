@@ -139,7 +139,8 @@ else:
 
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    result = requests.get("https://www.southwire.com/newsroom",headers=headers)
+    page_source = "https://www.southwire.com/newsroom"
+    result = requests.get(page_source,headers=headers)
     response = Selector(result)
     Base_Link = "https://www.southwire.com"
     links = response.css(".carousel-inner .active .card-shadow .card-img-top ::attr(href)").getall()
@@ -151,7 +152,6 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    page_source = "https://www.southwire.com/newsroom"
     Emr_Crawlers_Logs(c_name,page_source,final_links)
 
     for i in final_links:
@@ -173,6 +173,9 @@ try:
                 title = response1.xpath("//meta[@property='og:title']/@content").get().replace("| Southwire","")
             except:
                 title = ""
+                
+            print(title)
+
             try:
                 analysis = response1.xpath("//meta[@name='description']/@content").get()
             except:

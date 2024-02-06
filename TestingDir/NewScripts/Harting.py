@@ -45,7 +45,7 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 from newspaper import fulltext
-from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
 # Comment these lines when you are running locally
@@ -157,6 +157,7 @@ try:
         db_list.append(x['News_Weblink'])
 
     Emr_Crawlers_Logs(c_name,page_source,news_links)
+
     for i in news_links:
         if i in db_list:
             total_crwalled_links += 1

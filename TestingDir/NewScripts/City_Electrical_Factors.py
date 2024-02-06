@@ -145,7 +145,7 @@ try:
     proxies = {'http': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280',
                 'https': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280'}
     
-    result = requests.get(Base_url,headers=headers, proxies=proxies)
+    result = requests.get(Base_url,headers=headers, proxies=proxies, timeout=20)
     response = Selector(result)
     news_links = []
      

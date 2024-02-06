@@ -62,24 +62,7 @@ Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
-# defining variables
-# opts = Options()
-# opts.add_argument("--window-size=190,100")
-# opts.add_argument("--disable-automation")
-# opts.add_argument("--no-sandbox")
-# opts.add_argument('--profile-directory=Default')
-# opts.add_argument("start-maximized")
-# opts.add_argument("disable-infobars")
-# opts.add_argument("--lang=en")
-# opts.add_argument("--enable-javascript")
-# opts.add_argument("--enable-cookies")
-# lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-# prefs = {
-#   "translate_whitelists": lang_dict,
-#   "translate":{"enabled":"true"}
-# }
-# opts.add_experimental_option("prefs", prefs)
-# opts.headless = True
+
 
 running_Sequence = []
 
@@ -176,12 +159,9 @@ try:
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
-    # service = Service("C:\Program Files (x86)\chromedriver.exe")
-    # chrome_options = webdriver.ChromeOptions()
-
-    # driver = webdriver.Chrome(service=service, options=opts)
-
-    driver.get("https://www.pipelife.com/service/news-and-projects.html")
+  
+    Web_Page = "https://www.pipelife.com/service/news-and-projects.html"
+    driver.get(Web_Page)
     time.sleep(10)
     Main_url = "https://www.pipelife.com"
 
@@ -200,7 +180,7 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Web_Page = "https://www.pipelife.com/service/news-and-projects.html"
+    
     Emr_Crawlers_Logs(c_name,Web_Page,news_links)
 
     for news_weblink in news_links:
@@ -217,6 +197,9 @@ try:
                 title = soup2.find("h1", class_="intro__headline").text
             except:
                 title = ""
+
+            print(title)
+
             try:
                 image = soup2.find("meta", attrs={"property":"og:image"}).get("content")
             except:

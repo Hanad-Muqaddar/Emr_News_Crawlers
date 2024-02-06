@@ -46,6 +46,9 @@ from scrapy import Selector
 import feedparser
 
 from newspaper import fulltext
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -140,23 +143,35 @@ else:
 # *****************************************************************************
 
 try:
-    # This is for Press Release
 
-    # feed = feedparser.parse("https://ir.rockwellautomation.com/rss/PressRelease.aspx")
-    # print(feed)
+     # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = False
+
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    Bas_url = "https://www.rockwellautomation.com/en-us/sitemap.xml"
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
 
-    page = requests.get(Bas_url,headers=headers)
-    soup = BeautifulSoup(page.content, "html.parser")
-    # print(soup.prettify())
+    Main_url = "https://ir.rockwellautomation.com"
+    page_source = "https://ir.rockwellautomation.com/press-releases/default.aspx"
+    
+    driver.get(page_source)
+    time.sleep(5)
 
-    news_links = [] 
-
-    links = soup.find_all('loc')
+    news_links = []
+    links = driver.find_elements(By.XPATH, '//div[@id="whats-new"]//DIV[@class="content-tile"]//a[@class="teaser__link-over"]')
     for link in links:
-        if "/press-releases/" in link.text:
-            news_links.append(link.text)
+        news_link = link.get_attribute('href')
+        news_links.append(news_link)
+  
     print(news_links)
     print(len(news_links))
 
@@ -165,7 +180,7 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    page_source = "https://ir.rockwellautomation.com/press-releases/default.aspx"
+    
     Emr_Crawlers_Logs(c_name,page_source,news_links)
 
     for i in news_links:
@@ -202,11 +217,11 @@ try:
             try:
                 announcement = fulltext(result1.text)
                 announcement = announcement.replace('\n','<br>')
+                print(announcement)
             except:
                 announcement = ""
             announcement_type = "Press Release"
             language = "en-US"
-            page_source = "https://ir.rockwellautomation.com/press-releases/default.aspx"
             crawled_date = datetime.datetime.now()
 
             company_news = {}

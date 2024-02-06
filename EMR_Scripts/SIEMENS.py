@@ -161,7 +161,8 @@ try:
     # driver = webdriver.Chrome(service=service, options=opts)
 
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
-    driver.get("https://www.siemens-energy.com/global/en/home/press-releases.html?")
+    page_source = "https://www.siemens-energy.com/global/en/home/press-releases.html?"
+    driver.get(page_source)
     time.sleep(10)
     Main_url = "https://www.siemens-energy.com"
 
@@ -180,8 +181,7 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    Web_Page = "https://www.siemens-energy.com/global/en/home/press-releases.html?"
-    Emr_Crawlers_Logs(c_name,Web_Page,news_links)
+    Emr_Crawlers_Logs(c_name,page_source,news_links)
     
     for n in news_links:   
         if n in links_list:
@@ -222,7 +222,7 @@ try:
             except:
                 news_date = ""
 
-            page_source = "https://www.siemens-energy.com/global/en/home/press-releases.html?"
+            
             news_weblink = n
             
             try:

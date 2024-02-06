@@ -188,7 +188,7 @@ try:
 
     page_source = "https://www.lapp.com/en/de/news/press/e/000143"
 
-    Emr_Crawlers_Logs(c_name,Web_Page,news_links)
+    Emr_Crawlers_Logs(c_name,page_source,news_links)
 
     for i,d in zip(news_links,N_dates):
         if i in db_list:

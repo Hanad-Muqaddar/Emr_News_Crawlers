@@ -240,6 +240,7 @@ try:
                     title = response1.css(".b-heading-h1 ::text").get()
             except:
                 title = ""
+            print(title)
             try:
                 news_date = dateparser.parse(response1.xpath("//meta[@name='publish-date']/@content").get())
             except:

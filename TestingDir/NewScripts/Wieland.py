@@ -135,9 +135,9 @@ else:
 # *****************************************************************************
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    Base_url = "https://www.wieland.com/en/about/news"
+    page_source = "https://www.wieland.com/en/about/news"
     Main_url = "https://www.wieland.com"
-    page = requests.get(Base_url,headers=headers)
+    page = requests.get(page_source,headers=headers)
     soup = BeautifulSoup(page.content , 'lxml')
     news_links = []
 
@@ -152,7 +152,7 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-    page_source = "https://www.wieland.com/en/about/news"
+
     Emr_Crawlers_Logs(c_name,page_source,news_links)
 
     for i in news_links:
@@ -168,7 +168,7 @@ try:
 
             try:
                 title = data.find('span', {"class":"ezstring-field"}).get_text(strip=True)
-                # print(title)
+                print(title)
             except:
                 title = ""
             
@@ -191,7 +191,7 @@ try:
                 date = data.find('time', {"class":"meta-time"}).get_text(strip=True)
                 # print(date)
                 news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'DMY'})
-                # print(news_date)
+                print(news_date)
             except:
                 news_date = ""
 

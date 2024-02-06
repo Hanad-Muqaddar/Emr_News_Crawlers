@@ -155,15 +155,14 @@ try:
     opts.headless = True
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(version='114.0.5735.90').install()), options=opts)
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
     driver.get("https://www.findernet.com/en/worldwide/news/")
     time.sleep(5)
-
+    
     news_links = []
     news_dates = []
     links = driver.find_elements(By.XPATH, '//div[@class="style__StyledNewsListing-pjpy3m-0 gGKRCh"][1]//div[contains(@class,"style__StyledNewsListingItem-pjpy3m-5") or contains(@class,"style__StyledNewsListingHighlight-pjpy3m-4")]')
     for link in links:
-        # news_link = link.find_element(By.XPATH, './/a[@class="read-more arrow-right-link animated-arrow-right-link"]').get_attribute('href')
         news_link = link.find_element(By.XPATH, './/a').get_attribute('href')
         news_links.append(news_link)
         
@@ -220,7 +219,7 @@ try:
                 analysis = ""
             try:
                 news_date = dateparser.parse(L_date,settings={'DATE_ORDER': 'YMD'})
-                # print(news_date)
+                print(news_date)
             except:
                 news_date = ""
 
@@ -273,7 +272,8 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.now()
-except:
+except Exception as e:
+    print(e)
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()

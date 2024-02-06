@@ -44,7 +44,7 @@ import datetime
 from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
-
+from scrapy import Selector
 from urllib.request import Request, urlopen
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
@@ -60,25 +60,7 @@ spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
 
-# ************************************************************************
-# defining variables
-# opts = Options()
-# opts.add_argument("--window-size=190,100")
-# opts.add_argument("--disable-automation")
-# opts.add_argument("--no-sandbox")
-# opts.add_argument('--profile-directory=Default')
-# opts.add_argument("start-maximized")
-# opts.add_argument("disable-infobars")
-# opts.add_argument("--lang=en")
-# opts.add_argument("--enable-javascript")
-# opts.add_argument("--enable-cookies")
-# lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-# prefs = {
-#   "translate_whitelists": lang_dict,
-#   "translate":{"enabled":"true"}
-# }
-# opts.add_experimental_option("prefs", prefs)
-# opts.headless = True
+ 
 
 running_Sequence = []
 
@@ -95,11 +77,11 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -163,44 +145,48 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
     Optimization_links = []
-        
-    result = requests.get("https://www.esylux.com/press/#c787")
-    soup = BeautifulSoup(result.content, 'lxml')
-    data = soup.find_all("div", class_="row pressemitteilung")
 
+    Main_url = "https://www.esylux.com"
     page_source = "https://www.esylux.com/press/#c787"
-    # print(data)
-    for i in data:
+    result = requests.get(page_source)
+
+    response = Selector(result)
+     
+    links = response.xpath('//div[@class="row pressemitteilung"]')
+    for i in links:        
         
-        try:
-            news_link = "https://www.esylux.com" + i.find("a").get("href")
-        except:
-            news_link = ""
-        if news_link == "":
-            continue
+        news_link = Main_url + i.xpath('.//a[@class="download"]/@href').get()
+        
         Optimization_links.append(news_link)
+
         if news_link in db_list:
             Already_exist += 1
             total_crwalled_links += 1
+            print("Already Crawled")
             continue
         else:
             try:
-                news_date = i.find("span", class_='date').text
+                news_date = i.xpath('.//span[@class="date"]/text()').get()
                 news_date = dateparser.parse(news_date,  settings={'DATE_ORDER': 'DMY'})
             except:
                 news_date = ""
+            print(news_date)
+
             try:
-                title = i.find("h3").text
+                title = i.xpath('.//h3/text()').get()  
             except:
                 title = ""
+
             try:
-                analysis = i.find("p").text
+                analysis = i.xpath('.//p/text()').get()  
             except:
                 analysis = ""
+
             try:
-                image = "https://www.esylux.com" + i.find("img").get("src")
+                image = "https://www.esylux.com" + i.xpath('.//img[@class="img-fluid"]/@src').get()  
             except:
                 image = ""
+
             sub_category = ""
             announcement = ""
             announcement_type = "PRESS RELEASES"

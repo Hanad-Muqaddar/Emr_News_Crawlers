@@ -47,8 +47,6 @@ from newspaper import fulltext
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-
-
 import unicodedata
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
@@ -260,11 +258,9 @@ try:
     for x in mydoc:
         All_title_list.append(x['title'])
 
-    
-    Emr_Crawlers_Logs(c_name,page_source,links)
-    print("i  in in ")
+    Emr_Crawlers_Logs(c_name,page_source,news_links)
+
     for i in news_links:
-        print("i am in ")
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1
@@ -284,9 +280,10 @@ try:
             
             else:
                 try:
-                    news_date = parse_news_date(response1)
+                    n_date = response1.xpath('//article[contains(@class,"webstorypage newspage-v2 page-v2 page")]//span[@class="cmp-newsinfo__item"][3]/text()').get()
+                    news_date = dateparser.parse(n_date,  settings={'DATE_ORDER': 'DMY'})
                 except:
-                    news_date = ""
+                    news_date = datetime.datetime.now()
                 
                 try:
                     analysis = response1.xpath('//meta[@name="description"]/@content').get()
