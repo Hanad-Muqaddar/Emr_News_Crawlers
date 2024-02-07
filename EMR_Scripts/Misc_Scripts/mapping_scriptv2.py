@@ -313,6 +313,7 @@ try:
                         if type(tempIndNews[newsKey])==list:            
                             tempIndNews[newsKey]=j[newsKey]
                 tempIndNews['announcementType']['value']=''
+                tempIndNews['Crawled_Source']= j['Source']
                 tempIndNews['companyId']['value']=[indCompany['_id']]
                 tempIndNews['Remark']='ADDED TODAY'+str(today.date())
                 tempIndNews['isVisible']=copy.deepcopy(temp)
