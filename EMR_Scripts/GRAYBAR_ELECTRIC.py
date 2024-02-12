@@ -157,8 +157,8 @@ try:
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
      
 
-    page_source = "https://www.graybar.com/news"
-    driver.get(page_source)
+    Crawler_source = "https://www.graybar.com/news"
+    driver.get(Crawler_source)
     time.sleep(5)
 
     page_source = driver.page_source
@@ -178,7 +178,7 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,page_source,final_links)
+    Emr_Crawlers_Logs(c_name,Crawler_source,final_links)
 
     for i , j ,k , title in zip(final_links, dates, announcement_type, titles):
         if i in db_list:
@@ -235,7 +235,7 @@ try:
             company_news['title']=title
             company_news['Language']= language
             company_news['announcementType']= announcement_type
-            company_news['Source'] = page_source
+            company_news['Source'] = Crawler_source
             company_news['News_Weblink'] = i
             company_news['photo']= image
             company_news['videos']= ''

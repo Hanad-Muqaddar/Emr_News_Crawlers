@@ -175,8 +175,8 @@ try:
 
     page_source = "https://www.boschrexroth.com/en/de/company/press/"
     Emr_Crawlers_Logs(c_name,page_source,news_links)
+
     for i in news_links:
-        
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1

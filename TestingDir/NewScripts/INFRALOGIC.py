@@ -44,9 +44,8 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
-
+from scrapy import Selector
 from newspaper import fulltext
-
 from googletrans import Translator
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
@@ -139,24 +138,22 @@ else:
 
 # *****************************************************************************
 try:
+
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    Main_url = "http://www.infralogic.se/"
-    Base_url = "http://www.infralogic.se/"
-    result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
+    Main_url = "http://www.infralogic.se"
+    page_source = "https://www.infralogic.se/news"
+
+    result = requests.get(page_source,headers=headers, verify=False)
+    response = Selector(result)
+    links = response.xpath('//div[@class="news-items"]/a/@href').getall()
+    news_links = [Main_url + l for l in links]
+    print(news_links)
 
     def translate(Trans):
         translator = Translator()
         Trans_text = translator.translate(Trans,dest='en')
         return Trans_text.text
     
-    news_links = []
-
-    links = soup.find('ul',{ "class" : "category-module mod-list"}).find_all('li')
-    for link in links:
-        news_link = Main_url + link.find('a',{ "class" : "mod-articles-category-title"}).get('href')
-        if news_link not in news_links:
-            news_links.append(news_link)
 
     # Creating a list of links already avilable in database
     links_list = []
@@ -164,7 +161,6 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    page_source = "http://www.infralogic.se/"
     Emr_Crawlers_Logs(c_name,page_source,news_links)
     
     for i in news_links: 
@@ -184,6 +180,8 @@ try:
                 title = translate(title)
             except:
                 title =""
+
+            print(title)
             
             announcement_type = "Press Release"
             language = "en-us"        
@@ -210,11 +208,11 @@ try:
             news_weblink = i
             
             try:
-                announcement = data.find('div',{"itemprop":"articleBody"}).get_text()
+                announcement = data.find('div',{"class":"news-body"}).get_text()
                 announcement = translate(announcement)         
             except:
                 announcement = ""
-            
+
             date = datetime.datetime.now()
         
             company_news = {}
@@ -250,7 +248,8 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.datetime.now()
-except:
+except Exception as e:
+    print(e)
     Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()

@@ -136,11 +136,15 @@ else:
 # *****************************************************************************
 
 try:
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     BASE_URL = "https://www.investors.acuitybrands.com"
-    result = requests.get("https://www.investors.acuitybrands.com/news-releases")
+    result = requests.get("https://www.investors.acuitybrands.com/news-releases",headers=headers)
     response = Selector(result)
     links = response.css(".news-releases a::attr(href)").getall()
     FINAL_links = [BASE_URL + link for link in links]
+
+    print(FINAL_links)
+
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
@@ -154,19 +158,22 @@ try:
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1
+            print("Already Crawled")
             continue
         else:
-            result1 = requests.get(i)
+            result1 = requests.get(i,headers=headers)
             response1 = Selector(result1)
             try:
                 news_date = response1.css(".date-field .field__item ::text").get()
                 news_date = dateparser.parse(news_date,  settings={'DATE_ORDER': 'DMY'})
             except:
                 news_date = ""
+            print(news_date)
             try:
                 title = response1.css(".field--name-field-nir-news-title .field__item ::text").get()
             except:
                 title = ""
+            print(title)
             try:
                 analysis = response1.xpath("//meta[@name='description']/@content").get()
             except:
@@ -219,6 +226,7 @@ try:
 
     ended_on = datetime.datetime.now()
 except Exception as e:
+    print(e)
     Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()

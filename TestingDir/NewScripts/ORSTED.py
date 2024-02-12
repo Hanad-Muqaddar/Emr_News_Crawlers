@@ -48,6 +48,7 @@ from newspaper import fulltext
 
 from scrapy import Selector
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+
 # ================================================================================
 # Comment these lines when you are running locally
 import importlib.util
@@ -59,6 +60,7 @@ Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
+
 # ************************************************************************
 # defining variables
 
@@ -168,6 +170,8 @@ try:
         link = link.text
         if '/en/media/newsroom/news/' in link or 'en/company-announcement-list/'in link and link not in news_links:
             news_links.append(link) 
+
+    print(news_links)
     
     links_list = []
     mydoc = collection.find()
@@ -175,7 +179,9 @@ try:
         links_list.append(x['News_Weblink'])
 
     page_source = "https://orsted.com/en/media/newsroom/news"
+ 
     Emr_Crawlers_Logs(c_name,page_source,news_links)
+
     for i in news_links:
         if i in links_list:
             total_crwalled_links += 1
@@ -190,6 +196,7 @@ try:
                 title = data.find('meta',attrs = {'property':'og:title'}).get('content')
             except:
                 title = ""
+            print(title)
             
             announcement_type = "News"
             language = "en-us"
@@ -212,7 +219,7 @@ try:
             except:
                 news_date = ""
 
-            
+            print(news_date)
             
             try:
                 announcement = ann_response.xpath('//section[contains(@class,"container-fluid narrow-container")]//div[contains(@class,"article-content")]').get()
@@ -268,7 +275,8 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.now()
-except:
+except Exception as e:
+    print(e)
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()

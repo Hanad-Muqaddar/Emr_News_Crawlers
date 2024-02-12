@@ -259,7 +259,6 @@ try:
         All_title_list.append(x['title'])
 
     Emr_Crawlers_Logs(c_name,page_source,news_links)
-
     for i in news_links:
         if i in db_list:
             Already_exist += 1
@@ -276,7 +275,7 @@ try:
                 Already_exist += 1
                 total_crwalled_links += 1
                 print('Title Already Exist')
-                # continue
+                continue
             
             else:
                 try:
