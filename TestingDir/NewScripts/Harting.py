@@ -137,7 +137,7 @@ else:
 # *****************************************************************************
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    page_source = "https://www.harting.com/DE/en-gb/news/company"
+    page_source = "https://www.harting.com/DE/en-gb/news"
     Main_url = "https://www.harting.com"
     page = requests.get(page_source)
     soup = BeautifulSoup(page.content , 'lxml')
@@ -192,7 +192,7 @@ try:
                 date = data.find('article', {"role":"article"}).find('div', {"class":"node-article-full__submitted width--content"}).get_text(strip=True)
                 f_date = date.replace('on','').split('at')[0].strip()
                 news_date = dateparser.parse(f_date,  settings={'DATE_ORDER': 'DMY'})
-                # print(news_date)
+                print(news_date)
             except:
                 news_date = ""
 

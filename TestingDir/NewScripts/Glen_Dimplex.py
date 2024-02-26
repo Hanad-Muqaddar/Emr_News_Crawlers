@@ -144,7 +144,7 @@ try:
     result = requests.get(page_source,headers=headers)
     response = Selector(text=result.content)
     
-    news_links = response.xpath('//div[@class="container"]//article/a[@role="article"]/@href').getall()
+    news_links = response.xpath('//div[@class="container"]//article/a/@href').getall()
     f_link = [Main_url + l for l in news_links]
     print(f_link)
     # print(len(f_link))

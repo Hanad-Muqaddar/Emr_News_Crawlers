@@ -161,20 +161,23 @@ def parse_filtered_news(announcement):
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Base_Url = "https://www.legrandgroup.com"
-    result = requests.get("https://www.legrandgroup.com/en/press/newsroom",headers=headers)
+    Web_page = "https://www.legrandgroup.com/en/press"
+
+    result = requests.get(Web_page,headers=headers)
     response = Selector(result)
-    links = response.css(".text a ::attr(href)").getall()
-    all_links = []
-    for link in links:
-        all_links.append(Base_Url + link)
+    links = response.xpath('//div[@class="grid"]//ul/li/a/@href').getall()
+    all_links = [Base_Url + l for l in links]
+    
 
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
     
-    Web_page = "https://www.legrandgroup.com/en/press/newsroom"
+    
     Emr_Crawlers_Logs(c_name,Web_page,all_links)
+
+    print(all_links)
 
     for i in all_links:
         
@@ -191,10 +194,12 @@ try:
                 news_date = dateparser.parse(news_date)
             except:
                 news_date = ""
+            print(news_date)
             try:
                 title = response1.xpath('//h2[@itemprop="headline"]/text()').get()
             except:
                 title = ""
+            print(title)
             try:
                 analysis = response1.xpath("//meta[@name='description']/@content").get()
             except:
@@ -232,7 +237,6 @@ try:
             except:
                 announcement_type = "PRESS RELEASE"
             language = "en-US"
-            page_source = "https://www.legrandgroup.com/en/press/newsroom"
             crawled_date = datetime.datetime.now()
 
             company_news = {}
@@ -244,7 +248,7 @@ try:
             company_news['title']=title
             company_news['Language']= language
             company_news['announcementType']= announcement_type
-            company_news['Source'] = page_source
+            company_news['Source'] = Web_page
             company_news['News_Weblink'] = i
             company_news['photo']= image
             company_news['videos']= ''
@@ -272,6 +276,7 @@ try:
 
     ended_on = datetime.datetime.now()
 except Exception as e:
+    print(e)
     Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()

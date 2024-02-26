@@ -140,15 +140,21 @@ else:
 # *****************************************************************************
 
 try:
+    proxies = {'http': f"http://waleeProxy:Cheeta@1de.proxymesh.com:31280",
+            'https': f"http://waleeProxy:Cheeta@1@de.proxymesh.com:31280"}
+
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     d = feedparser.parse('https://pressroom.grainger.com/rss/pressrelease.aspx')
     data = d.entries
+
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
     Optimization_links = []
-    for i in data:        
+    for i in data:    
+       
         Optimization_links.append(i.link)
         if i.link in db_list:
             Already_exist += 1
@@ -156,19 +162,24 @@ try:
             print("Already Crawled")
             continue
         else:
-            result1 = requests.get(i.link)
+            result1 = requests.get(i.link, proxies=proxies, headers=headers)
             response1 = Selector(result1)
+
             try:
-                news_date = response1.css("#_ctrl0_ctl66_lblDate ::text").get()
-                news_date = dateparser.parse(news_date,  settings={'DATE_ORDER': 'DMY'})
-                # print(news_date)
+                news_date = dateparser.parse(i.published,  settings={'DATE_ORDER': 'DMY'})
+                print(news_date)
             except:
                 news_date = ""
+
+            print(news_date)
+
             try:
-                title = response1.css("#_ctrl0_ctl66_lblModuleDetailHeadline ::text").get()
-                # print(title)
+                title = i.title
+                
             except:
                 title = ""
+            print(title)
+
             try:
                 analysis = response1.xpath("//meta[@property='og:description']/@content").get()
             except:
@@ -181,6 +192,7 @@ try:
             try:
                 announcement = fulltext(result1.text)
                 announcement = announcement.replace('\n','<br>')
+                print(announcement)
             except:
                 announcement = ""
             announcement_type = "News"
@@ -223,6 +235,7 @@ try:
 
     ended_on = datetime.datetime.now()
 except Exception as e:
+    print(e)
     Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()

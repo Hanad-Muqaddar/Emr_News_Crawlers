@@ -43,6 +43,8 @@ from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
 
+from scrapy import Selector
+
 from urllib.request import Request, urlopen
 from newspaper import fulltext
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
@@ -140,36 +142,28 @@ try:
     Main_url = "https://imelco.com" 
     Base_url = "https://imelco.com/publications/press-releases" 
     result = requests.get(Base_url, verify=False, headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
+    # soup = BeautifulSoup(result.content , 'lxml')
     
     news_Titles = []
     news_dates = [] 
     pdfs = []
 
-    N_Titles = soup.find_all('h3',attrs = {"style":"display:inline-block; margin:0.25em 0;"})
-    for title in N_Titles:
-        news_Titles.append(title.get_text(strip=True))
+    response = Selector(result)
+    divs = response.xpath('//div[@id="wpv-view-layout-1088"]//div[@style="display:inline-block; font-style: italic; font-size: 0.75em; margin-right:0.25em; "]')
+    for div in divs:
+        n_date = div.xpath("normalize-space(.)").get()
+        news_dates.append(n_date)
+
+        N_Titles = div.xpath("normalize-space(.//following-sibling::br/following-sibling::a[1]/h3)").get()
+        news_Titles.append(N_Titles)
         
-    N_Dates = soup.find_all('div',attrs = {"style":"display:inline-block; font-style: italic; font-size: 0.75em; margin-right:0.25em; "})
-    for N_Date in N_Dates:
-        news_dates.append(N_Date.get_text(strip=True))
-    
-    pdf = soup.find('div',attrs = { "id" : "wpv-view-layout-1088"}).find_all('a',attrs = { "target" : "_blank"})
-    for p in pdf:
-        p= p.get('href')
-        pdfs.append(p)
+        pdf = div.xpath('.//following-sibling::br/following-sibling::a[1]/@href').get()
+        pdfs.append(pdf)
 
-    pdf_set = set(pdfs)
-
-
-
-    # print(news_Titles)
-    # print(news_dates)
-    # print(pdf_set)
 
     print(len(news_Titles))
     print(len(news_dates))
-    print(len(pdf_set))
+    print(len(pdfs))
 
     # Creating a list of links already avilable in database
     links_list = []
@@ -178,15 +172,21 @@ try:
         links_list.append(x['News_Weblink'])
 
     page_source = "https://imelco.com/publications/press-releases" 
-    Emr_Crawlers_Logs(c_name,page_source,pdf_set)
+    # Emr_Crawlers_Logs(c_name,page_source,pdf_set)
 
-    for i , N_Date, p in zip(news_Titles,news_dates,pdf_set):
+    for i , N_Date, p in zip(news_Titles,news_dates,pdfs):
+
+        # print(i)
+        # print(N_Date)
+        # print(p)
+        # print('\n\n')
         
         if p in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue    
+
         else: 
        
             title = i 
@@ -241,7 +241,8 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.now()
-except:
+except Exception as e:
+    print(e)
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()

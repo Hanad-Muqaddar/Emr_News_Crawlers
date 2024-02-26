@@ -65,6 +65,8 @@ crawlerToCollectionMapping={
     "ROCKWELL":"ROCKWELL",
     "SCHNIDER_ELECTRIC":"SCHNIDER_ELECTRIC",
     "SIEMENS_ENERGY":"SIEMENS_ENERGY",
+    "Siemens_Second":"Siemens_Second",
+    "Siemens_Third":"Siemens_Third",
     "SIEMENS":"SIEMENS",
     "SITECO":"SITECO",
     "SONEPAR":"SONEPAR",
@@ -295,6 +297,9 @@ Emr_News_Cralers_Dict = {
     
     # "SCHNIDER_ELECTRIC":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "SIEMENS_ENERGY":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
+    "Siemens_Second":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
+    "Siemens_Third":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
+
     "SIEMENS":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "SIGNIFY":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",
     "SITECO":"/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/",

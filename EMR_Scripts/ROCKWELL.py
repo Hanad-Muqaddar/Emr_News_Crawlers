@@ -167,7 +167,9 @@ try:
     time.sleep(5)
 
     news_links = []
-    links = driver.find_elements(By.XPATH, '//div[@id="whats-new"]//DIV[@class="content-tile"]//a[@class="teaser__link-over"]')
+    # links = driver.find_elements(By.XPATH, '//div[@id="whats-new"]//DIV[@class="content-tile"]//a[@class="teaser__link-over"]')
+
+    links = driver.find_elements(By.XPATH, ' //generic-filter//div[@class="filter__results-content-container"]/div[@class="generic-filter__result"]//a[@class="generic-filter__result-title"]')
     for link in links:
         news_link = link.get_attribute('href')
         news_links.append(news_link)

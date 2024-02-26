@@ -138,7 +138,7 @@ try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://www.urmet.com"
     page_source = "https://www.urmet.com/en-us/news-and-events/news"
-    result = requests.get(page_source, verify=False)
+    result = requests.get(page_source)
     soup = BeautifulSoup(result.content , 'lxml')
     
     news_links = []
@@ -146,11 +146,13 @@ try:
 
     links = soup.find_all('article', class_=re.compile(r"article-news"))
     for link in links:
-        news_link = link.find('a',{ "class" : "article-news__image"}).get('href')
+        # print(link)
+        # print("here")
+        news_link = link.find('a',{ "class" : "news_image"}).get('href')
         if news_link not in news_links:
             news_links.append(news_link)
             try:
-                news_date = link.find('div',{"class":"article-news__publish-date"}).get_text(strip=True)
+                news_date = link.find('div',{"class":"news_publishdate"}).get_text(strip=True)
                 news_dates.append(news_date)
             except:
                 news_date = ""
@@ -215,7 +217,7 @@ try:
             news_weblink = i
             
             try:
-                announcement = data.find('div',{"class":"main_content"}).get_text(strip=True)
+                announcement = data.find('div',{"class":"edn_content"}).get_text(strip=True)
                 print(announcement)            
             except:
                 announcement = ""
@@ -255,7 +257,8 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.now()
-except:
+except Exception as e:
+    print(e)
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()

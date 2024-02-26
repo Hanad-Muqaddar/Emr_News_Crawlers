@@ -63,7 +63,7 @@ spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', modul
 Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
-# ================================================================================
+# # ================================================================================
 # defining variables
 
 running_Sequence = []
@@ -194,7 +194,7 @@ try:
             response2 = Selector(result2)
             
             try:
-                title = response2.xpath('//div[@class="aem-press-header__title col-sm-11"]/h1/text()').get()
+                title = response2.xpath('normalize-space(//div[@class="aem-press-header__title col-sm-11"])').get()
                 print(title)
             except:
                 title = response2.xpath('///meta[@name="og:title"]/@content').get()

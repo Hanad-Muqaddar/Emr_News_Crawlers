@@ -44,7 +44,7 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
-
+from newspaper import fulltext
 from scrapy import Selector
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
@@ -156,20 +156,25 @@ try:
     Emr_Crawlers_Logs(c_name,page_source,final_links)
 
     for link in final_links:
+        print(link)
         
         if link in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
+            
         else:
             res = requests.get(link,headers=headers)
             response2 = Selector(res)
             try:
-                title = response2.xpath('//h2[@class="text-image__heading text-left"]/text()').get()
-                print(title)
+                title = response2.xpath('//meta[@property="og:title"]/@content').get()
+                if title is None:
+                    title = response2.xpath('//h2[@class="text-image__heading text-left"]/text()').get()
             except:
                 title = ""
+            print(title)
+
             try:
                 analysis = response2.xpath("//meta[@property='og:description']/content").get()
             except:
@@ -182,10 +187,14 @@ try:
                 sub_category = response2.xpath('//meta[@property="og:type"]/@content').get()
             except:
                 sub_category = ""
+
             try:
-                announcement = response2.xpath("normalize-space(//div[@class = 'grid-container text-module-outer'])").get()
+                announcement = fulltext(res.content)
+                announcement = announcement.replace('\n','<br>')
+                # print(announcement)
             except:
                 announcement = ""
+            
             date = datetime.datetime.now()
             language = "en-US"
             page_source = "https://www.weidmuller.com/en/company/press/company_news/index.jsp"

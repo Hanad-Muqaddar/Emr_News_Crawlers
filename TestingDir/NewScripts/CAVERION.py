@@ -42,6 +42,11 @@ from datetime import datetime
 from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
+from scrapy.selector import Selector
+
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 
 from urllib.request import Request, urlopen
 from newspaper import fulltext
@@ -137,30 +142,44 @@ else:
 # *****************************************************************************
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+ 
+     # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = True
+    # Set a custom User-Agent
+    opts.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36")
+ 
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+    news_weblink = "https://www.caverion.com/newsroom/"
+    driver.get(news_weblink)
+    time.sleep(20)
     Main_url = "https://www.caverion.com"
-    Base_url = "https://www.caverion.com/newsroom/"
-    result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
-    
-    news_links = []
 
-    links = soup.find_all('div',{ "class" : "h-100 d-flex flex-column position-relative bg-white mx-3"})
+    news_links = []
+    links = driver.find_elements(By.XPATH, '//div[contains(@class,"tag-filter-item")]//a[@class="text-decoration-none"]')
     for link in links:
-        news_link = Main_url + link.find('a',{ "class" : "text-decoration-none"}).get('href')
-        if news_link not in news_links:
-            news_links.append(news_link)
+        news_link = link.get_attribute('href')
+        news_links.append(news_link)
 
     print(news_links)
     print(len(news_links))
-
+ 
      # Creating a list of links already avilable in database
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    page_source = "https://www.caverion.com/newsroom/"
-    Emr_Crawlers_Logs(c_name,page_source,news_links)   
+    Emr_Crawlers_Logs(c_name,news_weblink,news_links)   
 
     for i in news_links:  
         if i in links_list:
@@ -169,51 +188,49 @@ try:
             print("Already Crawled")
             continue
         else:   
-            response = requests.get(i, headers=headers)
-            data = BeautifulSoup(response.content, 'lxml')
+            driver.get(i)
+            time.sleep(20)
+            result1 = driver.page_source
+            # print(result1)
+            response1 = Selector(text=result1)
 
             try:
-                title = data.find('meta',attrs = {'property':'og:title'}).get('content')
-                title = title.replace('- Nestor Cables','')         
-                print(title)
+                title = response1.xpath('//meta[@property="og:title"]/@content').get()
             except:
                 title = ""
-                print(title)
+
+            print(title)
             
             announcement_type = "News"
             language = "en-us"
 
             try:
-                image = data.find('meta', attrs = {"property":"og:image"}).get("content")
+                image = Main_url + response1.xpath('//article//picture[@class="masthead__hero"]/img/@src').get()
                 print(image)
             except:
                 image = ""
-                print(image)
 
-            try:
-                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-            except:
-                sub_category = ""
+            sub_category = ""
             
             try:
-                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+                analysis = response1.find('meta', attrs = {"property":"og:description"}).get("content")
             except:
                 analysis = ""
+
             try:
-                date = data.find('div', {"class":"mt-5 mb-4"}).find('div', {"class":"mb-4 mt-2 d-flex"}).find(text=True, recursive=False).strip()
-                print(date)
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                n_date = response1.xpath('normalize-space(//div[@class="page NewsArticlePage"]/div[@class="row"]/div[1]/div[1]/div[1])').get()
+                f_n_date = n_date.split(' ')[0]
+                news_date = dateparser.parse(f_n_date,  settings={'DATE_ORDER': 'DMY'})
+                print('\n\n')
                 print(news_date)
+                print('\n\n')
             except:
                 news_date = ""
-            
-            news_weblink = i
-            
-            try:            
-                html = requests.get(i).text
-                announcement = fulltext(html)
+
+            try:
+                announcement = fulltext(result1)
                 announcement = announcement.replace('\n','<br>')
-                print(announcement)
+                # print(announcement)
                 
             except:
                 announcement = ""
@@ -229,8 +246,8 @@ try:
             company_news['title']=title
             company_news['Language']= language
             company_news['announcementType']= announcement_type
-            company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
+            company_news['Source'] = news_weblink
+            company_news['News_Weblink'] = i
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement
@@ -253,7 +270,8 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.now()
-except:
+except Exception as e:
+    print(e)
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
