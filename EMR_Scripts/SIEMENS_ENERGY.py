@@ -144,7 +144,7 @@ try:
     
     news_links = []
 
-    News = response.xpath('//div[contains(@class,"press-search-results-view-row content-type-c2-ct-press-release")]/div[@class="views-field views-field-title"]/a/@href').getall()
+    News = response.xpath('//div[contains(@class,"press-search-results-view-row content-type-c2-ct-press")]/div[@class="views-field views-field-title"]/a/@href').getall()
     for n in News:
         f_news_links = Main_url + n
         # print(f_news_links)

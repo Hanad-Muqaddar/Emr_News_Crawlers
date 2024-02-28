@@ -52,7 +52,6 @@ from googletrans import Translator
 from scrapy import Selector
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
-
 # ================================================================================
 # Comment these lines when you are running locally
 import importlib.util
@@ -158,6 +157,7 @@ try:
         
 
     for i in f_links:
+        print(i)
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1
@@ -170,26 +170,27 @@ try:
             response1 = Selector(result1)
 
             try:
-                news_date = response1.xpath("//meta[@name = 'dc:date.modified']/@content").get()
-                news_date = dateparser.parse(news_date,  settings={'DATE_ORDER': 'YMD'} )
-            except:
-                news_date = datetime.now()
-
-            print(news_date)
-        
-            try:
-                title = response1.xpath("//meta[@property='og:title']/@content").get()
+                title = response1.xpath("//meta[@name='og:title']/@content").get()
             except:
                 title = ""
 
             print(title)
 
             try:
-                analysis = response1.xpath("//meta[@property='og:description']/@content").get()
+                news_date = response1.xpath("//meta[@name = 'dc:date.modified']/@content").get()
+                news_date = dateparser.parse(news_date,  settings={'DATE_ORDER': 'YMD'} )
+            except:
+                news_date = datetime.now()
+
+            print(news_date)      
+            
+
+            try:
+                analysis = response1.xpath("//meta[@name='og:description']/@content").get()
             except:
                 analysis = ""
             try:
-                image = response1.xpath("//meta[@property='og:image']/@content").get()
+                image = response1.xpath("//meta[@name='og:image']/@content").get()
             except:
                 image = ""
 
