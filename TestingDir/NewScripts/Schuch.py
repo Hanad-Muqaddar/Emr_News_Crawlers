@@ -162,12 +162,12 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    current_date = datetime.now().date()
-
+    current_date = datetime.now()
     
     Emr_Crawlers_Logs(c_name,page_source,news_links) 
 
     for i in news_links:  
+        print(i)
         if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -241,6 +241,7 @@ try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
+                print(e)
                 running_Sequence.append(e)
     
     if Already_exist >= 1:
@@ -298,4 +299,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'None'
 
-error_logs.insert_one(log)
+# error_logs.insert_one(log)

@@ -56,7 +56,6 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
-
 # ================================================================================
 # Comment these lines when you are running locally
 import importlib.util
@@ -177,19 +176,20 @@ try:
             response1 = Selector(result1)
 
             try:
-                news_date = response1.xpath("//meta[@name = 'dc:date.modified']/@content").get()
-                news_date = dateparser.parse(news_date,  settings={'DATE_ORDER': 'YMD'} )
-            except:
-                news_date = datetime.now()
-
-            print(news_date)
-        
-            try:
                 title = response1.xpath("//meta[@property='og:title']/@content").get()
             except:
                 title = ""
 
             print(title)
+            
+            try:
+                news_date = response1.xpath('normalize-space(//div[@class="aem-press-header__date"]/span)').get()
+                news_date = dateparser.parse(news_date,  settings={'DATE_ORDER': 'YMD'} )
+            except:
+                news_date = datetime.now()
+
+            print(news_date)
+                
 
             try:
                 analysis = response1.xpath("//meta[@property='og:description']/@content").get()

@@ -155,7 +155,7 @@ try:
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
-    opts.headless = False
+    opts.headless = True
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
@@ -164,7 +164,7 @@ try:
     page_source = "https://ir.rockwellautomation.com/press-releases/default.aspx"
     
     driver.get(page_source)
-    time.sleep(5)
+    time.sleep(10)
 
     news_links = []
     # links = driver.find_elements(By.XPATH, '//div[@id="whats-new"]//DIV[@class="content-tile"]//a[@class="teaser__link-over"]')

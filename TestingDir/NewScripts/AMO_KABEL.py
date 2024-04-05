@@ -42,7 +42,7 @@ from datetime import datetime
 from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
-
+from scrapy import Selector
 from urllib.request import Request, urlopen
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
@@ -139,16 +139,10 @@ try:
     Main_url = "https://amokabel.com"
     Base_url = "https://amokabel.com/glo/news-archive"
     result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
+
+    response = Selector(result)
+    news_links = response.xpath('//div[@class="article_archive"]//div[contains(@class,"the-articles-outer")]/div[@class="row"]/div/a[contains(@href,"https://amokabel.com/glo/a")]/@href').getall()
     
-    news_links = []
-
-    links = soup.find('ul',{ "class" : "news-archive"}).find_all('li')
-    for link in links:
-        news_link = link.find('a').get('href')
-        if news_link not in news_links:
-            news_links.append(news_link)
-
     print(news_links)
     print(len(news_links))
 
@@ -198,7 +192,7 @@ try:
                 analysis = ""
 
             try:            
-                date = data.find('small',{'class':'date'}).get_text(strip=True)
+                date = data.find('p',{'class':'smallBlue'}).get_text(strip=True)
                 print(date)
                 news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
                 print(news_date)
@@ -210,7 +204,7 @@ try:
             news_weblink = i
             
             try:            
-                announcement = data.find('div', {'class': 'default-content article-single mt-5'}).find('div', {'class': 'container'}).select("div.row:nth-of-type(2)")[0].get_text()
+                announcement = data.find('div', {'class': 'article-single-content'}).get_text()
                 print(announcement)
             except:
                 announcement = ""

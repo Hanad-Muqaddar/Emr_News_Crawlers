@@ -63,7 +63,6 @@ spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
 
-
 running_Sequence = []
 
 started_on = datetime.datetime.now()
@@ -254,7 +253,6 @@ try:
                 running_Sequence.append(e)
         
     if Already_exist >= 1:
-
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
     else:
 
@@ -264,6 +262,7 @@ try:
 
     ended_on = datetime.datetime.now()
 except Exception as e:
+    print(e)
     Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()

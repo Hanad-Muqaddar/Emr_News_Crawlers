@@ -44,9 +44,16 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
+
 from newspaper import fulltext
 
+from googletrans import Translator
 from scrapy import Selector
+
+from newspaper import fulltext
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -60,6 +67,8 @@ Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
+
+# ************************************************************************
 # defining variables
 
 running_Sequence = []
@@ -122,7 +131,7 @@ else:
 
     last_time = last_insertion['Date']
 
-    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+    # running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
 
     Crwl_time = last_insertion['Date']
 
@@ -135,171 +144,114 @@ else:
 ####################################################
 
 # *****************************************************************************
-def parse_filtered_news(announcement):
-    api_url = "https://admin.new.emr-online.com/api/history/filterbody"
-    payload = json.dumps({
-                            "originalBody": announcement
-                            })
-    headers = {
-                'Content-Type': 'application/json'
-                }
-    return_response = requests.request("POST", api_url, headers=headers, data=payload)
-    new_data = return_response.text
-    new_data = json.loads(new_data)
-    status = new_data['statusCode']
-    if status == 200:
-        return new_data
-    else:
-        new_data =  ""
-        return new_data
-
 try:
-    proxies = {'http': f"http://waleeProxy:Cheeta@1@de.proxymesh.com:31280",
-            'https': f"http://waleeProxy:Cheeta@1@de.proxymesh.com:31280"}
     
-    print("Starting a script")
+    Main_url = "https://leviton.com"
+    page_source = "https://leviton.com/company/press-releases"
     
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
-               "Content-Type": "text/html; charset=UTF-8",
-                
-               }
-    Base_url = "https://www.leviton.com/sites/Satellite?pagename=LC/Utilities/GetAllPressReleases&d=Default&id=1469251297323"
-    Main_url = "https://www.leviton.com"
-    try:
-        page = requests.get(Base_url,headers=headers)
-        
-    except Exception as e:
-        print(e)
-    json_result = page.json()
-    
-    news_links = []
-    news_dates = []
 
-    for data in json_result['pressreleases']:
-        date = data['shortdescription']
-        news_dates.append(date)
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    result = requests.get(page_source,headers=headers)
+    response = Selector(result)
+    N_links = []
+    N_Dates = []
+    News = response.xpath('//div[@class="cmp-container"]//div[@class="cmp-text"]/ul/li')
+    for n in News:
+        link = Main_url + n.xpath('./a/@href').get()
+        N_links.append(link)
 
-        link = Main_url + data['assoc_link']
-        news_links.append(link)
+        N_Date = n.xpath('.//br/following-sibling::text()[1]').get()
+        N_Date = N_Date.replace('\r\n','')
+        N_Dates.append(N_Date)
 
+
+    # print(N_links)
+    # print(N_Dates)
+    # print(len(N_links))
+    # print(len(N_Dates))
 
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-    print(news_links)
-
-    All_title_list = []
-    mydoc = collection.find()
-    for x in mydoc:
-        All_title_list.append(x['title'])
-
-    print(news_links)
-    print(news_dates)
-
-    Web_Page = "https://www.leviton.com/en/company/news-events/press-releases"
-    Emr_Crawlers_Logs(c_name,Web_Page,news_links)
-
-    for i,d in zip(news_links, news_dates):
         
+    for i,d in zip(N_links,N_Dates):
         if i in db_list:
-            total_crwalled_links += 1
             Already_exist += 1
+            total_crwalled_links += 1
             print("Already Crawled")
             continue
-
         else:
-            response = requests.get(i, headers=headers)
-            data = BeautifulSoup(response.content, 'lxml')
-            response1 = Selector(response)
+            
+            result1 = requests.get(i,headers=headers, verify=False)
+            response1 = Selector(result1)
+
             try:
-                title = data.find('div', attrs = {"class":"title--a"}).get_text(strip=True)
-                print(title)
+                title = response1.xpath("//meta[@property='og:title']/@content").get()
             except:
-                title = data.find('title').text
-                print(title)
+                title = ""
+
+            print(title)
             
-            if title in All_title_list:
-                Already_exist += 1
+            try:
+                news_date = dateparser.parse(d,  settings={'DATE_ORDER': 'YMD'} )
+            except:
+                news_date = datetime.now()
+
+            print(news_date)
+                
+
+            try:
+                analysis = response1.xpath("//meta[@property='og:description']/@content").get()
+            except:
+                analysis = ""
+            try:
+                image = response1.xpath("//meta[@property='og:image']/@content").get()
+            except:
+                image = ""
+
+            sub_category = ""
+
+            try:
+                announcement = fulltext(result1.text)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
+            except:
+                announcement = ""
+            print(announcement)
+
+            announcement_type = "News"            
+            language = "en-US"
+            
+            crawled_date = datetime.now()
+
+            company_news = {}
+            company_news['companyId'] = ''
+            company_news['location']=''
+            company_news['comment']=''
+            company_news['Date']= news_date
+            company_news['Crawled_on']=crawled_date
+            company_news['title']=title
+            company_news['Language']= language
+            company_news['announcementType']= announcement_type
+            company_news['Source'] = page_source
+            company_news['News_Weblink'] = i
+            company_news['photo']= image
+            company_news['videos']= ''
+            company_news['announcement']=announcement
+            company_news['historySubCategory']= sub_category
+            company_news['analysis'] = analysis
+            try:
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
-                print('Title Already Exist')
-                continue
-            
-            else:
-            
-                announcement_type = "Press Release"
-                language = "en-us"
-                image = "" 
+            except Exception as e:
+                running_Sequence.append(e)
 
-                try:
-                    sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
-                except:
-                    sub_category = ""
-                
-                try:
-                    analysis = data.find('meta', attrs = {"name":"description"}).get("content")
-                except:
-                    analysis = ""
-                try:
-                    news_date = dateparser.parse(d )
-                    # print(news_date)
-                except:
-                    news_date = ""
+    Emr_Crawlers_Logs(c_name,page_source,N_links)
 
-                page_source = "https://www.leviton.com/en/company/news-events/press-releases"
-                news_weblink = i
-                
-                try:
-                    announcement = response1.xpath("//div[@class='ss-rg wrapper text__wrapper align-left__wrapper']").get()
-                    replace1 = response1.xpath("//div[@class='ss-rg wrapper text__wrapper align-left__wrapper']//div[@class='title--a']").get()
-                    announcement = announcement.replace(replace1, "")
-                    announcement = announcement.replace('\n','<br>')
-                    return_data = parse_filtered_news(announcement)
-                    announcement = return_data['filteredBody']
-                    emr_essentail = return_data['emrEssential']
-                    emr_executive = return_data['emrExecutive']
-                    emr_lite = return_data['emrLite']
-                    emr_html = return_data['emrHtmlText']
-                except:
-                    announcement = ""
-                    emr_essentail = ""
-                    emr_executive = ""
-                    emr_lite = ""
-                    emr_html = ""
-                
-                date = datetime.now()
-                # Creating a list of links already avilable in database
-                
-                company_news = {}
-                company_news['companyId'] = ''
-                company_news['location']=''
-                company_news['comment']=''
-                company_news['Date']= news_date
-                company_news['Crawled_on']=date
-                company_news['title']=title
-                company_news['Language']= language
-                company_news['announcementType']= announcement_type
-                company_news['Source'] = page_source
-                company_news['News_Weblink'] = news_weblink
-                company_news['photo']= image
-                company_news['videos']= ''
-                company_news['announcement']=announcement
-                company_news['historySubCategory']= sub_category
-                company_news['analysis'] = analysis
-                company_news['emrExecutive'] = emr_executive
-                company_news['emrEssential'] = emr_essentail
-                company_news['emrLite'] = emr_lite
-                company_news['News_Html'] = emr_html
-                try:
-                    collection.insert_one(company_news)
-                    total_crwalled_links += 1
-                except Exception as e:
-                    running_Sequence.append(e)
-    
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
-
     else:
 
         tmp_txt = ''
@@ -307,7 +259,8 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.now()
-except:
+except Exception as e:
+    print(e)
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
@@ -351,4 +304,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'None'
 
-# error_logs.insert_one(log)
+error_logs.insert_one(log)

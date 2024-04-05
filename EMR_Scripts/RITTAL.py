@@ -143,15 +143,15 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
 
-    page_source = "https://www.rittal.com/com-en/Company/Presse/"
+    page_source = "https://www.rittal.com/com-en/Company/Presse/Pressemeldungen"
     result = requests.get(page_source,headers=headers)
     links_list = []
 
     response = Selector(result)
-    links = response.xpath('//div[@class="article-content"]/div[@class="article-block --grey"][1]//a[@class="teaser-image"]/@href').getall()
+    links = response.xpath('//div[@class="teaser-grid-wrapper"]/div[@class="teaser --default"]//div[@class="teaser-buttons"]/a/@href').getall()
     F_links = ["https://www.rittal.com" + l for l in links]
-    print(F_links)
- 
+    # print(F_links)
+    print(len(F_links))
 
     # Creating a list of links already avilable in database
     links_list = []
@@ -236,7 +236,7 @@ try:
 
         running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
-        ended_on = datetime.now()
+    ended_on = datetime.now()
 except:
     Error_Time =  datetime.now()
 

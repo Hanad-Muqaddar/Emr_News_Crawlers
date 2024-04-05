@@ -9,11 +9,13 @@ from random import randint
 
 from bs4 import BeautifulSoup
 
-from pymongo import MongoClient, response
+from pymongo import MongoClient
 
 from bs4 import BeautifulSoup
 
 from selenium import webdriver
+
+# from webdriver_manager.chrome import ChromeDriver
 
 from selenium.webdriver.chrome.options import Options
 
@@ -25,6 +27,8 @@ from selenium.webdriver.support import expected_conditions
 
 from selenium.webdriver.common.by import By
 
+from urllib.parse import urlparse
+
 import re
 
 import traceback
@@ -33,7 +37,7 @@ import urllib
 
 import dateparser
 
-import datetime
+from datetime import datetime
 
 from bson.objectid import ObjectId
 
@@ -41,9 +45,10 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
-from scrapy import Selector
-
 from newspaper import fulltext
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -59,11 +64,13 @@ Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
 
 # ************************************************************************
+# defining variables
+
 running_Sequence = []
 
-started_on = datetime.datetime.now()
+started_on = datetime.now()
 
-c_name = 'NEXANS' # Name of the Collection
+c_name = 'NEXANS'
 
 total_crwalled_links = 0
 
@@ -74,12 +81,8 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
 
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -115,9 +118,9 @@ except:
 
 if last_insertion == None:
 
-    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
 
-    Crwl_time = datetime.datetime.now()
+    Crwl_time = datetime.now()
 
 else:
 
@@ -136,117 +139,114 @@ else:
 ####################################################
 
 # *****************************************************************************
-def parse_filtered_news(announcement):
-    api_url = "https://admin.new.emr-online.com/api/history/filterbody"
-    payload = json.dumps({
-                            "originalBody": announcement
-                            })
-    headers = {
-                'Content-Type': 'application/json'
-                }
-    return_response = requests.request("POST", api_url, headers=headers, data=payload)
-    new_data = return_response.text
-    new_data = json.loads(new_data)
-    status = new_data['statusCode']
-    if status == 200:
-        return new_data
-    else:
-        new_data =  ""
-        return new_data
-
 try:
+
+     # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = True
+
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    result = requests.get("https://www.nexans.com/en/newsroom/news.html?currentPage=0",headers=headers)
-    response = Selector(result)
-    links = response.css(".list-news__title a ::attr(href)").getall()
-    Base_Link = "https://www.nexans.com"
-    final_links = [Base_Link + link for link in links]
-    print(final_links)
+ 
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)   
+    driver.get("https://www.nexans.com/news-media-room/news/")
+    time.sleep(10)
+    Main_url = "https://www.nexans.com"
+
+    news_links = []
+    links = driver.find_elements(By.XPATH, '//div[contains(@class,"list-articles")]//div[contains(@class,"card")]')
+    for link in links:
+        news_link = link.find_element(By.XPATH, ".//a").get_attribute('href')
+        news_links.append(news_link)
+
+    print(news_links)
+    print(len(news_links))
+
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-    
-    Web_page = "https://www.nexans.com/en/newsroom/news.html?currentPage=0"
-    Emr_Crawlers_Logs(c_name,Web_page,final_links)
 
-    for i in final_links:
+    Web_Page = "https://www.nexans.com/news-media-room/news/"
+    Emr_Crawlers_Logs(c_name, Web_Page, news_links)
+    for i in news_links:
         if i in db_list:
-            Already_exist += 1
             total_crwalled_links += 1
+            Already_exist += 1
             print("Already Crawled")
             continue
-        else:
-            result1 = requests.get(i,headers=headers)
-            response1 = Selector(result1)
+        else:        
+            driver.get(i)
+
             try:
-                news_date = response1.css(".news-page--cover__date ::text").get()
-                news_date = dateparser.parse(news_date, settings={"DATE_ORDER":"YMD"})
-            except:
-                news_date = ""
-            try:
-                title = response1.css(".news-page--cover__title ::text").get()
+                title = driver.find_element(By.XPATH, "//meta[@property='og:title']").get_attribute('content')
                 print(title)
-                # print(title)
             except:
                 title = ""
+            
+            announcement_type = "News"
+            language = "en-us"
+
             try:
-                analysis = response1.xpath("//meta[@name='description']/@content").get()
+                image = driver.find_element(By.XPATH, ' //div[contains(@id,"cp-herobanner-news-block")]//picture/img').get_attribute('src')
+            except:
+                image = ""
+            print(image)
+
+
+            sub_category = ""
+            
+            try:
+                analysis = driver.find_element(By.XPATH, "//meta[@property='og:description']").get_attribute('content')
             except:
                 analysis = ""
             try:
-                image = Base_Link +  response1.css(".news-page--cover__media img ::attr(src)").get()
+                N_date = driver.find_element(By.XPATH, "//meta[@property='article:modified_time']").get_attribute('content')
+                print(N_date)
+                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'YMD'})
+                print(news_date)
             except:
-                image = ""
-            sub_category = ""
+                news_date = ""
+
+            page_source = "https://www.nexans.com/news-media-room/news/"
+            news_weblink = i
+            # print(news_weblink)
+ 
             try:
-                d = response1.xpath("//main[contains(@class,'main')]//section").getall()
-                new_html = []
-                for iii in range(len(d)-3):
-                    new_html.append(d[iii])
-                final_html = ''.join(new_html)
-                replace1 = response1.xpath("//div[@class='cell-8 cell-t-12 prepend-2']").get()
-                announcement = final_html.replace(replace1, "")
-                announcement = announcement.replace('img src="', 'img src="https://www.nexans.com')
-                announcement = announcement.replace('\r\n','<br>')
-                return_data = parse_filtered_news(announcement)
-                announcement = return_data['filteredBody']
-                emr_essentail = return_data['emrEssential']
-                emr_executive = return_data['emrExecutive']
-                emr_lite = return_data['emrLite']
-                emr_html = return_data['emrHtmlText']
+                announcement = driver.find_element(By.XPATH, '//div[@class="teq-container"]').text
             except:
                 announcement = ""
-                emr_essentail = ""
-                emr_executive = ""
-                emr_lite = ""
-                emr_html = ""
-                
-            announcement_type = "Press Release"
-            language = "en-US"
-            page_source = "https://www.nexans.com/en/newsroom/news.html?currentPage=0"
-            crawled_date = datetime.datetime.now()
+            
+            print(announcement)
 
+            
+            date = datetime.now()
+            # Creating a list of links already avilable in database
+            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
             company_news['comment']=''
             company_news['Date']= news_date
-            company_news['Crawled_on']=crawled_date
+            company_news['Crawled_on']=date
             company_news['title']=title
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
-            company_news['News_Weblink'] = i
+            company_news['News_Weblink'] = news_weblink
             company_news['photo']= image
-            company_news['videos']= ''
+            company_news['videos']= ""
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
-            company_news['emrExecutive'] = emr_executive
-            company_news['emrEssential'] = emr_essentail
-            company_news['emrLite'] = emr_lite
-            company_news['News_Html'] = emr_html
             try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1
@@ -256,24 +256,19 @@ try:
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
+
     else:
 
         tmp_txt = ''
 
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
-    ended_on = datetime.datetime.now()
-except Exception as e:
-    Error_Time =  datetime.datetime.now()
+    ended_on = datetime.now()
+except:
+    Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
 
-    running_Sequence.append(e)
-
-
-# **************************************************************************
-
-# **************************************************************************
 
 # **************************************************************************
 rep = ''
@@ -291,6 +286,7 @@ except Exception as e:
     rep = traceback.format_exc()
 
     pass
+
 
 log = {}
 
@@ -310,6 +306,6 @@ log['Links_Skipped'] = Already_exist
 
 log['Last_news_crawl_time'] = last_time
 
-log['Browser'] = 'Chrome'
+log['Browser'] = 'None'
 
 # error_logs.insert_one(log)
