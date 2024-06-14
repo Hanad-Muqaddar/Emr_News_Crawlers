@@ -42,6 +42,7 @@ from datetime import datetime
 from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
+from scrapy import Selector
 
 from urllib.request import Request, urlopen
 from newspaper import fulltext
@@ -141,24 +142,19 @@ try:
     Main_url = "https://www.loeffelhardt.de"
     Base_url = "https://www.loeffelhardt.de/events-news/aktuelles-news.html"
     result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
-
 
     def translate(Trans):
         translator = Translator()
-        Trans_text = translator.translate(Trans,dest='en')
+        Trans_text = translator.translate(Trans, dest='en')
         return Trans_text.text
-    
-    news_links = []
+      
+    response = Selector(result)   
 
-    links = soup.find('div',{ "class" : "news-list-view template3"}).find_all('div',{ "class" : "col-md-9 articletype-0"})
-    for link in links:
-        news_link = link.find('a',{ "class" : "mehr3"}).get('href')
-        if news_link not in news_links:
-            news_links.append(news_link)
+    news_links = response.xpath('//div[contains(@class,"news-list-view")]/div[contains(@class,"news-list-item")]//a[@class="mehr3"]/@href').getall()
+    f_news_links = [Main_url + l for l in news_links]
+    print(f_news_links)
+    print(len(f_news_links))
 
-    print(news_links)
-    print(len(news_links))
 
     # Creating a list of links already avilable in database
     links_list = []
@@ -167,9 +163,9 @@ try:
         links_list.append(x['News_Weblink'])
 
     page_source = "https://www.loeffelhardt.de/events-news/aktuelles-news.html"
-    Emr_Crawlers_Logs(c_name,page_source,news_links)
+    Emr_Crawlers_Logs(c_name,page_source,f_news_links)
     
-    for i in news_links:   
+    for i in f_news_links:   
         if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -178,14 +174,17 @@ try:
         else:     
             response = requests.get(i, headers=headers)
             data = BeautifulSoup(response.content, 'lxml')
+            # print(data)
 
             try:
                 title = data.find('title').get_text(strip=True)
                 title = translate(title)
                 # print(title)
-            except:
+            except Exception as e:
+                print(e)
                 title =""
-                # print(title)
+
+            print(title)
             
             announcement_type = "News"
             language = "en-us"

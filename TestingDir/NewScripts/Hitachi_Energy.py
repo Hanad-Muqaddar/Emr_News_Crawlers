@@ -60,7 +60,7 @@ spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', modul
 Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
-# ================================================================================
+# # ================================================================================
 
 # ************************************************************************
 running_Sequence = []
@@ -229,7 +229,24 @@ try:
     opts.add_argument("--enable-cookies")
     opts.headless = True
 
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    # headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+
+    headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+    'Accept': '*/*',
+    'Accept-Encoding': 'gzip, deflate, br, zstd',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'If-Modified-Since': 'Thu, 13 Jun 2024 04:41:47 GMT',
+    'Origin': 'https://www.hitachienergy.com',
+    'Priority': 'u=1, i',
+    'Sec-Ch-Ua': '"Google Chrome";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
+    'Sec-Ch-Ua-Mobile': '?0',
+    'Sec-Ch-Ua-Platform': '"Windows"',
+    'Sec-Fetch-Dest': 'empty',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'cross-site'
+}
+
 
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
      
@@ -266,6 +283,7 @@ try:
             print('Already Crawled')
             continue
         else:
+            print("A gaya")
             result1 = requests.get(i, headers=headers)
             response1 = Selector(result1)
 
@@ -343,6 +361,7 @@ try:
 
     ended_on = datetime.datetime.now()
 except Exception as e:
+    print(e)
     Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()
@@ -391,4 +410,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'Chrome'
 
-error_logs.insert_one(log)
+# error_logs.insert_one(log)

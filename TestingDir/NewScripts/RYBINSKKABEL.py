@@ -19,8 +19,6 @@ from selenium import webdriver
 
 from selenium.webdriver.chrome.options import Options
 
-from selenium.webdriver.chrome.service import Service
-
 from selenium.webdriver.support.ui import WebDriverWait
 
 from selenium.webdriver.common.keys import Keys
@@ -46,9 +44,16 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
+from scrapy import Selector
+
 from newspaper import fulltext
 from googletrans import Translator
+
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+
 
 # ================================================================================
 # Comment these lines when you are running locally
@@ -69,7 +74,7 @@ running_Sequence = []
 
 started_on = datetime.now()
 
-c_name = 'RYBINSKKABEL' # Name of the Collection
+c_name = 'RYBINSKKABEL'
 
 total_crwalled_links = 0
 
@@ -138,93 +143,105 @@ else:
 ####################################################
 
 # *****************************************************************************
-try:   
+try:
+
+     # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = True
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    service = Service("/home/ubuntu/chrome_driver/chromedriver.exe")
-    driver = webdriver.Chrome(service=service)
-    
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+
     def translate(Trans):
         translator = Translator()
-        Trans_text = translator.translate(Trans,dest='en')
+        Trans_text = translator.translate(Trans, dest='en')
         return Trans_text.text
 
     Main_url = "https://www.rkz.ru"
-
-    driver.get("https://www.rkz.ru/company/press/")
+    page_source = "https://www.rkz.ru/company/press/"
+    
+    driver.get(page_source)
     time.sleep(5)
 
     news_links = []
-     
-    links = driver.find_elements(By.XPATH, '//div[@id="news"]/div[@class="press news"]//div[@class="item"]')
+  
+    links = driver.find_elements(By.XPATH, '//div[@id="news"]/div[@class="press news"]/div[@class="item"]//a')
     for link in links:
-        news_link = link.find_element(By.XPATH, './/h3/a').get_attribute('href')        
+        news_link = link.get_attribute('href')
         news_links.append(news_link)
-   
-    # Creating a list of links already avilable in database
-    links_list = []
+        
+    print(news_links) 
+    print(len(news_links))
+
+    driver.close()
+
+    db_list = []
     mydoc = collection.find()
     for x in mydoc:
-        links_list.append(x['News_Weblink'])
+        db_list.append(x['News_Weblink'])
 
-    page_source = "https://www.rkz.ru/company/press/"
-    Emr_Crawlers_Logs(c_name,page_source,news_links)  
-    for i in news_links: 
-        if i in links_list:
+    Emr_Crawlers_Logs(c_name, page_source,news_links)
+
+    for i in news_links:
+        if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
-        else:    
-            response = requests.get(i, headers=headers)
-            data = BeautifulSoup(response.content, 'lxml')
-
+        else: 
+            result1 = requests.get(i, headers=headers)
+            response1 = Selector(result1)       
+            
             try:
-                title = data.find('title').get_text(strip=True)
+                title = response1.xpath('//title/text()').get()
                 title = translate(title)
                 print(title)
             except:
                 title = ""
-                print(title)
             
             announcement_type = "News"
             language = "en-us"
-
-            try:
-                image = data.find("div",{"class":"press_center"}).find("img").get('src')
-            except:
-                image = ""
-            try:
-                sub_category = data.find('meta', attrs = {"name":"type"}).get("content")
-            except:
-                sub_category = ""
+            image = ""            
+            Video = ""
+            sub_category = ""
             
             try:
-                analysis = data.find('meta', attrs = {"name":"description"}).get("content")
+                analysis = response1.find('meta', attrs = {"property":"og:description"}).get("content")
+                analysis = translate(analysis)
             except:
                 analysis = ""
+
             try:
-                date = data.find('div', {"class":"date"}).get_text(strip=True)
-                date = translate(date)
-                print(date)
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                d = response1.xpath('//DIV[@class="date"]/text()').get()
+                news_date = dateparser.parse(d,  settings={'DATE_ORDER': 'DMY'})
                 print(news_date)
             except:
                 news_date = ""
 
             
             news_weblink = i
+            print(news_weblink)
             
             try:
-                announcement = data.find("div",{"class":"press_center"}).get_text()
+                announcement = fulltext(response1.content)
+                announcement = announcement.replace('\n','<br>')
                 announcement = translate(announcement)
-                print(announcement)
-                
+                print(announcement)                
             except:
                 announcement = ""
-
+            
             date = datetime.now()
-        
+            # Creating a list of links already avilable in database
+            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -237,7 +254,7 @@ try:
             company_news['Source'] = page_source
             company_news['News_Weblink'] = news_weblink
             company_news['photo']= image
-            company_news['videos']= ''
+            company_news['videos']= Video
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
@@ -276,7 +293,7 @@ try:
     Error['Error_Time'] = Error_Time
 
 except Exception as e:
-
+    print(e)
     rep = traceback.format_exc()
 
     pass

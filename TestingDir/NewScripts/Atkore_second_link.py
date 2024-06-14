@@ -170,7 +170,7 @@ try:
     news_titles = []
     news_dates = []
 
-    links = driver.find_elements(By.XPATH, '//span[@class="ContentPaneDiv3"]//div[@class="module_container module_container--content"]/div[@class="module_item"]')
+    links = driver.find_elements(By.XPATH, '//div[@class="module_container module_container--content"]/div[@class="module_item"]')
     for link in links:
         try:
             news_title = link.find_element(By.XPATH, './/div[@class="module_headline"]').text
@@ -191,7 +191,7 @@ try:
     news_titles = list(filter(None,news_titles))
     news_dates = list(filter(None,news_dates))
     
-    print(news_title)
+    print(news_titles)
     print(news_dates)
 
     # Creating a list of links already avilable in database
@@ -260,7 +260,8 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.now()
-except:
+except Exception as e:
+    print(e)
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()

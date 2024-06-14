@@ -168,14 +168,21 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+        headers = {
+        'Referer': 'https://www.se.com/us/en/about-us/newsroom/news/',
+        'Sec-Ch-Ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"Windows"',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+    }
     # result = requests.get("https://www.se.com/us/en/about-us/newsroom/news/", headers=headers, proxies=proxies)
-    result = requests.get("https://www.se.com/us/en/about-us/newsroom/news/", headers=headers, proxies=proxies)
+    result = requests.get("https://www.se.com/us/en/about-us/newsroom/news/", headers=headers)
     res = Selector(result)
 
     # data = res.css(".sdl-wiztopic-press-releases_wiztopic-card .wiztopic-content")
 
-    News_Links = res.xpath('//div[contains(@class,"sdl-wiztopic-press-releases_wiztopic-card")]//div[@class="wiztopic-image "]/a/@href').getall()
+
+    News_Links = res.xpath('//div[@id="se2--wiztopic-event-list-cards-container---"]/div[contains(@class,"se2--wiztopic-event-list--wiztopic-card")]//div[@class="slide-content"]/a[@class="extra-link-wrapper"]/@href').getall()
     f_News_Links = [ "https://www.se.com" + l for l in News_Links]
     print(f_News_Links)
 
@@ -285,6 +292,7 @@ try:
 
     ended_on = datetime.datetime.now()
 except Exception as e:
+    print(e)
     Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()

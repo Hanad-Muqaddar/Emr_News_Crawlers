@@ -285,4 +285,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'None'
 
-error_logs.insert_one(log)
+# error_logs.insert_one(log)

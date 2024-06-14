@@ -193,7 +193,7 @@ try:
             res = requests.get(news_weblink,headers=headers)
             soup2 = BeautifulSoup(res.content, 'lxml')
             try:
-                title = soup2.find("h1", class_="intro__headline").text
+                title = soup2.find("h1", class_="intro__headline").text.strip()
             except:
                 title = ""
 

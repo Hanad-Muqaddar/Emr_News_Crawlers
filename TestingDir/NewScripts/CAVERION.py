@@ -141,37 +141,22 @@ else:
 
 # *****************************************************************************
 try:
+    
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
- 
-     # defining variables
-    opts = Options()
-    # opts.add_argument("--window-size=190,100")
-    # opts.add_argument("--disable-automation")
-    opts.add_argument("--no-sandbox")
-    opts.add_argument('--profile-directory=Default')
-    opts.add_argument("start-maximized")
-    opts.add_argument("disable-infobars")
-    opts.add_argument("--lang=en")
-    opts.add_argument("--enable-javascript")
-    opts.add_argument("--enable-cookies")
-    opts.headless = True
-    # Set a custom User-Agent
-    opts.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36")
- 
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
-    news_weblink = "https://www.caverion.com/newsroom/"
-    driver.get(news_weblink)
-    time.sleep(20)
     Main_url = "https://www.caverion.com"
 
-    news_links = []
-    links = driver.find_elements(By.XPATH, '//div[contains(@class,"tag-filter-item")]//a[@class="text-decoration-none"]')
-    for link in links:
-        news_link = link.get_attribute('href')
-        news_links.append(news_link)
+    news_weblink = "https://www.caverion.com/newsroom/"
+    result = requests.get(news_weblink,headers=headers)
 
-    print(news_links)
-    print(len(news_links))
+    
+      
+    response = Selector(result)   
+
+    news_links = response.xpath('//div[contains(@class,"tag-filter-item")]//a[@class="text-decoration-none"]/@href').getall()
+    f_news_links = [Main_url + l for l in news_links]
+
+    print(f_news_links)
+    print(len(f_news_links))
  
      # Creating a list of links already avilable in database
     links_list = []
@@ -179,20 +164,17 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,news_weblink,news_links)   
+    Emr_Crawlers_Logs(c_name,news_weblink,f_news_links)   
 
-    for i in news_links:  
+    for i in f_news_links:  
         if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
         else:   
-            driver.get(i)
-            time.sleep(20)
-            result1 = driver.page_source
-            # print(result1)
-            response1 = Selector(text=result1)
+            result1 = requests.get(i, headers=headers)
+            response1 = Selector(result1)
 
             try:
                 title = response1.xpath('//meta[@property="og:title"]/@content').get()

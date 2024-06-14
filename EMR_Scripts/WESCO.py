@@ -149,7 +149,7 @@ try:
     main_url = "https://investors.wesco.com"
     page = requests.get(page_source,headers=headers)
     response = scrapy.Selector(page)
-    links = response.xpath('//div[@class="nir-widget--list "]//article//div[contains(@class,"news--read-more")]/a/@href').getall()
+    links = response.xpath('//div[contains(@class,"nir-widget--list")]//article//div[contains(@class,"news--read-more")]/a/@href').getall()
     f_links = [main_url+l for l in links]
     print(f_links)
     

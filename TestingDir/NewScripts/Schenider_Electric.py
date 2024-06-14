@@ -160,19 +160,26 @@ def parse_filtered_news(announcement):
 try:
     proxies = {'http': 'http://waleeProxy:Cheeta@1@au.proxymesh.com:31280',
             'https': 'http://waleeProxy:Cheeta@1@au.proxymesh.com:31280'}
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-
+    headers = {
+    'Referer': 'https://www.se.com/ww/en/about-us/newsroom/news/',
+    'Sec-Ch-Ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+    'Sec-Ch-Ua-Mobile': '?0',
+    'Sec-Ch-Ua-Platform': '"Windows"',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+}
+    
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    result = requests.get("https://www.se.com/ww/en/about-us/newsroom/news/", headers=headers, proxies=proxies)
+    result = requests.get("https://www.se.com/ww/en/about-us/newsroom/news/", headers=headers)
     res = Selector(result)
 
-    News_Links = res.xpath('//div[contains(@class,"sdl-wiztopic-press-releases_wiztopic-card")]//div[@class="wiztopic-image "]/a/@href').getall()
+    News_Links = res.xpath('//div[@id="se2--wiztopic-event-list-cards-container---"]/div[contains(@class,"se2--wiztopic-event-list--wiztopic-card")]//div[@class="slide-content"]/a[@class="extra-link-wrapper"]/@href').getall()
     f_News_Links = [ "https://www.se.com" + l for l in News_Links]
     print(f_News_Links)
+    
 
     Web_Page = "https://www.se.com/ww/en/about-us/newsroom/news/"
     Emr_Crawlers_Logs(c_name,Web_Page,f_News_Links)
@@ -184,9 +191,8 @@ try:
             print("Already Crawled")
             continue
         else:
-            result2 = requests.get(news_weblink, headers=headers, proxies=proxies)
+            result2 = requests.get(news_weblink, headers=headers)
             response1 = Selector(result2)
-            date_get = response1.css(".sdl-wiztopic-press-release_publication-data p:nth-child(2) span").xpath("normalize-space()").get()
             location = response1.css('.sdl-wiztopic-press-release_publication-data p:nth-child(1) span').xpath("normalize-space()").get()
             try:
                 image = response1.xpath("//meta[@name='og:image']/@content").get()
@@ -200,11 +206,15 @@ try:
                 title = response1.xpath('//meta[@name="og:title"]/@content').get()
             except:
                 title = ""
+            print(title)
+
             try:
-                news_date = date_get
-                news_date = dateparser.parse(news_date, settings={'DATE_ORDER': 'YMD'})
+                n_date = response1.xpath('normalize-space(//p[contains(@class,"time")])').get()
+                news_date = dateparser.parse(n_date, settings={'DATE_ORDER': 'YMD'})
             except:
                 news_date = ""
+            print(news_date)
+
             try:
                 sub_category = response1.xpath('//meta[@name="og:type"]/@content').get()
             except:
@@ -279,6 +289,7 @@ try:
 
     ended_on = datetime.datetime.now()
 except Exception as e:
+    print(e)
     Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()

@@ -184,7 +184,6 @@ try:
 
             print(news_date)      
             
-
             try:
                 analysis = response1.xpath("//meta[@name='og:description']/@content").get()
             except:
@@ -204,10 +203,7 @@ try:
                 announcement = ""
             print(announcement)
 
-            try:
-                announcement_type = data['@type']
-            except:
-                announcement_type = ""
+            announcement_type = ""
             language = "en-US"
             
             crawled_date = datetime.now()

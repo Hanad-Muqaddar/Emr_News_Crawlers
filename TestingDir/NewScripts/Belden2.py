@@ -44,7 +44,7 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
-
+from scrapy import Selector
 from newspaper import fulltext
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
@@ -142,6 +142,7 @@ try:
 
      # defining variables
     opts = Options()
+    user_agent = "Mozilla/5.0 (Linux; Android 9; SM-N975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.101 Mobile Safari/537.36"
     # opts.add_argument("--window-size=190,100")
     # opts.add_argument("--disable-automation")
     opts.add_argument("--no-sandbox")
@@ -151,7 +152,8 @@ try:
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
-    opts.headless = True
+    opts.add_argument(f'--user-agent={user_agent}')
+    opts.headless = False
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     
@@ -184,27 +186,27 @@ try:
             print("Already Crawled")
             continue
         else:        
-            driver.get(i)
+            result1 = requests.get(i, headers=headers)
+            time.sleep(2)
+            response1 = Selector(result1)
 
             try:
-                title = driver.find_element(By.XPATH, '//h3[contains(@class,"evergreen-news-title")]/span').text
+                title = response1.xpath('//h3[contains(@class,"evergreen-news-title")]/span/text()').get()
                 print(title)
             except:
                 title = ""
             
             announcement_type = "News"
             language = "en-us"
-
             image = ""
-
             sub_category = ""
             
             try:
-                analysis = driver.find_element(By.XPATH, "//meta[@property='og:description']").get_attribute('content')
+                analysis = response1.find('meta', attrs = {"property":"og:description"}).get("content")
             except:
                 analysis = ""
             try:
-                N_date = driver.find_element(By.XPATH, '//div[contains(@class,"evergreen-news-date-time")]/span[@class="evergreen-news-date-text"]').text
+                N_date = response1.xpath('//span[contains(@id,"_spanDate")]/text()').get()
                 print(N_date)
                 news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
                 print(news_date)
@@ -213,11 +215,14 @@ try:
 
             news_weblink = i
             print(news_weblink)
+
             try:
-                announcement = driver.find_element(By.XPATH, '//div[@class="evergreen-news-body"]').text
-                print(announcement)
+                announcement = fulltext(response1.content)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)                
             except:
                 announcement = ""
+
             
             date = datetime.now()
             # Creating a list of links already avilable in database
@@ -256,7 +261,8 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.now()
-except:
+except Exception as e:
+    print(e)
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
