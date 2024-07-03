@@ -43,22 +43,25 @@ from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
 
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
+
 from urllib.request import Request, urlopen
 from newspaper import fulltext
 from googletrans import Translator
-# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
-# ================================================================================
-# Comment these lines when you are running locally
-import importlib.util
-# Specify the absolute path to Emr_Crawlers_Optimization.py
-module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
-# Load the module using the absolute path
-spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
-Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(Emr_Crawlers_Optimization)
-Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
-# ================================================================================
-# ************************************************************************
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+# # ================================================================================
+# # Comment these lines when you are running locally
+# import importlib.util
+# # Specify the absolute path to Emr_Crawlers_Optimization.py
+# module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
+# # Load the module using the absolute path
+# spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
+# Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
+# spec.loader.exec_module(Emr_Crawlers_Optimization)
+# Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
+# # ================================================================================
+# # ************************************************************************
 # defining variables
 
 running_Sequence = []
@@ -135,11 +138,27 @@ else:
 
 # *****************************************************************************
 try:
+
+     # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = False
+
+
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    Main_url = "https://classic.obeta.de"
-    Base_url = "https://classic.obeta.de/news/branche?embedMode=1&amp;token=undefined"
-    result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+    Main_url = "https://obeta.de"
+    page_source = "https://obeta.de/news"
+    # result = requests.get(Base_url,headers=headers)
+    # soup = BeautifulSoup(result.content , 'lxml')
 
 
     def translate(Trans):
@@ -147,23 +166,38 @@ try:
         Trans_text = translator.translate(Trans,dest='en')
         return Trans_text.text
     
-    news_links = []
+    # news_links = []
 
-    links = soup.find_all('div',{ "class" : "content-inner"})
-    for link in links:
-        news_link = Main_url + link.find('a').get('href')
-        if news_link not in news_links:
-            news_links.append(news_link)
+    # links = soup.find_all('div',{ "class" : "content-inner"})
+    # for link in links:
+    #     news_link = Main_url + link.find('a').get('href')
+    #     if news_link not in news_links:
+    #         news_links.append(news_link)
 
     # print(news_links)
     # print(len(news_links))
+
+  
+    driver.get(page_source)
+    time.sleep(10)
+
+    news_links = []
+    links = driver.find_elements(By.XPATH, '//ul[contains(@class,"page-newsroom__block__listing")]/li/article//a')
+    for link in links:
+        news_link = link.get_attribute('href')
+        news_links.append(news_link)
+        
+
+    print(news_links)
+
+
+
 
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    page_source = "https://obeta.de/industry-news"
     Emr_Crawlers_Logs(c_name,page_source,news_links)
     
     for i in news_links:   
@@ -244,7 +278,7 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                collection.insert_one(company_news)
+                # collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

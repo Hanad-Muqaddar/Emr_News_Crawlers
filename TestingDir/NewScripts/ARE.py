@@ -49,6 +49,7 @@ from newspaper import fulltext
 from scrapy import Selector
 from googletrans import Translator
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+
 # ================================================================================
 # Comment these lines when you are running locally
 import importlib.util
@@ -144,7 +145,7 @@ try:
     result = requests.get(Base_url,headers=headers)
     response = Selector(result)
     
-    news_links = response.xpath('//div[@class=" sm:w-1/2 lg:w-1/3"]/a/@href').getall()
+    news_links = response.xpath('//div[@class="grid js-material-grid"]/article/a/@href').getall()
     print(news_links)
 
     def translate(Trans):
