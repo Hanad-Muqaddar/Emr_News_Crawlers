@@ -49,6 +49,10 @@ from urllib.request import Request, urlopen
 
 from scrapy.selector import Selector
 
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
+
 from newspaper import fulltext
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
@@ -144,14 +148,44 @@ else:
 # *****************************************************************************
 
 try:
+
+     # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = False
+
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     page_source = "https://investors.wesco.com/news-events/news-releases"
     main_url = "https://investors.wesco.com"
-    page = requests.get(page_source,headers=headers)
-    response = scrapy.Selector(page)
-    links = response.xpath('//div[contains(@class,"nir-widget--list")]//article//div[contains(@class,"news--read-more")]/a/@href').getall()
-    f_links = [main_url+l for l in links]
-    print(f_links)
+
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)   
+    driver.get("https://investors.wesco.com/news-events/news-releases")
+    time.sleep(15)
+
+    news_links = []
+    links = driver.find_elements(By.XPATH, '//div[contains(@class,"nir-widget--list")]//article//div[contains(@class,"news--read-more")]')
+    for link in links:
+        news_link = link.find_element(By.XPATH, "./a").get_attribute('href')
+        news_links.append(news_link)
+
+    print(news_links)
+    print(len(news_links))
+
+
+    # page = requests.get(page_source,headers=headers)
+    # response = scrapy.Selector(page)
+    # links = response.xpath('//div[contains(@class,"nir-widget--list")]//article//div[contains(@class,"news--read-more")]/a/@href').getall()
+
+    # f_links = [main_url+l for l in news_links]
+    # print(f_links)
     
    
     db_list = []
@@ -159,9 +193,9 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,page_source,f_links)
+    Emr_Crawlers_Logs(c_name,page_source,news_links)
     
-    for i in f_links:
+    for i in news_links:
         print(i)
         if i in db_list:
             total_crwalled_links += 1

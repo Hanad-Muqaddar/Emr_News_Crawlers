@@ -148,8 +148,8 @@ try:
         news_link = link.text
         if "en/media-and-publications/media-articles/" in news_link and news_link not in news_links:
             news_links.append(news_link)
-
-    # print(news_links)
+    news_links.append("https://hagergroup.com/en/media-and-publications/media-articles/fabrice-amedeo-lorient-cuxhaven")
+    print(news_links)
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
@@ -171,7 +171,7 @@ try:
 
             try:
                 title = data.find('meta', attrs = {"name":"description"}).get("content")
-                # print(title)
+                print(title)
             except:
                 title = ""
             

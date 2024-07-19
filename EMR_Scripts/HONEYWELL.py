@@ -155,11 +155,20 @@ def parse_filtered_news(announcement):
     
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    result = requests.get("https://www.honeywell.com/us/en/press",headers=headers)
-    response = Selector(result)
-    links = response.xpath('//div[@class="list-component__item-headline"]/parent::a/@href').getall()
-    final_links = ["https://www.honeywell.com" + link if "https://www.honeywell.com" not in link else link for link in links[:10]]
-    # print(final_links)
+
+    # result = requests.get("https://www.honeywell.com/us/en/press",headers=headers)
+    # response = Selector(result)
+    # links = response.xpath('//div[@class="list-component__item-headline"]/parent::a/@href').getall()
+    # final_links = ["https://www.honeywell.com" + link if "https://www.honeywell.com" not in link else link for link in links[:10]]
+    
+
+    result = requests.get("https://www.honeywell.com/sitemap.xml",headers=headers)
+    print("working")
+    soup = BeautifulSoup(result.content, 'lxml')
+    links = soup.find_all('loc')
+    final_links = [link.text for link in links if "us/en/press/2024" in link.text ]
+    print(final_links)
+
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
@@ -183,10 +192,12 @@ try:
                 news_date = dateparser.parse(news_date,  settings={'DATE_ORDER': 'DMY'})
             except:
                 news_date = ""
+            print(news_date)
             try:
                 title = response1.xpath("//meta[@property='og:title']/@content").get()
             except:
                 title = ""
+            print(title)
             try:
                 analysis = response1.xpath("//meta[@name='description']/@content").get()
             except:

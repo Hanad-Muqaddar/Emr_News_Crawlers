@@ -46,20 +46,20 @@ from scrapy import Selector
 from newspaper import fulltext
 
 import unicodedata
-# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
-# ================================================================================
-# Comment these lines when you are running locally
+# # ================================================================================
+# # Comment these lines when you are running locally
 
-import importlib.util
-# Specify the absolute path to Emr_Crawlers_Optimization.py
-module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
-# Load the module using the absolute path
-spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
-Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(Emr_Crawlers_Optimization)
-Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
-# ================================================================================
+# import importlib.util
+# # Specify the absolute path to Emr_Crawlers_Optimization.py
+# module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
+# # Load the module using the absolute path
+# spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
+# Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
+# spec.loader.exec_module(Emr_Crawlers_Optimization)
+# Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
+# # ================================================================================
 # ************************************************************************
 running_Sequence = []
 
@@ -164,7 +164,7 @@ try:
     Base_url = "https://www.danfoss.com"
     result = requests.get("https://www.danfoss.com/sitemap.xml/en/",headers=headers)
     print("working")
-    soup = BeautifulSoup(result.content, 'lxml')
+    soup = BeautifulSoup(result.content, 'xml')
     links = soup.find_all('loc')
     final_links = [link.text for link in links if "/news/" in link.text or "/case-stories/" in link.text]
     

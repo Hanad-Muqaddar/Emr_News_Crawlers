@@ -168,7 +168,7 @@ try:
     links = soup.find_all('loc')
     for link in links:   
         link = link.text
-        if '/en/media/newsroom/news/' in link or 'en/company-announcement-list/'in link and link not in news_links:
+        if '/en/media/news/2024/' in link or 'en/company-announcement-list/2024'in link and link not in news_links:
             news_links.append(link) 
 
     print(news_links)

@@ -158,10 +158,12 @@ try:
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
+
     page_source = "https://www.mynewsdesk.com/fi/are/latest_news"
     Emr_Crawlers_Logs(c_name,page_source,news_links)
 
-    for n in news_links:      
+    for n in news_links: 
+        print(n)     
         if n in links_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -202,9 +204,9 @@ try:
                 analysis = ""
             try:
                 N_date = response2.xpath('//article[@class="panel"]//time/@datetime').get()
-                N_date = translate(N_date)
-                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
-                print(news_date)
+                T_N_date = translate(N_date)
+                news_date = dateparser.parse(T_N_date,  settings={'DATE_ORDER': 'YMD'})
+                # print(news_date)
             except:
                 news_date = ""
 

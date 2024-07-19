@@ -43,24 +43,23 @@ from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
 
-from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
-
+from scrapy import Selector
 from urllib.request import Request, urlopen
 from newspaper import fulltext
 from googletrans import Translator
-from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
-# # ================================================================================
-# # Comment these lines when you are running locally
-# import importlib.util
-# # Specify the absolute path to Emr_Crawlers_Optimization.py
-# module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
-# # Load the module using the absolute path
-# spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
-# Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
-# spec.loader.exec_module(Emr_Crawlers_Optimization)
-# Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
-# # ================================================================================
+# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+
+# ================================================================================
+# Comment these lines when you are running locally
+import importlib.util
+# Specify the absolute path to Emr_Crawlers_Optimization.py
+module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
+# Load the module using the absolute path
+spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
+Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(Emr_Crawlers_Optimization)
+Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
+# ================================================================================
 # # ************************************************************************
 # defining variables
 
@@ -139,124 +138,158 @@ else:
 # *****************************************************************************
 try:
 
-     # defining variables
-    opts = Options()
-    # opts.add_argument("--window-size=190,100")
-    # opts.add_argument("--disable-automation")
-    opts.add_argument("--no-sandbox")
-    opts.add_argument('--profile-directory=Default')
-    opts.add_argument("start-maximized")
-    opts.add_argument("disable-infobars")
-    opts.add_argument("--lang=en")
-    opts.add_argument("--enable-javascript")
-    opts.add_argument("--enable-cookies")
-    opts.headless = False
+
+    url = "https://headless-cms.obeta.io/graphql"
+
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "operationName": "obetaNews",
+        "query": """
+        query obetaNews($filters: ObetaNewsFiltersInput, $pagination: PaginationArg = {}, $sort: [String] = [], $publicationState: PublicationState = LIVE) {
+        obetaNewsCollection(
+            filters: $filters
+            pagination: $pagination
+            sort: $sort
+            publicationState: $publicationState
+        ) {
+            meta {
+            pagination {
+                total
+                __typename
+            }
+            __typename
+            }
+            data {
+            id
+            attributes {
+                url
+                pinned
+                teaserText
+                startDate
+                publishedAt
+                endDate
+                category
+                title
+                teaser {
+                data {
+                    id
+                    attributes {
+                    url
+                    alternativeText
+                    __typename
+                    }
+                    __typename
+                }
+                __typename
+                }
+                __typename
+            }
+            __typename
+            }
+            __typename
+        }
+        }
+        """,
+        "variables": {
+            # "filters": {
+            #     "endDate": {
+            #         "gte": "2024-07-05T05:47:03.906Z"
+            #     },
+            #     "startDate": {
+            #         "lte": "2024-07-05T05:47:03.906Z"
+            #     }
+            # },
+            "pagination": {
+                "limit": 20,
+                "start": 0
+            },
+            "publicationState": "LIVE",
+            "sort": ["startDate:desc"]
+        }
+    }
 
 
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
     Main_url = "https://obeta.de"
     page_source = "https://obeta.de/news"
     # result = requests.get(Base_url,headers=headers)
     # soup = BeautifulSoup(result.content , 'lxml')
 
+    json_payload = json.dumps(payload)
+    response = requests.post(url, headers=headers, data=json_payload)
+
+    final_list = []
+
+    returned_response = response.json()
+    data = returned_response['data']['obetaNewsCollection']['data']
+    for item in data:
+        try:
+            url = item['attributes']['url']
+            if url:
+                link = "https://obeta.de" + url
+                try:
+                    news_image = item['attributes']['teaser']['data']['attributes']['url']
+                except:
+                    news_image = ""
+                final_list.append({"news_link":link,"news_title": item['attributes']['teaserText'],"news_date": item['attributes']['publishedAt'],"news_image": news_image})
+        except:
+            continue
+        
+    # print(final_list)
+    final_news = [item['news_link'] for item in final_list]
+    print(final_news)
 
     def translate(Trans):
         translator = Translator()
         Trans_text = translator.translate(Trans,dest='en')
         return Trans_text.text
-    
-    # news_links = []
-
-    # links = soup.find_all('div',{ "class" : "content-inner"})
-    # for link in links:
-    #     news_link = Main_url + link.find('a').get('href')
-    #     if news_link not in news_links:
-    #         news_links.append(news_link)
-
-    # print(news_links)
-    # print(len(news_links))
-
-  
-    driver.get(page_source)
-    time.sleep(10)
-
-    news_links = []
-    links = driver.find_elements(By.XPATH, '//ul[contains(@class,"page-newsroom__block__listing")]/li/article//a')
-    for link in links:
-        news_link = link.get_attribute('href')
-        news_links.append(news_link)
-        
-
-    print(news_links)
-
-
-
 
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,page_source,news_links)
+    Emr_Crawlers_Logs(c_name,page_source,final_news)
     
-    for i in news_links:   
-        if i in links_list:
+    for i in final_list:   
+        news_weblink = i['news_link']
+        if news_weblink in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
+
         else:
-
-            response = requests.get(i, headers=headers)
-            data = BeautifulSoup(response.content, 'lxml')
-
             try:
-                title = data.find('meta',attrs = {'property':'og:title'}).get('content')
+                title = i['news_title']
                 title = translate(title)
                 print(title)
             except Exception as e:
-                title = data.find('meta',attrs = {'property':'og:title'}).get('content')
                 print(e)
             
             announcement_type = "News"
             language = "en-us"
 
             try:            
-                image = Main_url + data.find('img',attrs = {'id':'nf_teaserImage'}).get('src')
+                image = i['news_image']
                 # print(image)
             except:
                 image = ""
-                # print(image)
+       
+
+            sub_category = ""
+            analysis = ""
 
             try:
-                sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-                sub_category = translate(sub_category)
-            except:
-                sub_category = ""
-            
-            try:
-                analysis = data.find('meta',attrs = {'property':'og:title'}).find_previous_sibling('meta').get('description')
-                analysis = translate(analysis)
-                # print(analysis)
-            except:
-                analysis = ""
-            try:
-                date = data.find('meta', attrs = {"http-equiv":"last-modified"}).get('content')
+                date = i['news_date']
                 news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-                # print(news_date)
+                print(news_date)
             except:
                 news_date = ""
-
-            
-            news_weblink = i
-            
-            try:
-                announcement = data.find('td', attrs = {"id":"nf_mainContent"}).get_text()
-                announcement = translate(announcement)
-                # print(announcement)            
-            except:
-                announcement = ""
+          
+            announcement = ""
             
             date = datetime.now()
             # Creating a list of links already avilable in database
@@ -278,11 +311,11 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    
+            
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) + ' Links were Already Crawled '
@@ -294,7 +327,8 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.now()
-except:
+except Exception as e:
+    print(e)
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()

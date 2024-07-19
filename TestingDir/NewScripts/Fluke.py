@@ -144,7 +144,7 @@ try:
     soup = BeautifulSoup(result.content , 'lxml')
     
     news_links = []
-    current_date = datetime.now().date()
+    current_date = datetime.now()
 
     links = soup.find_all("p",{ "class" : "press-release-title"})
     for link in links:
@@ -228,6 +228,7 @@ try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
+                print(e)
                 running_Sequence.append(e)
     
     if Already_exist >= 1:

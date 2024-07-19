@@ -150,7 +150,7 @@ try:
       
     response = Selector(result)   
 
-    news_links = response.xpath('//div[contains(@class,"news-list-view")]/div[contains(@class,"news-list-item")]//a[@class="mehr3"]/@href').getall()
+    news_links = response.xpath('//div[@class="news-list-view template2"]//ul/li//div[@class="news-image-item"]/a/@href | //div[contains(@class,"news-list-view")]/div[contains(@class,"news-list-item")]//a[@class="mehr3"]/@href').getall()
     f_news_links = [Main_url + l for l in news_links]
     print(f_news_links)
     print(len(f_news_links))

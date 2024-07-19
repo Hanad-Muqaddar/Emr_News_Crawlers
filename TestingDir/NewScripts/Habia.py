@@ -42,6 +42,7 @@ from datetime import datetime
 from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
+from scrapy import Selector
 
 from urllib.request import Request, urlopen
 from newspaper import fulltext
@@ -138,18 +139,11 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://www.habia.com"
-    Base_url = "https://www.habia.com/habia-cable-news/"
+    Base_url = "https://www.habia.com/en/news/"
     result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
-    
-    news_links = []
-
-    links = soup.find('div',{ "id" : "search-filter-holder"}).find_all('li')
-    for link in links:
-        news_link = link.find('a').get('href')
-        if news_link not in news_links:
-            news_links.append(news_link)
-
+    response = Selector(result)
+    News = response.xpath('//section[@class="habia-wide-list-container"]/ul[@class="wide-list"]/li//h3/a/@href').getall()
+    news_links = [Main_url + l for l in News]
     print(news_links)
     print(len(news_links))
 
@@ -159,8 +153,9 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    page_source = "https://www.habia.com/habia-cable-news/"
+    page_source = "https://www.habia.com/en/news/"
     Emr_Crawlers_Logs(c_name,page_source,news_links)
+
     for i in news_links:
         if i in links_list:
             total_crwalled_links += 1
@@ -175,14 +170,14 @@ try:
                 title = data.find('meta', attrs = {"property":"og:title"}).get("content")
                 print(title)
             except:
-                title = data.find('title').text
+                title = ""
                 print(title)
             
             announcement_type = "News"
             language = "en-us"
 
             try:
-                image = data.find('meta', attrs = {"property":"og:image"}).get("content")
+                image = Main_url + data.find('meta', attrs = {"property":"og:image"}).get("content")
                 print(image)
             except:
                 image = ""
@@ -198,9 +193,8 @@ try:
             except:
                 analysis = ""
             try:
-                date = data.find('meta', attrs = {"name":"created"}).get('content')
-                print(date)
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                n_date = data.select_one('ul.habia-categories-and-date li time')['datetime']
+                news_date = dateparser.parse(n_date, settings={'DATE_ORDER': 'YMD'})
                 print(news_date)
             except:
                 news_date = ""
@@ -208,8 +202,8 @@ try:
             news_weblink = i
             
             try:
-                html = requests.get(i).text
-                announcement = fulltext(html)
+                # html = requests.get(i).text
+                announcement = fulltext(response.content)
                 announcement = announcement.replace('\n','<br>')
                 print(announcement)
                 
@@ -251,7 +245,8 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.now()
-except:
+except Exception as e:
+    print(e)
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
