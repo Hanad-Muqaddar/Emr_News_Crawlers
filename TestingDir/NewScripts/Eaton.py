@@ -189,7 +189,7 @@ try:
                 'Accept-Language': 'en-US,en;q=0.9'
                 }
     # result = requests.get("https://www.eaton.com/us/en-us/company/news-insights/news-releases.html", headers=headers, proxies=proxies, timeout=20)
-    result = requests.get("https://www.eaton.com/us/en-us/company/news-insights/news-releases.html", headers=headers, timeout=20)
+    result = requests.get("https://www.eaton.com/us/en-us/company/news-insights/news-releases.html", headers=headers, verify=False, timeout=20)
     # print(result)
     response = Selector(result)
     # print(response)
@@ -223,7 +223,7 @@ try:
             print(news_weblink)
             # news, image = parse_newspaper_data(news_weblink)
             # print("Comes here at first point")
-            result1 = requests.get(news_weblink , headers=headers)
+            result1 = requests.get(news_weblink, verify=False , headers=headers)
             result1.encoding = 'utf-8'
             response1 = Selector(result1)
             
@@ -370,6 +370,7 @@ try:
 
     ended_on = datetime.datetime.now()
 except Exception as e:
+    print(e)
     Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()

@@ -154,7 +154,7 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
 
-    # print(news_links)
+    print(news_links)
     # print(len(news_links))
 
     # Creating a list of links already avilable in database
