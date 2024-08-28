@@ -151,12 +151,8 @@ def parse_news_date(response):
 
 def parse_filtered_news(announcement):
         api_url = "https://admin.new.emr-online.com/api/history/filterbody"
-        payload = json.dumps({
-                                "originalBody": announcement
-                                })
-        headers = {
-                    'Content-Type': 'application/json'
-                    }
+        payload = json.dumps({"originalBody": announcement})
+        headers = {'Content-Type': 'application/json'}
         return_response = requests.request("POST", api_url, headers=headers, data=payload)
         new_data = return_response.text
         new_data = json.loads(new_data)
@@ -227,8 +223,7 @@ try:
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
-    opts.headless = True
-
+    opts.add_argument("--headless")
     # headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
 
     headers = {
@@ -248,7 +243,7 @@ try:
 }
 
 
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+    driver = webdriver.Chrome(options=opts)
      
     Main_url = "https://www.hitachienergy.com"
     page_source = "https://www.hitachienergy.com/news"
@@ -261,7 +256,9 @@ try:
     for link in links:
         news_link = link.find_element(By.XPATH, './a[@class="cmp-newslist__news-item-link"]').get_attribute('href')
         news_links.append(news_link)
-
+    
+    driver.quit()
+    
     print(news_links)
     print(len(news_links))
 
@@ -276,6 +273,7 @@ try:
         All_title_list.append(x['title'])
 
     Emr_Crawlers_Logs(c_name,page_source,news_links)
+    
     for i in news_links:
         if i in db_list:
             Already_exist += 1
@@ -319,6 +317,7 @@ try:
                     emr_lite = ""
                     emr_executive = ""
                     emr_html = ""
+                    
                 announcement_type = "Press Release"
                 language = "en-US"
                 
@@ -410,4 +409,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'Chrome'
 
-# error_logs.insert_one(log)
+error_logs.insert_one(log)

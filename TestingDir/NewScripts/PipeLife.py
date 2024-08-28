@@ -157,7 +157,7 @@ try:
     opts.headless = True
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+    driver = webdriver.Chrome(options=opts)
   
     Web_Page = "https://www.pipelife.com/service/news-and-projects.html"
     driver.get(Web_Page)
@@ -311,5 +311,5 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'Chrome'
 
-# error_logs.insert_one(log)
+error_logs.insert_one(log)
 

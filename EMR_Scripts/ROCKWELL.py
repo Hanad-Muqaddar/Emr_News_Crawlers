@@ -25,9 +25,13 @@ from selenium.webdriver.support import expected_conditions
 
 from selenium.webdriver.common.by import By
 
+from requests_html import HTMLSession
+
 import re
 
 import traceback
+
+from scrapy import Selector
 
 import urllib
 
@@ -142,47 +146,36 @@ else:
 
 # *****************************************************************************
 
+def set_proxy(session, proxy):
+    session.proxies = {
+        'http': f"http://{proxy}",
+        'https': f"http://{proxy}"
+    }
+
 try:
+    headers = {
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+    }
 
-     # defining variables
-    opts = Options()
-    # opts.add_argument("--window-size=190,100")
-    # opts.add_argument("--disable-automation")
-    opts.add_argument("--no-sandbox")
-    opts.add_argument('--profile-directory=Default')
-    opts.add_argument("start-maximized")
-    opts.add_argument("disable-infobars")
-    opts.add_argument("--lang=en")
-    opts.add_argument("--enable-javascript")
-    opts.add_argument("--enable-cookies")
-    opts.headless = False 
-
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
-
-    Main_url = "https://ir.rockwellautomation.com"
-    page_source = "https://ir.rockwellautomation.com/press-releases/default.aspx"
+    Main_url = "https://www.rockwellautomation.com"
+    page_source = "https://www.rockwellautomation.com/en-us/company/investor-relations/news/jcr:content/root/main-par/generic_container/GenericContainerParsys/column_control_1712903781/Col1/generic_filter.genericSearch.json?rootPath=%2Fcontent%2Frockwell-automation%2Fglobal%2Fna%2Fen&deepCount=false&contentType=news-press&company=rockwell-automation%3Ametadata%2Fcompany%2Fnewsroom%2Fpress-releases&sort=pubAsc&numPerPage=10&page=1"
     
-    driver.get(page_source)
-    time.sleep(10)
-
+    session = HTMLSession()
+    set_proxy(session, 'waleeProxy:Cheeta@1@uk.proxymesh.com:31280')
+    result = session.get(page_source, headers=headers)
+    result_json = result.json()
+    
     news_links = []
-    # links = driver.find_elements(By.XPATH, '//div[@id="whats-new"]//DIV[@class="content-tile"]//a[@class="teaser__link-over"]')
-
-    links = driver.find_elements(By.XPATH, ' //generic-filter//div[@class="filter__results-content-container"]/div[@class="generic-filter__result"]//a[@class="generic-filter__result-title"]')
-    for link in links:
-        news_link = link.get_attribute('href')
-        news_links.append(news_link)
-  
-    print(news_links)
-    print(len(news_links))
+    for i in result_json["results"]:
+        link = i["link"]
+        news_links.append(link)
 
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    
     Emr_Crawlers_Logs(c_name,page_source,news_links)
 
     for i in news_links:
@@ -192,8 +185,9 @@ try:
             total_crwalled_links += 1
             print("Already Crawled")
             continue
+        
         else:
-            result1 = requests.get(i,headers=headers)
+            result1 = session.get(i,headers=headers)
             response1 = Selector(result1)
             try:
                 ne_date = response1.xpath('//div[@class="hero-banner__subtitle-text"]/text()').get()
@@ -248,94 +242,97 @@ try:
             except Exception as e:
                 running_Sequence.append(e)
     
-    url = "https://ir.rockwellautomation.com/services/EventService.svc/GetEventList"
-    payload = json.dumps({
-            "serviceDto": {
-                "ViewType": "2",
-                "ViewDate": "",
-                "Signature": "",
-                "LanguageId": "1",
-                "RevisionNumber": "1",
-                "TagList": [],
-                "StartIndex": 0,
-                "ItemCount": 25,
-                "IncludeTags": True
-            },
-            "excludeSelection": 0,
-            "year": -1,
-            "eventSelection": 3,
-            "sortOperator": 1,
-            "includePressReleases": True,
-            "includePresentations": True,
-            "includeFinancialReports": True
-            })
-    response = requests.request("POST", url, data=payload)
-    Base_Link = "https://ir.rockwellautomation.com"
-    for j in response.json()['GetEventListResult']:
-        db_list = []
-        mydoc = collection.find()
-        for x in mydoc:
-            db_list.append(x['News_Weblink'])
+    # url = "https://ir.rockwellautomation.com/services/EventService.svc/GetEventList"
+    # payload = json.dumps({
+    #         "serviceDto": {
+    #             "ViewType": "2",
+    #             "ViewDate": "",
+    #             "Signature": "",
+    #             "LanguageId": "1",
+    #             "RevisionNumber": "1",
+    #             "TagList": [],
+    #             "StartIndex": 0,
+    #             "ItemCount": 25,
+    #             "IncludeTags": True
+    #         },
+    #         "excludeSelection": 0,
+    #         "year": -1,
+    #         "eventSelection": 3,
+    #         "sortOperator": 1,
+    #         "includePressReleases": True,
+    #         "includePresentations": True,
+    #         "includeFinancialReports": True
+    #         })
+    
+    # response = session.post(url, data=payload)
+    # print(f"\n\n\n{response.text}\n\n\n")
+    # Base_Link = "https://ir.rockwellautomation.com"
+    # for j in response.json()['GetEventListResult']:
         
-        web_link = Base_Link + j['LinkToDetailPage']
-        if web_link in db_list:
-            Already_exist += 1
-            total_crwalled_links += 1
-            continue
-        else:
-            result1 = requests.get(web_link)
-            response1 = Selector(result1)
-            try:
-                news_date = j['StartDate']
-                news_date = dateparser.parse(news_date,  )
-            except:
-                news_date = ""
-            try:
-                title = j['Title']
-            except:
-                title = ""
-            try:
-                analysis = response1.xpath("//meta[@name='description']/@content").get()
-            except:
-                analysis = ""
-            try:
-                image = response1.xpath("//meta[@property='og:image']/@content").get()
-            except:
-                image = ""
-            sub_category = ""
-            try:
-                announcement = fulltext(result1.text)
-                announcement = announcement.replace('\n','<br>')
-            except:
-                announcement = ""
-            announcement_type = "Events"
-            language = "en-US"
-            page_source = "https://ir.rockwellautomation.com/events-and-presentations/default.aspx"
-            crawled_date = datetime.datetime.now()
+    #     db_list = []
+    #     mydoc = collection.find()
+    #     for x in mydoc:
+    #         db_list.append(x['News_Weblink'])
+        
+    #     web_link = Base_Link + j['LinkToDetailPage']
+    #     if web_link in db_list:
+    #         Already_exist += 1
+    #         total_crwalled_links += 1
+    #         continue
+    #     else:
+    #         result1 = session.get(web_link)
+    #         response1 = Selector(result1)
+    #         try:
+    #             news_date = j['StartDate']
+    #             news_date = dateparser.parse(news_date,  )
+    #         except:
+    #             news_date = ""
+    #         try:
+    #             title = j['Title']
+    #         except:
+    #             title = ""
+    #         try:
+    #             analysis = response1.xpath("//meta[@name='description']/@content").get()
+    #         except:
+    #             analysis = ""
+    #         try:
+    #             image = response1.xpath("//meta[@property='og:image']/@content").get()
+    #         except:
+    #             image = ""
+    #         sub_category = ""
+    #         try:
+    #             announcement = fulltext(result1.text)
+    #             announcement = announcement.replace('\n','<br>')
+    #         except:
+    #             announcement = ""
+    #         announcement_type = "Events"
+    #         language = "en-US"
+    #         page_source = "https://www.rockwellautomation.com/en-us/company/investor-relations/events-presentations.html"
+    #         crawled_date = datetime.datetime.now()
 
-            company_news = {}
-            company_news['companyId'] = ''
-            company_news['location']=''
-            company_news['comment']=''
-            company_news['Date']= news_date
-            company_news['Crawled_on']=crawled_date
-            company_news['title']=title
-            company_news['Language']= language
-            company_news['announcementType']= announcement_type
-            company_news['Source'] = page_source
-            company_news['News_Weblink'] = web_link
-            company_news['photo']= image
-            company_news['videos']= ''
-            company_news['announcement']=announcement
-            company_news['historySubCategory']= sub_category
-            company_news['analysis'] = analysis
-            print(company_news)
-            print("********************")
-            try:
-                collection.insert_one(company_news)
-                total_crwalled_links += 1
-            except Exception as e:
-                running_Sequence.append(e)
+    #         company_news = {}
+    #         company_news['companyId'] = ''
+    #         company_news['location']=''
+    #         company_news['comment']=''
+    #         company_news['Date']= news_date
+    #         company_news['Crawled_on']=crawled_date
+    #         company_news['title']=title
+    #         company_news['Language']= language
+    #         company_news['announcementType']= announcement_type
+    #         company_news['Source'] = page_source
+    #         company_news['News_Weblink'] = web_link
+    #         company_news['photo']= image
+    #         company_news['videos']= ''
+    #         company_news['announcement']=announcement
+    #         company_news['historySubCategory']= sub_category
+    #         company_news['analysis'] = analysis
+    #         print(company_news)
+    #         print("********************")
+    #         try:
+    #             # collection.insert_one(company_news)
+    #             total_crwalled_links += 1
+    #         except Exception as e:
+    #             running_Sequence.append(e)
     
     if Already_exist >= 1:
 
@@ -351,6 +348,7 @@ except Exception as e:
     Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()
+    print(Reported_Error, e)
 
     running_Sequence.append(e)
 
@@ -396,4 +394,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'Chrome'
 
-# error_logs.insert_one(log)
+error_logs.insert_one(log)
