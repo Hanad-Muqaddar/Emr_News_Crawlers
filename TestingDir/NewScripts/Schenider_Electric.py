@@ -158,8 +158,8 @@ def parse_filtered_news(announcement):
         new_data =  ""
         return new_data
 try:
-    proxies = {'http': 'http://waleeProxy:Cheeta@1@au.proxymesh.com:31280',
-            'https': 'http://waleeProxy:Cheeta@1@au.proxymesh.com:31280'}
+    proxies = {'http': 'http://p5IChyPNwWS1LFUQ:wifi;ee;;;@proxy.rampageproxies.com:9027',
+            'https': 'http://p5IChyPNwWS1LFUQ:wifi;ee;;;@proxy.rampageproxies.com:9027'}
     headers = {
     'Referer': 'https://www.se.com/ww/en/about-us/newsroom/news/',
     'Sec-Ch-Ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',

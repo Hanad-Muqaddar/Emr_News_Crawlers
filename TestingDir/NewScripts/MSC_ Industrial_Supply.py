@@ -113,13 +113,12 @@ try:
     Emr_Crawlers_Logs(c_name, page_source, total_links)
 
     for i, N_Date, lin in zip(total_titles, total_dates, total_links):  
-        if i in links_list:
+        if lin in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
         else:      
-        
             try:
                 title = i
                 print(title)
