@@ -65,8 +65,6 @@ spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
 
-# ************************************************************************
-
 options = Options()
 options.add_argument("--window-size=1980,1020")
 options.add_argument("--headless")
@@ -168,134 +166,158 @@ def parse_filtered_news(announcement):
         return new_data
 
 try:
+
+     # defining variables
+    opts = Options()
+    # opts.add_argument("--window-size=190,100")
+    # opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.headless = False
+
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+
     db_list = []
     mydoc = collection.find()
     # print('1')
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(version='114.0.5735.90').install()), options=opts)
-    links = ['https://z.lighting/en/group/news-insights/?category=company', 'https://z.lighting/en/group/news-insights/?category=zumtobel']
-    for i in links:
-        Emr_Crawlers_Logs(c_name,i)
-        driver.get(i)
-        # driver.get_screenshot_as_file("/home/emr/TestingDir/ScreenShots/screenshot.png")
-        page_source = i
-        time.sleep(3)
-        try:
-            accept_button = driver.find_element_by_xpath("//div[@class='CookieAgreement-buttonWrapper']/button")
-            accept_button.click()
-        except:
-            pass
-        # page_source = i
-        time.sleep(15)
-        # try:
-        #     while True:
-        #         button = driver.find_element_by_xpath("//button[@class='s-button-white NewsLandingItems-showMore']")
-        #         button.click()
-        #         time.sleep(3)
-        # except Exception as e:
-        #     pass
-        # driver.get_screenshot_as_file("/home/emr/TestingDir/ScreenShots/screenshot2.png")
-        time.sleep(3)
-        response = Selector(text=driver.page_source.encode('utf-8'))
-        head_link = response.css(".NewsLandingHead-title a::attr(data-url)").get()
-        all_links = response.css(".NewsLandingItems-itemLink ::attr(href)").getall()
-        all_links.append(head_link)
-        f_links = ['https://z.lighting' + j for j in all_links]
-        # print('Links aagay hn')
-        # print(f_links)
-        for j in f_links:
-            Emr_Crawlers_Logs(c_name,j)
-            news_weblink = j
-            
-            # print('2')
-            if news_weblink in db_list:
-                # print('skip')
-                total_crwalled_links += 1
-                Already_exist += 1
-                print("Already Crawled")
-                continue
-            driver.get(j)
-            # print("Inner Links chal raha hn")
-            time.sleep(5)
-            response1 = Selector(text=driver.page_source.encode('utf-8'))
-            try:
-                image = 'https://z.lighting' + response1.css(".NewsStoryPopup-image img::attr(src)").get()
-            except:
-                image = ""
-            try:
-                title = response1.css(".NewsStoryPopup-title ::text").get()
-            except:
-                title = ""
-            try:
-                announcement = response1.xpath("//div[@class='NewsStoryPopup-contentWrapper']").get()
-                replace1 = response1.xpath("//div[@class='NewsStoryPopup-date_mobile s-text-tiny']").get()
-                replace2 = response1.xpath("//div[@class='NewsStoryPopup-title s-title-big']").get()
-                replace3 = response1.xpath("//div[@class='NewsStoryPopup-date s-text-tiny']").get()
-                announcement = announcement.replace(replace1, "")
-                announcement = announcement.replace(replace2, "")
-                announcement = announcement.replace(replace3, "")
-                announcement = announcement.replace('\r\n','<br>')
-                return_data = parse_filtered_news(announcement)
-                announcement = return_data['filteredBody']
-                emr_essentail = return_data['emrEssential']
-                emr_executive = return_data['emrExecutive']
-                emr_lite = return_data['emrLite']
-                emr_html = return_data['emrHtmlText']
-            except:
-                announcement = ""
-                emr_essentail = ""
-                emr_executive = ""
-                emr_lite = ""
-                emr_html = ""
-            try:
-                date = response1.css('.NewsStoryPopup-date ::text').get()
-                news_date = dateparser.parse(date)
-            except:
-                news_date = ""
-            try:
-                analysis = response1.css('.NewsStoryPopup-blockWrapper p::text').get()
-            except:
-                analysis = ""
+    driver = webdriver.Chrome(options=opts)
+    # service = Service("C:\Program Files (x86)\chromedriver.exe")
+    # chrome_options = webdriver.ChromeOptions()
 
-            announcement_type = 'News'
-            crawled_on_date = datetime.datetime.now()
-            language = "en"
-            sub_category = ""
+    # driver = webdriver.Chrome(service=service, options=options)
+    Optimization_links = []
+    # links = ['https://z.lighting/en/group/news-insights/?category=company', 'https://z.lighting/en/group/news-insights/?category=zumtobel']
+    link = 'https://z.lighting/en/group/news-insights/?category=press'
+    driver.get(link)
+    # driver.get_screenshot_as_file("/home/emr/TestingDir/ScreenShots/screenshot.png")
+    page_source = link
+    time.sleep(3)
+    try:
+        accept_button = driver.find_elements(By.XPATH, "//div[@class='CookieAgreement-buttonWrapper']/button")
+        # find_element_by_xpath("")
+        accept_button.click()
+    except:
+        pass
+    time.sleep(15)
+    # try:
+    #     while True:
+    #         button = driver.find_element_by_xpath("//button[@class='s-button-white NewsLandingItems-showMore']")
+    #         button.click()
+    #         time.sleep(3)
+    # except Exception as e:
+    #     pass
+    # driver.get_screenshot_as_file("/home/emr/TestingDir/ScreenShots/screenshot2.png")
+    time.sleep(3)
+    response = Selector(text=driver.page_source.encode('utf-8'))
+    head_link = response.css(".NewsLandingHead-title a::attr(data-url)").get()
+    all_links = response.css(".NewsLandingItems-itemLink ::attr(href)").getall()
+    all_links.append(head_link)
+    f_links = ['https://z.lighting' + j for j in all_links]
+    # print('Links aagay hn')
+    print(f_links)
+
+    for j in f_links:
+        Optimization_links.append(j)
+        news_weblink = j
+        
+        # print('2')
+        if news_weblink in db_list:
+            # print('skip')
+            total_crwalled_links += 1
+            Already_exist += 1
+            print("Already Crawled")
+            continue
+        driver.get(j)
+        # print("Inner Links chal raha hn")
+        time.sleep(5)
+        response1 = Selector(text=driver.page_source.encode('utf-8'))
+        try:
+            image = 'https://z.lighting' + response1.css(".NewsStoryPopup-image img::attr(src)").get()
+        except:
+            image = ""
+        try:
+            title = response1.css(".NewsStoryPopup-title ::text").get()
+            print(title)
+        except:
+            title = ""
+        try:
+            announcement = response1.xpath("//div[@class='NewsStoryPopup-contentWrapper']").get()
+            replace1 = response1.xpath("//div[@class='NewsStoryPopup-date_mobile s-text-tiny']").get()
+            replace2 = response1.xpath("//div[@class='NewsStoryPopup-title s-title-big']").get()
+            replace3 = response1.xpath("//div[@class='NewsStoryPopup-date s-text-tiny']").get()
+            announcement = announcement.replace(replace1, "")
+            announcement = announcement.replace(replace2, "")
+            announcement = announcement.replace(replace3, "")
+            announcement = announcement.replace('\r\n','<br>')
+            return_data = parse_filtered_news(announcement)
+            announcement = return_data['filteredBody']
+            emr_essentail = return_data['emrEssential']
+            emr_executive = return_data['emrExecutive']
+            emr_lite = return_data['emrLite']
+            emr_html = return_data['emrHtmlText']
+        except:
+            announcement = ""
+            emr_essentail = ""
+            emr_executive = ""
+            emr_lite = ""
+            emr_html = ""
+        try:
+            date = response1.css('.NewsStoryPopup-date ::text').get()
+            news_date = dateparser.parse(date)
+        except:
+            news_date = ""
+        try:
+            analysis = response1.css('.NewsStoryPopup-blockWrapper p::text').get()
+        except:
+            analysis = ""
+
+        announcement_type = 'News'
+        crawled_on_date = datetime.datetime.now()
+        language = "en"
+        sub_category = ""
+        
+        company_news = {}
+        company_news['companyId'] = ''
+        company_news['location']=''
+        company_news['comment']=''
+        company_news['Date']=news_date
+        company_news['Crawled_on']=crawled_on_date
+        company_news['title']= title
+        company_news['Language']= language
+        company_news['announcementType']= announcement_type
+        company_news['Source'] = page_source
+        company_news['News_Weblink'] = news_weblink
+        company_news['photo']= image
+        company_news['videos']= ''
+        company_news['announcement']= announcement
+        company_news['historySubCategory']= sub_category
+        company_news['analysis'] = analysis
+        company_news['emrExecutive'] = emr_executive
+        company_news['emrEssential'] = emr_essentail
+        company_news['emrLite'] = emr_lite
+        company_news['News_Html'] = emr_html  
+
+        try:
+            collection.insert_one(company_news)     
+            # print("Inserted")
+            total_crwalled_links += 1
+        except Exception as e:
+            running_Sequence.append(e)
             
-            company_news = {}
-            company_news['companyId'] = ''
-            company_news['location']=''
-            company_news['comment']=''
-            company_news['Date']=news_date
-            company_news['Crawled_on']=crawled_on_date
-            company_news['title']= title
-            company_news['Language']= language
-            company_news['announcementType']= announcement_type
-            company_news['Source'] = page_source
-            company_news['News_Weblink'] = news_weblink
-            company_news['photo']= image
-            company_news['videos']= ''
-            company_news['announcement']= announcement
-            company_news['historySubCategory']= sub_category
-            company_news['analysis'] = analysis
-            company_news['emrExecutive'] = emr_executive
-            company_news['emrEssential'] = emr_essentail
-            company_news['emrLite'] = emr_lite
-            company_news['News_Html'] = emr_html
-            try:
-                collection.insert_one(company_news)
-                # print("Inserted")
-                total_crwalled_links += 1
-            except Exception as e:
-                running_Sequence.append(e)
+    driver.close()
+    Emr_Crawlers_Logs(c_name,link,Optimization_links)
     
     if Already_exist >= 1:
-
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
     else:
-
         tmp_txt = ''
 
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)

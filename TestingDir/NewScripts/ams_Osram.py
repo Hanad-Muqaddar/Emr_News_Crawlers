@@ -47,6 +47,7 @@ from urllib.request import Request, urlopen
 from newspaper import fulltext
 from scrapy import Selector
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+
 # ================================================================================
 # Comment these lines when you are running locally
 import importlib.util
@@ -125,7 +126,6 @@ else:
     running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
 
     Crwl_time = last_insertion['Date']
-
 # ****************************************************************************
 
 ####################################################
@@ -135,156 +135,129 @@ else:
 ####################################################
 
 # *****************************************************************************
-def parse_filtered_news(announcement):
-    api_url = "https://admin.new.emr-online.com/api/history/filterbody"
-    payload = json.dumps({
-                            "originalBody": announcement
-                            })
-    headers = {
-                'Content-Type': 'application/json'
-                }
-    return_response = requests.request("POST", api_url, headers=headers, data=payload)
-    new_data = return_response.text
-    new_data = json.loads(new_data)
-    status = new_data['statusCode']
-    if status == 200:
-        return new_data
-    else:
-        new_data =  ""
-        return new_data
-
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    Main_url = "https://ams-osram.com"
-    Base_url = "https://ams-osram.com/sitemap.xml"
-    result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
-    
-    news_links = []
 
-    links = soup.find_all("loc")
+    opts = Options()
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'}
+    driver = webdriver.Chrome(options=opts)
+
+    Main_url = "https://ams-osram.com"
+    page_source = "https://ams-osram.com/news"
+    
+    driver.get(page_source)
+    time.sleep(5)
+
+    news_links = []
+    N_dates = []
+    links = driver.find_elements(By.XPATH, '//a[contains(@class,"news-card")]')
     for link in links:
-        news_link = link.text
-        if "/news/press-releases/" in news_link and news_link not in news_links:
-            news_links.append(news_link)
-            
+        news_link = link.get_attribute('href')
+        news_links.append(news_link)
+        try:
+            dat = link.find_element(By.XPATH, './/time').text
+            N_dates.append(dat)
+        except:
+            dat = ""
+            N_dates.append(dat)
+
+    print(news_links)
+    print(N_dates)
+    print(len(N_dates))
+    print(len(news_links))
+
+    driver.close()
+
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    All_title_list = []
-    mydoc = collection.find()
-    for x in mydoc:
-        All_title_list.append(x['title'])
+    Emr_Crawlers_Logs(c_name, page_source,news_links)
 
-    page_source = "https://ams-osram.com/news"
-    Emr_Crawlers_Logs(c_name,page_source,news_links)
-    
-    for i in news_links:
-        
+    for i,d in zip(news_links,N_dates):
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
-        else:
-            response = requests.get(i, headers=headers)
-            data = BeautifulSoup(response.content, 'lxml')
-            response1 = Selector(response)
-            try:
-                title = data.find('h1',attrs = {'class':'info-detail__title'}).get_text(strip=True)
-                # print(title)
-            except:
-                try:
-                    title = data.find('title').get_text(strip=True)
-                except:
-                    title = ""
-                # print(title)
-
-            if title in All_title_list:
-                Already_exist += 1
-                total_crwalled_links += 1
-                print('Title Already Exist')
-                continue
+        else: 
+            result1 = requests.get(i, headers=headers)
+            response1 = Selector(result1)       
             
-            else:
-                announcement_type = "News"
-                language = "en-us"
+            try:
+                title = response1.xpath('//h1[@data-lfr-editable-id="title"]/text()').get()
+                print(title)
+            except:
+                title = ""
+            
+            announcement_type = "News"
+            language = "en-us"
 
-                try:
-                    image = data.find('meta', attrs = {"property":"og:image"}).get("content")
-                except:
-                    image = ""
-                
-                try:
-                    sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
-                except:
-                    sub_category = ""
-                try:
-                    analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
-                except:
-                    analysis = ""
+            try:
+                image = response1.xpath('//img[@class="image fullscreen"]/@src').get()
+                print(image)
+            except:
+                image = ""
 
-                try:
-                    N_date = data.find('p',{"class":"info-detail__left-date"}).get_text(strip=True)
-                    news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'YMD'} )
-                    print(news_date)
-                except:
-                    try:
-                        N_date = data.find('div',{"class":"text-body"}).find('p').get_text(strip=True)
-                        f_date = N_date.split('--')[1].strip()
-                        news_date = dateparser.parse(f_date,  settings={'DATE_ORDER': 'YMD'} )
-                        print(news_date)
-                    except:
-                        news_date = ""
-                        print(news_date)
+            try:
+                Video = response1.xpath('//div[contains(@class,"video-container")]/iframe/@src').get()
+                print(Video)
+            except:
+                Video = ""
 
-                page_source = "https://ams-osram.com/news"
-                
-                try:
-                    announcement = response1.css("#mainContent").get()
-                    announcement = announcement.replace('\n','<br>')
-                    return_data = parse_filtered_news(announcement)
-                    announcement = return_data['filteredBody']
-                    emr_essentail = return_data['emrEssential']
-                    emr_executive = return_data['emrExecutive']
-                    emr_lite = return_data['emrLite']
-                    emr_html = return_data['emrHtmlText']
-                except:
-                    announcement = ""
-                    emr_essentail = ""
-                    emr_executive = ""
-                    emr_lite = ""
-                    emr_html = ""
-                
-                date = datetime.now()
-                # Creating a list of links already avilable in database
-                company_news = {}
-                company_news['companyId'] = ''
-                company_news['location']=''
-                company_news['comment']=''
-                company_news['Date']= news_date
-                company_news['Crawled_on']=date
-                company_news['title']=title
-                company_news['Language']= language
-                company_news['announcementType']= announcement_type
-                company_news['Source'] = page_source
-                company_news['News_Weblink'] = i
-                company_news['photo']= image
-                company_news['videos']= ''
-                company_news['announcement']=announcement
-                company_news['historySubCategory']= sub_category
-                company_news['analysis'] = analysis
-                company_news['emrExecutive'] = emr_executive
-                company_news['emrEssential'] = emr_essentail
-                company_news['emrLite'] = emr_lite
-                company_news['News_Html'] = emr_html
-                try:
-                    collection.insert_one(company_news)
-                    total_crwalled_links += 1
-                except Exception as e:
-                    running_Sequence.append(e)      
+            sub_category = ""
+            
+            try:
+                analysis = response1.find('meta', attrs = {"property":"og:description"}).get("content")
+            except:
+                analysis = ""
+
+            try:
+                news_date = dateparser.parse(d,  settings={'DATE_ORDER': 'DMY'})
+                print(news_date)
+            except:
+                news_date = ""
+
+            
+            news_weblink = i
+            print(news_weblink)
+            
+            try:
+                announcement = fulltext(response1.content)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)                
+            except:
+                announcement = ""
+            
+            date = datetime.now()
+            # Creating a list of links already avilable in database
+            
+            company_news = {}
+            company_news['companyId'] = ''
+            company_news['location']=''
+            company_news['comment']=''
+            company_news['Date']= news_date
+            company_news['Crawled_on']=date
+            company_news['title']=title
+            company_news['Language']= language
+            company_news['announcementType']= announcement_type
+            company_news['Source'] = page_source
+            company_news['News_Weblink'] = news_weblink
+            company_news['photo']= image
+            company_news['videos']= Video
+            company_news['announcement']=announcement
+            company_news['historySubCategory']= sub_category
+            company_news['analysis'] = analysis
+            try:
+                collection.insert_one(company_news)
+                total_crwalled_links += 1
+            except Exception as e:
+                running_Sequence.append(e)
     
     if Already_exist >= 1:
 
