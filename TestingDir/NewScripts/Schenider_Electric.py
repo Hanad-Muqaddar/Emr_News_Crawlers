@@ -158,16 +158,16 @@ def parse_filtered_news(announcement):
         new_data =  ""
         return new_data
 try:
-    proxies = {'http': 'http://p5IChyPNwWS1LFUQ:wifi;gb;;;@proxy.rampageproxies.com:9000',
-            'https': 'http://p5IChyPNwWS1LFUQ:wifi;gb;;;@proxy.rampageproxies.com:9000'}
+    # proxies = {'http': 'http://p5IChyPNwWS1LFUQ:wifi;gb;;;@proxy.rampageproxies.com:9000',
+            # 'https': 'http://p5IChyPNwWS1LFUQ:wifi;gb;;;@proxy.rampageproxies.com:9000'}
     headers = {
-    'Referer': 'https://www.se.com/ww/en/about-us/newsroom/news/',
-    'Sec-Ch-Ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
-    'Sec-Ch-Ua-Mobile': '?0',
-    'Sec-Ch-Ua-Platform': '"Windows"',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
-}
-    
+        'Referer': 'https://www.se.com/ww/en/about-us/newsroom/news/',
+        'Sec-Ch-Ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"Windows"',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+    }
+    proxies = {}
     db_list = []
     mydoc = collection.find()
     for x in mydoc:

@@ -160,9 +160,9 @@ def parse_filtered_news(announcement):
         return new_data
     
 try:
-    proxies = {'http': 'http://p5IChyPNwWS1LFUQ:wifi;gb;;;@proxy.rampageproxies.com:9000',
-            'https': 'http://p5IChyPNwWS1LFUQ:wifi;gb;;;@proxy.rampageproxies.com:9000'}
-    
+    # proxies = {'http': 'http://p5IChyPNwWS1LFUQ:wifi;gb;;;@proxy.rampageproxies.com:9000',
+    #         'https': 'http://p5IChyPNwWS1LFUQ:wifi;gb;;;@proxy.rampageproxies.com:9000'}
+    proxies = {}
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
