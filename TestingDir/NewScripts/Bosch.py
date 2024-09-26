@@ -152,7 +152,7 @@ try:
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
     opts.headless = True
-
+    
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
     driver.get("https://www.boschrexroth.com/en/de/company/press/")

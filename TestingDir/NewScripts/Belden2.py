@@ -140,28 +140,32 @@ else:
 # *****************************************************************************
 try:
 
-     # defining variables
     opts = Options()
-    user_agent = "Mozilla/5.0 (Linux; Android 9; SM-N975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.101 Mobile Safari/537.36"
-    # opts.add_argument("--window-size=190,100")
-    # opts.add_argument("--disable-automation")
+    user_agent = "Mozilla/5.0 (Linux; Android 9; SM-N975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36"
+    opts.add_argument("--window-size=1920,1080")
+    opts.add_argument("--disable-automation")
     opts.add_argument("--no-sandbox")
     opts.add_argument('--profile-directory=Default')
-    opts.add_argument("start-maximized")
-    opts.add_argument("disable-infobars")
+    opts.add_argument("--start-maximized")
+    opts.add_argument("--disable-infobars")
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
     opts.add_argument(f'--user-agent={user_agent}')
     opts.headless = False
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+    driver.maximize_window()
 
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    # headers = {
+    #     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    #     'cookie': '__uxq412__ses.ddf1=*; sp=1e9d9deb-261f-4a6b-87b4-19e6534c2e8c; OptanonAlertBoxClosed=2024-09-26T10:28:17.477Z; OptanonConsent=isGpcEnabled=0&datestamp=Thu+Sep+26+2024+15%3A28%3A17+GMT%2B0500+(Pakistan+Standard+Time)&version=202405.2.0&browserGpcFlag=0&isIABGlobal=false&hosts=&consentId=cf119496-bdcb-48a4-84db-a675861b3ad7&interactionCount=1&isAnonUser=1&landingPath=NotLandingPage&groups=C0001%3A1%2CC0002%3A1%2CC0003%3A1%2CC0004%3A1&intType=1; _ga_5MPZPNNXMT=GS1.1.1727346497.1.0.1727346497.0.0.0; _ga=GA1.1.1705416635.1727346498; __uxq412__id.ddf1=75f4d860-09ea-4e13-a386-e63a4737ac47.1727346494.1.1727346525.1727346494.a08a122e-f920-4c60-af5e-14e66416057b',
+    #     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36',
+    #     }
     
 
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
     Web_Page = "https://investor.belden.com/overview/default.aspx"
     driver.get(Web_Page)
-    time.sleep(10)
+    time.sleep(5)
     Main_url = "https://investor.belden.com"
 
     news_links = []
@@ -179,16 +183,16 @@ try:
         db_list.append(x['News_Weblink'])
     
     for i in news_links:
-        
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
-        else:        
-            result1 = requests.get(i, headers=headers)
-            time.sleep(2)
-            response1 = Selector(result1)
+        else:
+            driver.get(i)  
+            # result1 = requests.get(i, headers=headers)
+            time.sleep(3)
+            response1 = Selector(text=driver.page_source)
 
             try:
                 title = response1.xpath('//h3[contains(@class,"evergreen-news-title")]/span/text()').get()
@@ -202,11 +206,11 @@ try:
             sub_category = ""
             
             try:
-                analysis = response1.find('meta', attrs = {"property":"og:description"}).get("content")
+                analysis = response1.xpath('//meta[@name="description"]/@content').get()
             except:
                 analysis = ""
             try:
-                N_date = response1.xpath('//span[contains(@id,"_spanDate")]/text()').get()
+                N_date = response1.xpath('normalize-space(//span[contains(@id,"_spanDate")])').get()
                 print(N_date)
                 news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
                 print(news_date)
@@ -217,7 +221,7 @@ try:
             print(news_weblink)
 
             try:
-                announcement = fulltext(response1.content)
+                announcement = fulltext(driver.page_source)
                 announcement = announcement.replace('\n','<br>')
                 print(announcement)                
             except:

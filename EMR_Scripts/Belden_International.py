@@ -160,7 +160,6 @@ try:
     opts.add_argument("--enable-cookies")
     opts.headless = True
 
-
     Web_Page = "https://www.belden.com/news#sort=%40contentpublisheddate%20descending"    
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
     driver.get(Web_Page)

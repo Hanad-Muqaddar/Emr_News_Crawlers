@@ -46,10 +46,10 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from newspaper import fulltext
 from googletrans import Translator
-# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
-# Comment these lines when you are running locally
+# # Comment these lines when you are running locally
 import importlib.util
 # Specify the absolute path to Emr_Crawlers_Optimization.py
 module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
@@ -156,7 +156,7 @@ try:
             news_links.append(news_link)
 
     print(news_links)
-    # print(len(news_links))
+    print(len(news_links))
 
     # Creating a list of links already avilable in database
     links_list = []

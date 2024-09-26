@@ -165,7 +165,7 @@ try:
             print("Already Crawled")
             continue
 
-        else:        
+        else:
             response = requests.get(i, headers=headers)
             data = BeautifulSoup(response.content, 'lxml')
 
