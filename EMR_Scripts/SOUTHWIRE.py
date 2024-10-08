@@ -45,7 +45,7 @@ from urllib.request import Request, urlopen
 from scrapy import Selector
 
 from newspaper import fulltext
-# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
 # Comment these lines when you are running locally
@@ -140,9 +140,10 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     page_source = "https://www.southwire.com/newsroom"
+    
     result = requests.get(page_source,headers=headers)
     response = Selector(result)
-    Base_Link = "https://www.southwire.com"
+    Base_Link = "https://www.southwire.com/"
     links = response.css(".carousel-inner .active .card-shadow .card-img-top ::attr(href)").getall()
     final_links = [Base_Link + link for link in links]
     print(final_links)
@@ -153,16 +154,15 @@ try:
         db_list.append(x['News_Weblink'])
 
     Emr_Crawlers_Logs(c_name,page_source,final_links)
-
+    
     for i in final_links:
-        
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1
             print("Already Crawled")
             continue
         else:
-            result1 = requests.get(i,headers=headers)
+            result1 = requests.get(i, headers=headers)
             response1 = Selector(result1)
             try:
                 news_date = response1.xpath("normalize-space(//div[@class='article-publishDate-content'])").get()

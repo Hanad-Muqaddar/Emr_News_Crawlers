@@ -141,9 +141,7 @@ try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://www.phoenixcontact.com"
     Base_url = "https://www.phoenixcontact.com/en-pc/events-and-news/news"
-
-    proxies = {'http': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280',
-                'https': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280'}
+    proxies = {'http': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280', 'https': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280'}
     
     print("First step done")
     try:
@@ -156,7 +154,7 @@ try:
     
     news_links = []
 
-    links = soup.find_all('a',{ "class" : "ex-do-item"})   
+    links = soup.find_all('a',{ "class" : "ex-do-item ex-domain-www"})   
     for link in links:
         news_link = Main_url + link.get('href')
         if news_link not in news_links:
@@ -175,7 +173,6 @@ try:
     Emr_Crawlers_Logs(c_name,Web_Page,news_links)
     
     for i in news_links:  
-                
         if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -190,7 +187,7 @@ try:
                 print("error")
                 
             try:
-                title = data.find('title').get_text()
+                title = data.find('h1').get_text(strip=True)
                 print(title)
             except:
                 title = ""

@@ -148,7 +148,7 @@ try:
         news_link = link.text
         if "en/media-and-publications/media-articles/" in news_link and news_link not in news_links:
             news_links.append(news_link)
-    news_links.append("https://hagergroup.com/en/media-and-publications/media-articles/fabrice-amedeo-lorient-cuxhaven")
+    news_links.append("https://hagergroup.com/en/media-and-publications/media-articles/hagergroup-acquires-advizeo")
     print(news_links)
     db_list = []
     mydoc = collection.find()

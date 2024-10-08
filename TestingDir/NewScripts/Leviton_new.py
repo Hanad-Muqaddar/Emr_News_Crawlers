@@ -175,7 +175,7 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
         
-    for i,d in zip(N_links,N_Dates):
+    for i, d in zip(N_links, N_Dates):
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1
@@ -183,7 +183,7 @@ try:
             continue
         else:
             
-            result1 = requests.get(i,headers=headers, verify=False)
+            result1 = requests.get(i, headers=headers, verify=False)
             response1 = Selector(result1)
 
             try:

@@ -151,8 +151,7 @@ try:
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
-    opts.headless = True
-
+    opts.add_argument("--headless")
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
 
     # service = Service("C:\Program Files (x86)\chromedriver.exe")
@@ -160,10 +159,9 @@ try:
 
     # driver = webdriver.Chrome(service=service, options=opts)
 
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+    driver = webdriver.Chrome(options=opts)
     driver.get("https://www.lapp.com/en/de/news/press/e/000143")
     time.sleep(10)
-    
      
     news_links = []
     N_dates = []

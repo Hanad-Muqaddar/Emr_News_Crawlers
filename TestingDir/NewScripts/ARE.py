@@ -139,21 +139,19 @@ else:
 
 # *****************************************************************************
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'}
     Main_url = "https://www.mynewsdesk.com"
     Base_url = "https://www.mynewsdesk.com/fi/are/latest_news"
     result = requests.get(Base_url,headers=headers)
     response = Selector(result)
     
-    news_links = response.xpath('//div[@class="grid js-material-grid"]/article/a/@href').getall()
-    print(news_links)
+    news_links = response.xpath('//a[@class="panel__link"]/@href').getall()
 
     def translate(Trans):
         translator = Translator()
         Trans_text = translator.translate(Trans,dest='en')
         return Trans_text.text
 
-    # Creating a list of links already avilable in database
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
