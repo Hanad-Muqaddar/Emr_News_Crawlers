@@ -156,28 +156,35 @@ def parse_filtered_news(announcement):
         return new_data
     
 try:
-    # proxies = {'http': 'http://p5IChyPNwWS1LFUQ:wifi;gb;;;@proxy.rampageproxies.com:9000',
-    #         'https': 'http://p5IChyPNwWS1LFUQ:wifi;gb;;;@proxy.rampageproxies.com:9000'}
+    # proxies = {'http': 'http://waleeProxy:Cheeta@1@uk.proxymesh.com:31280', 'https': 'http://waleeProxy:Cheeta@1@uk.proxymesh.com:31280'}
+    headers = {
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'accept-encoding': 'gzip, deflate, br, zstd',
+        'accept-language': 'en-US,en;q=0.9',
+        'cache-control': 'no-cache',
+        'cookie': 'visitorOriginStatus=external; AWSALB=ee0d8sdIANgWz3qfUQpXLwlpjSLG0fvIFKWTZevqXEhJFJ/vRVq9T81vSsUfdhuBtUEYcSjcGK/DJ57uf7flp5A3ND9hn6BU/HDBGVj1I44QGtSpRJB5E0oPUxLd; AWSALBCORS=ee0d8sdIANgWz3qfUQpXLwlpjSLG0fvIFKWTZevqXEhJFJ/vRVq9T81vSsUfdhuBtUEYcSjcGK/DJ57uf7flp5A3ND9hn6BU/HDBGVj1I44QGtSpRJB5E0oPUxLd; _gcl_au=1.1.1700038501.1721053979; OptanonAlertBoxClosed=2024-07-15T14:33:00.312Z; _fbp=fb.1.1721053980428.915424709765820502; visitorOriginStatus=external; _ga=GA1.1.1081535430.1721053982; _mkto_trk=id:178-GYD-668&token:_mch-www.se.com-1721053982357-87505; _evga_c320={%22uuid%22:%2281d216181558237d%22}; _sfid_10cb={%22anonymousId%22:%2281d216181558237d%22%2C%22consents%22:[]}; _cs_c=0; mdLogger=false; kampyle_userid=c940-4397-b899-2fb9-7816-14b5-84ea-5c05; AKA_A2=A; __gtm_campaign_url=; ak_bmsc=964DB2658AE7256D2F99B0CF9D822E78~000000000000000000000000000000~YAAQVJ42FyTrMWiSAQAANgJKdhmni4WfmPm1TMUNo3tw6FJG2+LRDwpGoVzl8TZVKprmTmQplP5HY9IX0x9GJc25BwuR3AC6EAqR4HbK0pSamcs8wzJauOAJ/hdmUGMF2s46wZvEVIVufHYUDWYBzsn1mFXZ8DhYi1Hwe6NJAUZHHAgg2DZsAmEGx63Y0C5aWVBxSvJ2rnT6hX1xNADX35nyFQkGmgYW47NjYFGIHlDSQ7SO7a4ObmSf167dvVZTWGeWY+HIUCl3E+CjX3oJe4JTETsgUPFUawveHzkizaUR53yaZrjC+sX/RDv6SyJH+JquixZjiNVkekkvn3DEKVXuu1YNC/coks6UBepsIfrfSsPK+J2c/7KsUIVy4lwU/KUNYRqJ8L1Kv4lcrhEsF/8XeSrg+j8BRtWcQ+RLfGnqJMuOY+crNC+wrfyg1scCuZbCyMxICDkjXiSf; OptanonConsent=isGpcEnabled=0&datestamp=Thu+Oct+10+2024+16%3A56%3A55+GMT%2B0500+(Pakistan+Standard+Time)&version=202407.2.0&browserGpcFlag=0&isIABGlobal=false&hosts=&consentId=bc4a5bae-01b5-4181-b245-1946a9c7afef&interactionCount=1&isAnonUser=1&landingPath=NotLandingPage&groups=C0001%3A1%2CC0002%3A1%2CC0003%3A1%2CC0004%3A1&intType=3&geolocation=PK%3BPB&AwaitingReconsent=false; TEAL=v:1190b6cfacb882145216592064068536f2878677960$t:1728563216193$sn:2$en:1$s:1728561416192%3Bexp-sess; _cs_cvars=%7B%7D; _cs_id=9b105d11-cd03-a0e6-9425-da34198c6078.1721053983.2.1728561416.1728561416.1708007454.1755217983326.1; _mkto_trk=id:178-GYD-668&token:_mch-www.se.com-1721053982357-87505; _cs_s=1.0.1.1728563217520; bm_sv=869F16D7F0FA4D18CDB4851998F68813~YAAQVJ42FyLtMWiSAQAA+hZKdhl+Vnt+G1kMKTBLkkJPKFQ0y1zPWs6AY9cNalMZhz5IwcEnF2gMxSPAyjEWWE/OiHDYyFOYu5UC8eHqSV99fiwSb7Ko2V49cbd6aa/DqPBmYxqoJfjX7hxGNxHaPs5EN6NbSs4yTb9dpQrLlIekm6U1sNSXvO9PG1DmP4Lpwkw8vcSGBAPCvfNxLpiU7GIZbsaLEot9Qzly55KDj7dGF8uL/0Q7IWEVE29qWWvL~1; _ga_MXD394MGXR=GS1.1.1728561416.2.0.1728561420.0.0.0; kampyleUserSession=1728561420353; kampyleUserSessionsCount=2; kampyleSessionPageCounter=1; kampyleUserPercentile=79.78088371373941; kampylePageLoadedTimestamp=1728561420376',
+        'pragma': 'no-cache',
+        'priority': 'u=0, i',
+        'sec-ch-ua': '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'document',
+        'sec-fetch-mode': 'navigate',
+        'sec-fetch-site': 'none',
+        'sec-fetch-user': '?1',
+        'upgrade-insecure-requests': '1',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
+    }
     proxies = {}
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-        headers = {
-        'Referer': 'https://www.se.com/us/en/about-us/newsroom/news/',
-        'Sec-Ch-Ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
-        'Sec-Ch-Ua-Mobile': '?0',
-        'Sec-Ch-Ua-Platform': '"Windows"',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
-    }
-    # result = requests.get("https://www.se.com/us/en/about-us/newsroom/news/", headers=headers, proxies=proxies)
-    result = requests.get("https://www.se.com/us/en/about-us/newsroom/news/", headers=headers)
+    result = requests.get("https://www.se.com/us/en/about-us/newsroom/news/", headers=headers, proxies=proxies)
     res = Selector(result)
 
     # data = res.css(".sdl-wiztopic-press-releases_wiztopic-card .wiztopic-content")
-
-
     News_Links = res.xpath('//div[@id="se2--wiztopic-event-list-cards-container---"]/div[contains(@class,"se2--wiztopic-event-list--wiztopic-card")]//div[@class="slide-content"]/a[@class="extra-link-wrapper"]/@href').getall()
     f_News_Links = [ "https://www.se.com" + l for l in News_Links]
     print(f_News_Links)

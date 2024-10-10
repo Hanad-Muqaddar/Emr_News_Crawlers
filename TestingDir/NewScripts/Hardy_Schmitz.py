@@ -157,7 +157,7 @@ try:
         if news_link not in news_links:
             news_links.append(news_link)
 
-    print(news_links)
+    print(len(news_links))
     # print(len(news_links))
 
     # Creating a list of links already avilable in database
@@ -176,7 +176,7 @@ try:
             print("Already Crawled")
             continue
         else:
-
+            print(i)
             response = requests.get(i, headers=headers)
             data = BeautifulSoup(response.content, 'lxml')
 
@@ -195,7 +195,6 @@ try:
 
             try:            
                 image = Main_url + data.find('a', attrs = {"class":"thumbnail"}).get("href")
-                print(image)
             except:
                 image = ""
                 # print(image)
@@ -214,6 +213,7 @@ try:
                 analysis = ""
             try:
                 date = data.find('main', attrs = {"class":"flex-shrink-0"}).find('span').get_text()
+                # print(date)
                 # date = translate(date).strip()            
                 news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
                 print(news_date)

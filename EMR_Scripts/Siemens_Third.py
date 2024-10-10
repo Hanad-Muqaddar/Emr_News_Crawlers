@@ -211,7 +211,7 @@ try:
             print(announcement)
 
             try:
-                announcement_type = data['@type']
+                announcement_type = "Press Release"
             except:
                 announcement_type = ""
             language = "en-US"
@@ -251,7 +251,7 @@ try:
 
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
-    ended_on = datetime.datetime.now()
+    ended_on = datetime.now()
 except Exception as e:
     print(e)
     Error_Time =  datetime.now()

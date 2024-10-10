@@ -153,7 +153,7 @@ try:
     opts.add_argument("--enable-cookies")
     opts.add_argument(f'--user-agent={user_agent}')
     opts.headless = False
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+    driver = webdriver.Chrome(options=opts)
     driver.maximize_window()
 
     # headers = {

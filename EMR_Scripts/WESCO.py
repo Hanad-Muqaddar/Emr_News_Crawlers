@@ -160,15 +160,14 @@ try:
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
-    opts.headless = False
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     page_source = "https://investors.wesco.com/news-events/news-releases"
     main_url = "https://investors.wesco.com"
 
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)   
+    driver = webdriver.Chrome(options=opts)   
     driver.get("https://investors.wesco.com/news-events/news-releases")
-    time.sleep(15)
+    time.sleep(10)
 
     news_links = []
     links = driver.find_elements(By.XPATH, '//div[contains(@class,"nir-widget--list")]//article//div[contains(@class,"news--read-more")]')
@@ -203,11 +202,11 @@ try:
             print("Already Crawled")
             continue
         else:
-            res = requests.get(i,headers=headers)
-            response1 = scrapy.Selector(res)
+            driver.get(i)
+            time.sleep(5)
+            response1 = scrapy.Selector(text=driver.page_source)
             try:
-                title = response1.xpath('//article//div[contains(@class,"field field--name-field-nir-news-title")]/div[@class="field__item"]/text()').get()
-                
+                title = response1.xpath('normalize-space(//h2//div[@class="field__item"])').get()
             except:
                 title = response1.xpath("//meta[@property='og:title']/@content").get()
             print(title)

@@ -47,6 +47,7 @@ from urllib.request import Request, urlopen
 from newspaper import fulltext
 from googletrans import Translator
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+
 # ================================================================================
 # Comment these lines when you are running locally
 import importlib.util
@@ -138,7 +139,7 @@ try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://www.oosterberg.nl"
     Base_url = "https://www.oosterberg.nl/category/algemeen-nieuws/"
-    result = requests.get(Base_url,headers=headers)
+    result = requests.get(Base_url, headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
 
     def translate(Trans):
