@@ -137,12 +137,8 @@ else:
 # *****************************************************************************
 def parse_filtered_news(announcement):
     api_url = "https://admin.new.emr-online.com/api/history/filterbody"
-    payload = json.dumps({
-                            "originalBody": announcement
-                            })
-    headers = {
-                'Content-Type': 'application/json'
-                }
+    payload = json.dumps({"originalBody": announcement})
+    headers = {'Content-Type': 'application/json'}
     return_response = requests.request("POST", api_url, headers=headers, data=payload)
     new_data = return_response.text
     new_data = json.loads(new_data)

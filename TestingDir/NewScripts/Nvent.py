@@ -52,17 +52,17 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
 from selenium.webdriver.support.ui import Select
-from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 # # ================================================================================
-# # Comment these lines when you are running locally
-# import importlib.util
-# # Specify the absolute path to Emr_Crawlers_Optimization.py
-# module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
-# # Load the module using the absolute path
-# spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
-# Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
-# spec.loader.exec_module(Emr_Crawlers_Optimization)
-# Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
+# Comment these lines when you are running locally
+import importlib.util
+# Specify the absolute path to Emr_Crawlers_Optimization.py
+module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
+# Load the module using the absolute path
+spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
+Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(Emr_Crawlers_Optimization)
+Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # # ================================================================================
 # ************************************************************************
  
@@ -145,10 +145,7 @@ else:
 # *****************************************************************************
 
 try:
-     # defining variables
     opts = Options()
-    # opts.add_argument("--window-size=190,100")
-    # opts.add_argument("--disable-automation")
     opts.add_argument("--no-sandbox")
     opts.add_argument('--profile-directory=Default')
     opts.add_argument("start-maximized")
@@ -156,67 +153,65 @@ try:
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
-    opts.headless = False
-
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-
+    # opts.add_argument('--headless=new')
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'}
+    
     page_source = "https://investors.nvent.com/press-releases/default.aspx"
-
-    # result = requests.get("https://investors.nvent.com/rss/PressRelease.aspx?LanguageId=1&CategoryWorkflowId=1cb807d2-208f-4bc3-9133-6a9ad45ac3b0&tags=",headers=headers).content
-    # soup = BeautifulSoup(result, 'lxml')
-    # links = [ "https:" +item.text.split('https:')[1].split('.aspx')[0] +".aspx" for item in soup.find_all('item') ]
-    # print(links)
-
+    
+    api_url = "https://investors.nvent.com/feed/PressRelease.svc/GetPressReleaseList?LanguageId=1&bodyType=0&pressReleaseDateFilter=3&categoryId=00000000-0000-0000-0000-000000000000&pageSize=-1&pageNumber=0&tagList=&includeTags=true&year=-1&excludeSelection=1"
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
-
-    driver.get(page_source)
-    time.sleep(6)
-
+    driver.get(api_url)
+    data_element = driver.find_element(By.XPATH, '//pre').text
+    data = json.loads(data_element)
+    
     N_links = []
-    links = driver.find_elements(By.XPATH, '//div[contains(@class,"evergreen-news-content-list")]/div[contains(@class,"evergreen-item evergreen-news")]//a[contains(@class,"evergreen-item-title")]')
-    for link in links:
-        news_link = link.get_attribute('href')
+    __list = data['GetPressReleaseListResult']
+    for obj in __list:
+        news_link = "https://investors.nvent.com/" + obj['LinkToDetailPage']
         N_links.append(news_link)
 
     print(N_links)
-
 
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
     
-    
     for j in N_links:
         news_weblink = j
-        
         if news_weblink in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
         else:
-            result2 = requests.get(news_weblink)
-            soup = BeautifulSoup(result2.content, 'lxml')
+            driver.get(news_weblink)
+            time.sleep(5)
+            soup = BeautifulSoup(driver.page_source, 'lxml')
             try:
                 title = soup.find("title").text.strip()
+                print(title)
             except:
                 title = ""
             try:
-                news_date = soup.find("span", id='_ctrl0_ctl72_lblDate').text.strip()
+                news_date = soup.find("span", id='_ctrl0_ctl69_spanDate').text.strip()
                 news_date = dateparser.parse(news_date)
+                print(news_date)
             except:
                 news_date = ""
             try:
                 analysis = soup.find("meta", attrs={"property":"og:description"}).get("content")
+                print(analysis)
             except:
                 analysis = ""
             try:
                 sub_category = soup.find("meta", attrs={"property":"og:type"}).get("content")
+                print(sub_category)
             except:
                 sub_category = ""
             try:
                 announcement = soup.find("div", id="maincontent").text.strip()
+                print(announcement)
             except:
                 announcement = ""
             announcement_type = "Press Release"

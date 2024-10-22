@@ -141,10 +141,8 @@ else:
 # *****************************************************************************
 try:
 
-     # defining variables
     opts = Options()
-    # opts.add_argument("--window-size=190,100")
-    # opts.add_argument("--disable-automation")
+    opts.add_argument('--headless=new')
     opts.add_argument("--no-sandbox")
     opts.add_argument('--profile-directory=Default')
     opts.add_argument("start-maximized")
@@ -152,7 +150,6 @@ try:
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
-    opts.add_argument("--headless")
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
  

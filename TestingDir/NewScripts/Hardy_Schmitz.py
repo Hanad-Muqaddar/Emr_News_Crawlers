@@ -152,8 +152,13 @@ try:
     news_links = []
 
     links = soup.find_all('div',{ "class" : "row area-box-container text-left"})
-    for link in links:
-        news_link = Main_url + link.find('section',{ "class" : "area-action-button"}).find('a',{ "class" : "btn btn-primary"}).get('href')
+    news_link = ""
+    for link_ele in links:
+        link = link_ele.find('section',{ "class" : "area-action-button"}).find('a',{ "class" : "btn btn-primary"}).get('href')
+        
+        if not "http" in link:
+            news_link = Main_url + link
+            
         if news_link not in news_links:
             news_links.append(news_link)
 

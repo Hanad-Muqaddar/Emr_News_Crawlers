@@ -162,7 +162,7 @@ try:
     page_source = "https://www.rockwellautomation.com/en-us/company/investor-relations/news/jcr:content/root/main-par/generic_container/GenericContainerParsys/column_control_1712903781/Col1/generic_filter.genericSearch.json?rootPath=%2Fcontent%2Frockwell-automation%2Fglobal%2Fna%2Fen&deepCount=false&contentType=news-press&company=rockwell-automation%3Ametadata%2Fcompany%2Fnewsroom%2Fpress-releases&sort=pubAsc&numPerPage=10&page=1"
     
     session = HTMLSession()
-    # set_proxy(session, 'p5IChyPNwWS1LFUQ:wifi;gb;;;@proxy.rampageproxies.com:9000')
+    set_proxy(session, 'waleeProxy:Cheeta@1@uk.proxymesh.com:31280')
     result = session.get(page_source, headers=headers)
     result_json = result.json()
     

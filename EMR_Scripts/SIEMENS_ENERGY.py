@@ -47,18 +47,18 @@ from urllib.request import Request, urlopen
 
 from newspaper import fulltext
 from scrapy import Selector
-# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
-# Comment these lines when you are running locally
-import importlib.util
-# Specify the absolute path to Emr_Crawlers_Optimization.py
-module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
-# Load the module using the absolute path
-spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
-Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(Emr_Crawlers_Optimization)
-Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
+# # Comment these lines when you are running locally
+# import importlib.util
+# # Specify the absolute path to Emr_Crawlers_Optimization.py
+# module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
+# # Load the module using the absolute path
+# spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
+# Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
+# spec.loader.exec_module(Emr_Crawlers_Optimization)
+# Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
 # defining variables
 
@@ -136,15 +136,14 @@ else:
 
 # *****************************************************************************
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'}
     Main_url = "https://press.siemens-energy.com"
     Base_url = "https://press.siemens-energy.com/global/en/press-search"
     result = requests.get(Base_url,headers=headers)
     response = Selector(result)
     
     news_links = []
-
-    News = response.xpath('//div[contains(@class,"press-search-results-view-row content-type-c2-ct-press")]/div[@class="views-field views-field-title"]/a/@href').getall()
+    News = response.xpath('//div[@data-g-name="LatestPressReleases"]/a/@href').getall()
     for n in News:
         f_news_links = Main_url + n
         # print(f_news_links)
@@ -174,10 +173,10 @@ try:
             response2 = Selector(result2)
             
             try:
-                title = response2.xpath('//section[@class="Intro Press Release container"]//h1/text()').get()
+                title = response2.xpath('normalize-space(//div[@class="aem-press-header__title col-sm-11"]//h1)').get()
                 print(title)
             except:
-                title = response2.xpath('///meta[@name="og:title"]/@content').get()
+                title = response2.xpath('//meta[@property="og:title"]/@content').get()
                 print(title)
             
             language = "en-us"
@@ -186,17 +185,17 @@ try:
 
             announcement_type = "News"
             try:
-                sub_category = response2.xpath('//meta[@property="og:type"]/@content').get()
+                sub_category = response2.xpath('//div[@class="aem-tag-template__tag-item"]//span/text()').get()
             except:
                 sub_category = ""
             
             try:
-                analysis = response2.xpath('//meta[@property="og:description"]/@content').get()
+                analysis = response2.xpath('normalize-space((//div[@class="aem-richtext"])[1])').get()
                 print(analysis)
             except:
                 analysis = ""
             try:
-                N_date = response2.xpath('//article[@class="panel"]//time/@datetime').get()
+                N_date = response2.xpath('normalize-space(//span[contains(text(), ", 202")])').get()
                 news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
                 print(news_date)
             except:
@@ -209,7 +208,6 @@ try:
                 announcement = fulltext(result2.text)
                 announcement = announcement.replace('\n','<br>')
                 print(announcement)
-                
             except:
                 announcement = response2.xpath('normalize-space(//article/section[@class="container Row"])').get()
             

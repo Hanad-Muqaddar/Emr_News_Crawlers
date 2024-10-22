@@ -144,7 +144,7 @@ try:
     result = requests.get(page_source,headers=headers)
     response = Selector(result)
     Base_Link = "https://www.southwire.com/"
-    links = response.css(".carousel-inner .active .card-shadow .card-img-top ::attr(href)").getall()
+    links = response.css(".carousel .card-shadow .card-img-top ::attr(href)").getall()
     final_links = [Base_Link + link for link in links]
     print(final_links)
 
