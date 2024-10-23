@@ -50,7 +50,7 @@ from newspaper import fulltext
 from googletrans import Translator
 
 from scrapy import Selector
-# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
 # Comment these lines when you are running locally

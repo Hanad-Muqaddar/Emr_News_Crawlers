@@ -139,10 +139,8 @@ else:
 
 # *****************************************************************************
 try:
-
-     # defining variables
     opts = Options()
-    opts.add_argument('--headless=new')
+    # opts.add_argument('--headless=new')
     opts.add_argument("--no-sandbox")
     opts.add_argument('--profile-directory=Default')
     opts.add_argument("start-maximized")
@@ -151,7 +149,7 @@ try:
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
 
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'}
     driver = webdriver.Chrome(options=opts)
     Web_Page = "https://www.weg.net/institutional/US/en/all-news/list"
     driver.get(Web_Page)
@@ -255,7 +253,7 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
