@@ -194,7 +194,7 @@ try:
             print(l)   
             
             try: 
-                title = soup.find('meta',attrs = {'property':'og:title'}).get('content')
+                title = soup.find('h1').find('pre').get_text(strip=True)
                 print(title)
             except:
                 title = ""

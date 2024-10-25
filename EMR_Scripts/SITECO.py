@@ -142,21 +142,20 @@ try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = 'https://www.siteco.com'
     page_source = 'https://www.siteco.com/news'
-    result = requests.get(page_source,headers=headers)
+    result = requests.get(page_source, headers=headers)
     response = Selector(result)
 
     news_links = response.xpath('//div[@class="block"]//div[@class="textmedia__text"]//a/@href').getall()
-    news_links = [Main_url + l for l in news_links]
+    news_links = [Main_url + l if not "https" in l else Main_url for l in news_links]
     print(news_links)
   
-    # Creating a list of links already avilable in database
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])                                                                                                    
 
     Emr_Crawlers_Logs(c_name,page_source,news_links)
-    current_date = datetime.now().date()
+    current_date = datetime.now()
     for n in news_links:           
         if n in links_list:
             total_crwalled_links += 1
@@ -168,7 +167,7 @@ try:
             response2 = Selector(result2)
             
             try:
-                title = response2.xpath('//meta[@property="og:title"]/@content').get()
+                title = response2.xpath('//meta[@property="og:title"]/@content').get() or response2.xpath('normalize-space(//title)').get()
                 print(title)
             except:
                 title = ""
@@ -195,9 +194,8 @@ try:
                 analysis = ""
             
             news_date = current_date
-
             news_weblink = n
-            
+
             try:
                 announcement = fulltext(result2.text)
                 announcement = announcement.replace('\n','<br>')
@@ -211,7 +209,6 @@ try:
                 print(announcement)
             
             date = datetime.now()
-        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -249,7 +246,7 @@ except:
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
-
+    print(Reported_Error)
 
 # **************************************************************************
 rep = ''

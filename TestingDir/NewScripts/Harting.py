@@ -139,12 +139,25 @@ try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     page_source = "https://www.harting.com/DE/en-gb/news"
     Main_url = "https://www.harting.com"
-    page = requests.get(page_source)
-    soup = BeautifulSoup(page.content , 'lxml')
+    
+    # page = requests.get(page_source)
+    opts = Options()
+    opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    driver = webdriver.Chrome(options=opts)
+    driver.get(page_source)
+    time.sleep(10)
+    
+    soup = BeautifulSoup(driver.page_source , 'lxml')
     news_links = []
 
-    links = soup.find_all('a',{ "class" : "featured-news__link"})
-
+    links = soup.find_all('a', { "class" : "hcl-grid-col-span-12"})
     for link in links:
         news_link = Main_url + link.get('href')
         if news_link not in news_links:
@@ -166,11 +179,12 @@ try:
             continue
 
         else:
-            response = requests.get(i, headers=headers)
-            data = BeautifulSoup(response.content, 'lxml')
+            driver.get(i)
+            time.sleep(3)
+            data = BeautifulSoup(driver.page_source, 'lxml')
 
             try:
-                title = data.find('div', {"id":"block-hdbp-page-title"}).find('h1').find('span').get_text(strip=True)
+                title = data.find('h1', {"class":"hcl-headline-90"}).get_text(strip=True)
                 print(title)
             except:
                 title = ""
@@ -179,19 +193,16 @@ try:
             language = "en-us"
 
             try:
-                img = data.find('div', {"class":"title-image__container"}).get('style')
-                image = img.split("url('")[1][:-2].strip()
-                # print(f_img)
+                image = data.find('div', {"class":"head-image"}).find('img').get('src')
             except:
                 image = ""
 
             sub_category = ""
-        
             analysis = ""
+
             try:
-                date = data.find('article', {"role":"article"}).find('div', {"class":"node-article-full__submitted width--content"}).get_text(strip=True)
-                f_date = date.replace('on','').split('at')[0].strip()
-                news_date = dateparser.parse(f_date,  settings={'DATE_ORDER': 'DMY'})
+                date = data.find('div', {"class":"release-date"}).get_text(strip=True)
+                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'DMY'})
                 print(news_date)
             except:
                 news_date = ""
@@ -201,15 +212,13 @@ try:
             print(news_weblink)
             
             try:
-                announcement = fulltext(response.content)
+                announcement = fulltext(driver.page_source)
                 announcement = announcement.replace('\n','<br>')
-                # print(announcement)
+                print(announcement)
             except:
                 announcement = ""
             
             date = datetime.now()
-            # Creating a list of links already avilable in database
-            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -231,7 +240,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    
+                
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '

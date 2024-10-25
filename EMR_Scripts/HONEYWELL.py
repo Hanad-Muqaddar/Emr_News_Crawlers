@@ -150,7 +150,7 @@ def parse_filtered_news(announcement):
         return new_data
     
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'}
 
     # result = requests.get("https://www.honeywell.com/us/en/press",headers=headers)
     # response = Selector(result)
@@ -158,7 +158,7 @@ try:
     # final_links = ["https://www.honeywell.com" + link if "https://www.honeywell.com" not in link else link for link in links[:10]]
     
 
-    result = requests.get("https://www.honeywell.com/sitemap.xml",headers=headers)
+    result = requests.get("https://www.honeywell.com/sitemap.xml", headers=headers)
     print("working")
     soup = BeautifulSoup(result.content, 'lxml')
     links = soup.find_all('loc')
@@ -173,8 +173,8 @@ try:
     Web_page = "https://www.honeywell.com/us/en/press"
     Emr_Crawlers_Logs(c_name,Web_page,final_links)
     
+    final_links.append("https://www.honeywell.com/us/en/press/2024/10/honeywell-reports-third-quarter-results-updates-2024-guidance")
     for i in final_links:
-        
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1

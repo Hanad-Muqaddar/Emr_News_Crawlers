@@ -5,6 +5,8 @@ import time
 
 import json
 
+from scrapy import Selector
+
 from random import randint
 
 from bs4 import BeautifulSoup
@@ -43,6 +45,9 @@ from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
 
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
+
 from urllib.request import Request, urlopen
 from newspaper import fulltext
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
@@ -60,7 +65,6 @@ Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
 
 # ************************************************************************
-# defining variables
 
 running_Sequence = []
 
@@ -73,8 +77,6 @@ total_crwalled_links = 0
 Already_exist = 0
 
 # *************************************************************************
-
-# trying to connect with mongodb
 
 try:
 
@@ -136,28 +138,46 @@ else:
 
 # *****************************************************************************
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+
+    opts = Options()
+    opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    # opts.add_argument("--headless=new")
+    opts.add_argument("--enable-cookies")
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+    driver.get("https://investors.atkore.com/feed/PressRelease.svc/GetPressReleaseList?apiKey=BF185719B0464B3CB809D23926182246&LanguageId=1&bodyType=0&pressReleaseDateFilter=3&categoryId=1cb807d2-208f-4bc3-9133-6a9ad45ac3b0&pageSize=-1&pageNumber=0&tagList=&includeTags=true&year=2024&excludeSelection=1")
+        
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'}
     Main_url = "https://investors.atkore.com"
-    Base_url = "https://investors.atkore.com/feed/PressRelease.svc/GetPressReleaseList?apiKey=BF185719B0464B3CB809D23926182246&LanguageId=1&bodyType=0&pressReleaseDateFilter=3&categoryId=1cb807d2-208f-4bc3-9133-6a9ad45ac3b0&pageSize=-1&pageNumber=0&tagList=&includeTags=true&year=2024&excludeSelection=1"
-    result = requests.get(Base_url,headers=headers)
+
+    # Base_url = "https://investors.atkore.com/feed/PressRelease.svc/GetPressReleaseList?apiKey=BF185719B0464B3CB809D23926182246&LanguageId=1&bodyType=0&pressReleaseDateFilter=3&categoryId=1cb807d2-208f-4bc3-9133-6a9ad45ac3b0&pageSize=-1&pageNumber=0&tagList=&includeTags=true&year=2024&excludeSelection=1"
+    # result = requests.get(Base_url,headers=headers)
 
     news_links = []
-
-    data = result.json()     
+    response = Selector(text=driver.page_source)
+    data_element = response.xpath('normalize-space(//pre)').get()
+    data = json.loads(data_element)
+    print(data)
+    
     for d in data['GetPressReleaseListResult']:
-    #     print(d)
+        # print(d)
         try:
             link = Main_url + d['LinkToDetailPage']
             news_links.append(link)
         except:
             print("not found")
-    
+
 
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
-    
+
     print(len(news_links))
     print(news_links)
 
@@ -172,11 +192,11 @@ try:
             continue
 
         else:        
-            response = requests.get(i, headers=headers)
-            data = BeautifulSoup(response.content, 'lxml')
+            driver.get(i)
+            data = BeautifulSoup(driver.page_source, 'lxml')
 
             try:
-                title = data.find('span', {'id':'_ctrl0_ctl78_lblModuleDetailHeadline'}).text
+                title = data.find('h2').find('span').text
                 print(title)
             except:
                 title = ""
@@ -200,9 +220,9 @@ try:
             except:
                 analysis = ""
             try:
-                date = data.find('span', {'id':'_ctrl0_ctl78_lblDate'}).text
+                date = data.find('div', class_='module_date-time').find('span').text
                 print(date)
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'DMY'})
+                news_date = dateparser.parse(date)
                 print(news_date)
             except:
                 news_date = ""
@@ -212,14 +232,13 @@ try:
             print(news_weblink)
             
             try:
-                announcement = fulltext(response.content)
+                announcement = fulltext(driver.page_source)
                 announcement = announcement.replace('\n','<br>')
                 print(announcement)
             except:
                 announcement = ""
             
             date = datetime.now()
-            # Creating a list of links already avilable in database
             
             company_news = {}
             company_news['companyId'] = ''
@@ -242,7 +261,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-    
+
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
@@ -258,6 +277,7 @@ except:
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
+    print(Reported_Error)
 
 
 # **************************************************************************
@@ -298,4 +318,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'None'
 
-# error_logs.insert_one(log)
+error_logs.insert_one(log)

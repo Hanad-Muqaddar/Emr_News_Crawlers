@@ -64,7 +64,6 @@ Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
 
 # ************************************************************************
-# defining variables
 # opts = Options()
 # opts.add_argument("--window-size=190,100")
 # opts.add_argument("--disable-automation")

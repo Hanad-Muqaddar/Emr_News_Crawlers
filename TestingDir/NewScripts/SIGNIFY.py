@@ -99,11 +99,11 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
+    # data = json.load(file)
+    # db_path = data[0]['Db_Path']
+    # client = MongoClient(db_path)
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -161,20 +161,35 @@ else:
 
 # *****************************************************************************
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    opts = Options()
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    opts.add_argument("--headless=new")
+    driver = webdriver.Chrome(options=opts)
+    
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
     proxies = {
-            'http': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280',
-            'https': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280'
-          }
-    response = requests.get("https://www.signify.com/content/signify/en_AA/our-company/news/n13-press-releases.feeds.json", proxies=proxies,headers=headers)
+        'http': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280',
+        'https': 'http://waleeProxy:Cheeta@1@de.proxymesh.com:31280'
+    }
+    
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'}
+    # response = requests.get("https://www.signify.com/content/signify/en_AA/our-company/news/n13-press-releases.feeds.json", proxies=proxies, headers=headers)
+    
+    driver.get("https://www.signify.com/content/signify/en_AA/our-company/news/n13-press-releases.feeds.json")
+    response = Selector(text=driver.page_source)
+    data_element = response.xpath('//pre/text()').get()
+    data = json.loads(data_element)
 
-    data = json.loads(response.text)
-    print(data)
     Optimization_links = []
     page_source = "https://www.signify.com/global/our-company/news/press-releases"
     for i in data:
@@ -226,9 +241,7 @@ try:
 
            
             language = "en"
-            
             crawled_date = datetime.datetime.now()
-
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -251,7 +264,9 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
+                
     Emr_Crawlers_Logs(c_name,page_source,Optimization_links)
+    
     if Already_exist >= 1:
 
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
@@ -260,13 +275,13 @@ try:
         tmp_txt = ''
 
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
-
     ended_on = datetime.datetime.now()
+
 except Exception as e:
     Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()
-
+    print(Reported_Error)
     running_Sequence.append(e)
 
 
