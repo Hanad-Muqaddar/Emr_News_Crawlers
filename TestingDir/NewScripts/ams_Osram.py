@@ -3,49 +3,24 @@ import requests
 
 import time
 
-import json
-
-from random import randint
-
-from bs4 import BeautifulSoup
-
 from pymongo import MongoClient
-
-from bs4 import BeautifulSoup
 
 from selenium import webdriver
 
-# from webdriver_manager.chrome import ChromeDriver
-
 from selenium.webdriver.chrome.options import Options
-
-from selenium.webdriver.support.ui import WebDriverWait
-
-from selenium.webdriver.common.keys import Keys
-
-from selenium.webdriver.support import expected_conditions
 
 from selenium.webdriver.common.by import By
 
-from urllib.parse import urlparse
-
-import re
-
 import traceback
-
-import urllib
 
 import dateparser
 
 from datetime import datetime
 
-from bson.objectid import ObjectId
-
-from urllib.error import HTTPError
-
-from urllib.request import Request, urlopen
 from newspaper import fulltext
+
 from scrapy import Selector
+
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -143,7 +118,7 @@ try:
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
-    opts.add_argument("--headless=new")
+    # opts.add_argument("--headless=new")
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'}
     driver = webdriver.Chrome(options=opts)
 

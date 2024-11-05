@@ -238,8 +238,6 @@ try:
                 announcement = ""
             
             date = datetime.now()
-            # Creating a list of links already avilable in database
-            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -277,7 +275,7 @@ except:
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
-
+    print(Reported_Error)
 
 # **************************************************************************
 rep = ''

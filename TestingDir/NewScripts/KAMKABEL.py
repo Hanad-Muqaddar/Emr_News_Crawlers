@@ -1,51 +1,18 @@
 # Packages to be imported
 import requests
 
-import time
-
-import json
-
-from random import randint
-
 from bs4 import BeautifulSoup
 
 from pymongo import MongoClient
 
-from bs4 import BeautifulSoup
-
-from selenium import webdriver
-
-# from webdriver_manager.chrome import ChromeDriver
-
-from selenium.webdriver.chrome.options import Options
-
-from selenium.webdriver.support.ui import WebDriverWait
-
-from selenium.webdriver.common.keys import Keys
-
-from selenium.webdriver.support import expected_conditions
-
-from selenium.webdriver.common.by import By
-
-from urllib.parse import urlparse
-
-import re
-
 import traceback
-
-import urllib
 
 import dateparser
 
 from datetime import datetime
 
-from bson.objectid import ObjectId
-
-from urllib.error import HTTPError
-
-from urllib.request import Request, urlopen
-from newspaper import fulltext
 from googletrans import Translator
+
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -139,6 +106,7 @@ try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'}
     Main_url = "https://www.kamkabel.ru"
     Base_url = "https://www.kamkabel.ru/press/news/"
+    
     result = requests.get(Base_url,headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
 
@@ -148,7 +116,7 @@ try:
         return Trans_text.text
     
     news_links = []
-
+    
     links = soup.find('div',{ "class" : "items row"}).find_all('div',{ "class" : "col-md-12"})
     for link in links:
         news_link = Main_url + link.find('a',{ "class" : "btn btn-default btn-sm"}).get('href')
@@ -158,7 +126,6 @@ try:
     print(news_links)
     print(len(news_links))
 
-    # Creating a list of links already avilable in database
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
@@ -177,6 +144,7 @@ try:
         else:
             response = requests.get(i, headers=headers)
             data = BeautifulSoup(response.content, 'lxml')
+            
             try:
                 title = data.find('section',attrs = {"class":"page-top"}).find('h1').get_text()
                 title = translate(title)
@@ -196,7 +164,6 @@ try:
                 print(image)
             except:
                 image = ""
-                # print(image)
 
             try:
                 sub_category = data.find('meta', attrs = {"property":"og:type"}).get("content")
@@ -207,27 +174,27 @@ try:
             try:
                 analysis = data.find('meta',attrs = {'property':'og:description'}).get("content")
                 analysis = translate(analysis)
-                # print(analysis)
+                print(analysis)
             except:
                 analysis = ""
+            
             try:
                 date = data.find('div',{'class':'period'}).find('span').get_text()
                 date = translate(date)
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-                # print(news_date)
+                news_date = dateparser.parse(date)
+                print(news_date)
             except:
                 date = data.find('div',{'class':'period'}).get_text()
                 date = translate(date)
-                # print(date)
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-                # print(news_date)
+                news_date = dateparser.parse(date)
+                print(news_date)
            
             news_weblink = i
             
             try:
                 announcement = data.find('div',{'class':'content'}).get_text()
                 announcement = translate(announcement)
-                # print(announcement)            
+                print(announcement)            
             except:
                 announcement = ""
             
@@ -249,6 +216,7 @@ try:
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
+            
             try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1
@@ -270,7 +238,6 @@ except:
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
-
 
 # **************************************************************************
 rep = ''

@@ -1,54 +1,21 @@
-# Packages to be imported
-import requests
-
 import time
-
-import json
-
-from random import randint
-
-from bs4 import BeautifulSoup
 
 from pymongo import MongoClient
 
-from bs4 import BeautifulSoup
-
 from selenium import webdriver
-
-# from webdriver_manager.chrome import ChromeDriver
 
 from selenium.webdriver.chrome.options import Options
 
-from selenium.webdriver.support.ui import WebDriverWait
-
-from selenium.webdriver.common.keys import Keys
-
-from selenium.webdriver.support import expected_conditions
-
 from selenium.webdriver.common.by import By
 
-from urllib.parse import urlparse
-
-import re
-
 import traceback
-
-import urllib
 
 import dateparser
 
 from datetime import datetime
 
-from bson.objectid import ObjectId
-
-from urllib.error import HTTPError
-
-from urllib.request import Request, urlopen
-
-from newspaper import fulltext
-from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
 from googletrans import Translator
+
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # # ================================================================================
@@ -138,17 +105,17 @@ else:
 ####################################################
 
 # *****************************************************************************
+
 try:
     opts = Options()
-    # opts.add_argument('--headless=new')
     opts.add_argument("--no-sandbox")
     opts.add_argument('--profile-directory=Default')
     opts.add_argument("start-maximized")
     opts.add_argument("disable-infobars")
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
+    # opts.add_argument('--headless=new')
     opts.add_argument("--enable-cookies")
-
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'}
     driver = webdriver.Chrome(options=opts)
     Web_Page = "https://www.weg.net/institutional/US/en/all-news/list"
@@ -217,7 +184,7 @@ try:
             try:
                 N_date = driver.find_element(By.XPATH, '//time[@class="pubdate label label-primary pull-right"]').text
                 print(N_date)
-                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
+                news_date = dateparser.parse(N_date)
                 print(news_date)
             except:
                 news_date = ""
@@ -234,8 +201,6 @@ try:
                 announcement = ""
             
             date = datetime.now()
-            # Creating a list of links already avilable in database
-            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

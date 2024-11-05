@@ -1,12 +1,6 @@
-# Packages to be imported
-from functools import total_ordering
 import requests
 
 import time
-
-import json
-
-from random import randint
 
 from bs4 import BeautifulSoup
 
@@ -16,39 +10,16 @@ from bs4 import BeautifulSoup
 
 from selenium import webdriver
 
-# from webdriver_manager.chrome import ChromeDriver
-
 from selenium.webdriver.chrome.options import Options
-
-from selenium.webdriver.support.ui import WebDriverWait
-
-from selenium.webdriver.common.keys import Keys
-
-from selenium.webdriver.support import expected_conditions
 
 from selenium.webdriver.common.by import By
 
-from urllib.parse import urlparse
-
-import re
-
 import traceback
-
-import urllib
 
 import dateparser
 
-# from datetime import datetime
 import datetime
 
-from bson.objectid import ObjectId
-
-from urllib.error import HTTPError
-
-from urllib.request import Request, urlopen
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -67,7 +38,7 @@ running_Sequence = []
 
 started_on = datetime.datetime.now()
 
-c_name = 'PIPELIFE' # Name of the Collection
+c_name = 'PIPELIFE'
 
 total_crwalled_links = 0
 
@@ -75,13 +46,7 @@ Already_exist = 0
 
 # *************************************************************************
 
-# trying to connect with mongodb
-
 try:
-    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    # data = json.load(file)
-    # db_path = data[0]['Db_Path']
-    # client = MongoClient(db_path)
 
     client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
@@ -150,7 +115,7 @@ try:
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
-    opts.add_argument("--headless=new")
+    # opts.add_argument("--headless=new")
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'}
     driver = webdriver.Chrome(options=opts)
@@ -256,8 +221,11 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.datetime.now()
+    
 except Exception as e:
+    
     print(e)
+    
     Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()

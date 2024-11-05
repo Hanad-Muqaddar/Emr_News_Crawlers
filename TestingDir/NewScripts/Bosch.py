@@ -3,51 +3,22 @@ import requests
 
 import time
 
-import json
-
-from random import randint
-
-from bs4 import BeautifulSoup
-
 from pymongo import MongoClient
 
 from bs4 import BeautifulSoup
 
 from selenium import webdriver
 
-# from webdriver_manager.chrome import ChromeDriver
-
 from selenium.webdriver.chrome.options import Options
 
-from selenium.webdriver.support.ui import WebDriverWait
-
-from selenium.webdriver.common.keys import Keys
-
-from selenium.webdriver.support import expected_conditions
-
-from selenium.webdriver.common.by import By
-
-from urllib.parse import urlparse
-
-import re
-
 import traceback
-
-import urllib
 
 import dateparser
 
 from datetime import datetime
 
-from bson.objectid import ObjectId
-
-from urllib.error import HTTPError
-
-from urllib.request import Request, urlopen
-
 from newspaper import fulltext
-from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
+
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -147,10 +118,10 @@ try:
     opts.add_argument("disable-infobars")
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
-    opts.add_argument('--headless=new')
+    # opts.add_argument('--headless=new')
     opts.add_argument("--enable-cookies")
     
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'}
     driver = webdriver.Chrome(options=opts)
     driver.get("https://www.boschrexroth.com/en/de/company/press/")
     time.sleep(5)
@@ -163,7 +134,6 @@ try:
 
     print(news_links)
     print(len(news_links))
-
 
     db_list = []
     mydoc = collection.find()
@@ -208,7 +178,7 @@ try:
             try:
                 N_date = data.find('span', {"class":"article-date author-name"}).get_text(strip=True)
                 print(N_date)
-                news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
+                news_date = dateparser.parse(N_date)
                 print(news_date)
             except:
                 news_date = ""
@@ -224,8 +194,6 @@ try:
                 announcement = ""
             
             date = datetime.now()
-            # Creating a list of links already avilable in database
-            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''

@@ -1,58 +1,19 @@
-# Packages to be imported
-import requests
-
-import time
-
-import json
-
-from random import randint
-
-from bs4 import BeautifulSoup
-
 from pymongo import MongoClient
 
-from bs4 import BeautifulSoup
-
-from selenium import webdriver
-
-from selenium.webdriver.chrome.options import Options
-
-from selenium.webdriver.support.ui import WebDriverWait
-
-from selenium.webdriver.common.keys import Keys
-
-from selenium.webdriver.support import expected_conditions
-
-from selenium.webdriver.common.by import By
-
 from requests_html import HTMLSession
-
-import re
 
 import traceback
 
 from scrapy import Selector
 
-import urllib
-
 import dateparser
 
 import datetime
 
-from bson.objectid import ObjectId
-
-from urllib.error import HTTPError
-
-from urllib.request import Request, urlopen
-
 from scrapy import Selector
 
-import feedparser
-
 from newspaper import fulltext
-from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
+
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -72,7 +33,7 @@ running_Sequence = []
 
 started_on = datetime.datetime.now()
 
-c_name = 'ROCKWELL' # Name of the Collection
+c_name = 'ROCKWELL'
 
 total_crwalled_links = 0
 
@@ -80,13 +41,7 @@ Already_exist = 0
 
 # *************************************************************************
 
-# trying to connect with mongodb
-
 try:
-    # file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    # data = json.load(file)
-    # db_path = data[0]['Db_Path']
-    # client = MongoClient(db_path)
     
     client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
@@ -155,7 +110,7 @@ def set_proxy(session, proxy):
 try:
     headers = {
         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
     }
 
     Main_url = "https://www.rockwellautomation.com"
@@ -179,7 +134,7 @@ try:
     Emr_Crawlers_Logs(c_name,page_source,news_links)
 
     for i in news_links:
-        
+
         if i in db_list:
             Already_exist += 1
             total_crwalled_links += 1
@@ -187,8 +142,9 @@ try:
             continue
         
         else:
-            result1 = session.get(i,headers=headers)
+            result1 = session.get(i, headers=headers)
             response1 = Selector(result1)
+            
             try:
                 ne_date = response1.xpath('//div[@class="hero-banner__subtitle-text"]/text()').get()
                 f_ne_date = ne_date.split('|')[1]
@@ -196,26 +152,32 @@ try:
                 print(news_date)
             except:
                 news_date = ""
+                
             try:
                 title = response1.xpath('//h1[@class="hero-banner__title"]/text()').get().strip()
                 print(title)
             except:
                 title = ""
+                
             try:
                 analysis = response1.xpath("//meta[@name='description']/@content").get()
             except:
                 analysis = ""
+                
             try:
                 image = response1.xpath("//meta[@property='og:image']/@content").get()
             except:
                 image = ""
+                
             sub_category = ""
+            
             try:
                 announcement = fulltext(result1.text)
                 announcement = announcement.replace('\n','<br>')
                 print(announcement)
             except:
                 announcement = ""
+                
             announcement_type = "Press Release"
             language = "en-US"
             crawled_date = datetime.datetime.now()

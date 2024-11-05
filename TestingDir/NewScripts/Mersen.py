@@ -1,51 +1,15 @@
-# Packages to be imported
-from functools import total_ordering
 import requests
-
-import time
-
-import json
-
-from random import randint
-
-from bs4 import BeautifulSoup
 
 from pymongo import MongoClient
 
 from bs4 import BeautifulSoup
 
-from selenium import webdriver
-
-# from webdriver_manager.chrome import ChromeDriver
-
-from selenium.webdriver.chrome.options import Options
-
-from selenium.webdriver.support.ui import WebDriverWait
-
-from selenium.webdriver.common.keys import Keys
-
-from selenium.webdriver.support import expected_conditions
-
-from selenium.webdriver.common.by import By
-
-from urllib.parse import urlparse
-
-import re
-
 import traceback
-
-import urllib
 
 import dateparser
 
-# from datetime import datetime
 import datetime
 
-from bson.objectid import ObjectId
-
-from urllib.error import HTTPError
-
-from urllib.request import Request, urlopen
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -61,30 +25,12 @@ Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
 
 # ************************************************************************
-# defining variables
-# opts = Options()
-# opts.add_argument("--window-size=190,100")
-# opts.add_argument("--disable-automation")
-# opts.add_argument("--no-sandbox")
-# opts.add_argument('--profile-directory=Default')
-# opts.add_argument("start-maximized")
-# opts.add_argument("disable-infobars")
-# opts.add_argument("--lang=en")
-# opts.add_argument("--enable-javascript")
-# opts.add_argument("--enable-cookies")
-# lang_dict = {'nl': 'en', 'fr': 'en', 'cs': 'en', 'da': 'en', 'de': 'en', 'es': 'en', 'it': 'en', 'hu': 'en', 'no': 'en', 'pl': 'en', 'pt': 'en', 'ro': 'en', 'sk': 'en', 'fi': 'en', 'sv': 'en', 'tr': 'en', 'el': 'en', 'bg': 'en', 'ru': 'en', 'uk': 'en', 'ar': 'en', 'id': 'en', 'vi': 'en', 'th': 'en', 'zh': 'en', 'ja': 'en', 'ko': 'en'}
-# prefs = {
-#   "translate_whitelists": lang_dict,
-#   "translate":{"enabled":"true"}
-# }
-# opts.add_experimental_option("prefs", prefs)
-# opts.headless = True
 
 running_Sequence = []
 
 started_on = datetime.datetime.now()
 
-c_name = 'MERSEN' # Name of the Collection
+c_name = 'MERSEN'
 
 total_crwalled_links = 0
 
@@ -92,14 +38,10 @@ Already_exist = 0
 
 # *************************************************************************
 
-# trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
 
     running_Sequence.append('Connected to DB Server')
 
@@ -158,33 +100,25 @@ else:
 # *****************************************************************************
 
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    result = requests.get("https://www.mersen.us/sitemap.xml",headers=headers)
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'}
+    result = requests.get("https://www.mersen.com/en/group/news-and-events", headers=headers)
     soup = BeautifulSoup(result.content, 'lxml')
-    data = soup.find_all('url')
+    
     news_links = []
-    dates = []
-
-    # Creating a list of links already avilable in database
+    news = soup.find_all('div' , class_ ="views-row")
+    for n in news:
+        n_link = "https://www.mersen.com" + n.find('a', class_='news__body__link').get('href')
+        news_links.append(n_link)
+    
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    for i in data:
-        if "news" in i.find("loc").text:
-            link = i.find('loc').text
-            news_links.append(link)
-            news_date = i.find('lastmod').text
-            dates.append(news_date)
-        else:
-            continue
-
     page_source = "https://www.mersen.us/news-media/events-news" 
-    Emr_Crawlers_Logs(c_name,page_source,news_links)
+    Emr_Crawlers_Logs(c_name, page_source, news_links)
     
-    for j,k in zip(news_links, dates):
-        
+    for j in news_links:
         if j in db_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -194,33 +128,46 @@ try:
             res = requests.get(j,headers=headers)
             soup = BeautifulSoup(res.content, 'lxml')
             try:
-                title = soup.find("meta", attrs={"property":"og:title"}).get("content")
+                title = soup.find("h1", class_="title").text
+                print("\n", title)
             except:
                 title = ""
             try:
                 analysis = soup.find("meta", attrs={"name":"description"}).get("content")
+                print(analysis)
             except:
                 analysis = ''
             try:
                 image = soup.find("meta", attrs={"property":"og:image"}).get("content")
+                print(image)
             except:
                 image = ""
             try:
-                announcement_type = soup.find("meta", attrs={"property":"og:type"}).get("content")
+                announcement_type = "News"
+                print(announcement_type)
             except:
                 announcement_type = ''
             try:
-                announcement = soup.find("main", id='main__content').text.strip()
+                announcement = soup.find('div', class_="field--name-field-paragraphs").find('div', class_='field__item').text.replace("\n", "<br/>").strip()
+                print(announcement)
             except:
                 announcement = ""
+            
             page_source = "https://www.mersen.us/news-media/events-news"
+            
             language = "en"
+            
             crawled_date = datetime.datetime.now()
+            
             news_weblink = j
+            
             try:
-                news_date = dateparser.parse(k)
+                news_date = soup.find('div', class_="field--name-field-dates").find("time").text
+                news_date = dateparser.parse(news_date)
+                print(news_date)
             except:
                 news_date = ""
+            
             sub_category = ""
             
             company_news = {}
@@ -259,15 +206,11 @@ except Exception as e:
     Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()
-
+    print(Reported_Error)
     running_Sequence.append(e)
 
-
 # **************************************************************************
 
-# **************************************************************************
-
-# **************************************************************************
 rep = ''
 
 try:
