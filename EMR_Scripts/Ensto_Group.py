@@ -36,6 +36,8 @@ import traceback
 
 import urllib
 
+from scrapy import Selector
+
 import dateparser
 
 from datetime import datetime
@@ -47,7 +49,7 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
-# ================================================================================
+# # ================================================================================
 # Comment these lines when you are running locally
 import importlib.util
 # Specify the absolute path to Emr_Crawlers_Optimization.py
@@ -139,46 +141,26 @@ else:
 # *****************************************************************************
 
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'}
     Optimization_links = []
-    result = requests.get("https://www.ensto.com/api/collection/search?firstPageSize=80&id%5B%5D=289",headers=headers)
+    result = requests.get("https://www.ensto.com/api/newsroom/getList?lang=en&areasOfInterestTag=&categoryTag=&Keyword=&rootPage=64&page=1",headers=headers)
     data = json.loads(result.text)
-    for i in range(len(data['Cards'])):
-        try:
-            title = data['Cards'][i]['header']
-            print(title)
-        except:
-            title = ""
-        try:
-            announcement = data['Cards'][i]['bodyText']
-        except:
-            announcement = ""
-        try:
-            analysis = data['Cards'][i]['introText']
-        except:
-            analysis = ""
-        try:
-            news_weblink = "https://www.ensto.com" + data['Cards'][i]['link']['url']
-        except:
-            news_weblink = ""
-        Optimization_links.append(news_weblink)
-        try:
-            image = data['Cards'][0]['images'][0]['url']
-        except:
-            image = ""
-        try:
-            announcement_type = data['Cards'][0]['categoryName']
-        except:
-            announcement_type = ""
-        try:
-            ne = data['Cards'][0]['publishedDate']
-            news_date = dateparser.parse(ne)
-        except:
-            news_date = ""
-        try:
-            sub_category = data['Cards'][0]['type']
-        except:
-            sub_category = ""
+    
+    for obj in data['items']:
+        
+        title = obj['heading']
+        news_weblink = f"https://www.ensto.com{obj['url']}"
+        announcement_type = obj['categoryTag']
+        news_date_text = obj['publishDate']
+        news_date = dateparser.parse(news_date_text,  settings={'DATE_ORDER': 'DMY'})
+        image = f"https://www.ensto.com{obj['image']['src']}"
+        
+        result = requests.get(news_weblink, headers=headers)
+        response = Selector(text=result.text)
+        announcement_texts = response.xpath('//div[@class="col-span-12 md:col-start-2 md:col-span-10 lg:col-start-3 lg:col-span-8"]//text()').getall()
+        announcement = " ".join(text.replace("\n", "<br/>").replace("\r", "").replace("  ", "").strip() for text in announcement_texts)
+        analysis = response.xpath('//meta[@property="og:description"]/@content').get()
+        
         language = "en"
         crawled_date = datetime.now()
         page_source = "https://www.ensto.com/company/newsroom/?category=Company%20news"
@@ -187,6 +169,7 @@ try:
         mydoc = collection.find()
         for x in mydoc:
             links_list.append(x['News_Weblink'])
+        
         if news_weblink in links_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -199,7 +182,7 @@ try:
             company_news['comment']=''
             company_news['Date']= news_date
             company_news['Crawled_on']=crawled_date
-            company_news['title']=title
+            company_news['title']=title.strip()
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source
@@ -207,13 +190,14 @@ try:
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement
-            company_news['historySubCategory']= sub_category
+            company_news['historySubCategory']= ""
             company_news['analysis'] = analysis
             try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
+            print(company_news)
     
     Web_Page = "https://www.ensto.com/company/newsroom/?category=Company%20news"      
     Emr_Crawlers_Logs(c_name,Web_Page,Optimization_links)
@@ -233,6 +217,7 @@ except:
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
+    print(Reported_Error)
 
 # **************************************************************************
 rep = ''

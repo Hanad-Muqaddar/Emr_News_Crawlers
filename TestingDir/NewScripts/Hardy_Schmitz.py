@@ -36,6 +36,8 @@ import traceback
 import urllib
 
 import dateparser
+ 
+from scrapy import Selector
 
 from datetime import datetime
 
@@ -67,15 +69,13 @@ running_Sequence = []
 
 started_on = datetime.now()
 
-c_name = 'Hardy_Schmitz' # Name of the Collection
+c_name = 'Hardy_Schmitz'
 
 total_crwalled_links = 0
 
 Already_exist = 0
 
 # *************************************************************************
-
-# trying to connect with mongodb
 
 try:
 
@@ -146,7 +146,7 @@ try:
 
     def translate(Trans):
         translator = Translator()
-        Trans_text = translator.translate(Trans,dest='en')
+        Trans_text = translator.translate(text=Trans, src='de', dest='en')
         return Trans_text.text
     
     news_links = []
@@ -163,9 +163,7 @@ try:
             news_links.append(news_link)
 
     print(len(news_links))
-    # print(len(news_links))
 
-    # Creating a list of links already avilable in database
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
@@ -210,17 +208,18 @@ try:
             except:
                 sub_category = ""
             
+            response2 = Selector(text=response.text)
+            
             try:
-                analysis = data.find('meta', attrs = {"name":"description"}).get("content")
+                analysis = response2.xpath('//meta[@name="description"]/@content').get()
                 analysis = translate(analysis)
-                # print(analysis)
             except:
                 analysis = ""
+                
             try:
-                date = data.find('main', attrs = {"class":"flex-shrink-0"}).find('span').get_text()
-                # print(date)
-                # date = translate(date).strip()            
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
+                date = response2.xpath('normalize-space(//div[@class="container"]/div[1]/section)').get()
+                f_date = translate(date.replace(".",""))
+                news_date = dateparser.parse(f_date,  settings={'DATE_ORDER': 'YMD'})
                 print(news_date)
             except:
                 news_date = ""
@@ -229,14 +228,13 @@ try:
             news_weblink = i
             
             try:
-                announcement = data.find('main', attrs = {"class":"flex-shrink-0"}).find('div', attrs = {"class":"container"}).get_text()
-                announcement = translate(announcement)
-                # print(announcement)           
+                announcement_texts = response2.xpath('(//div[@class="container"])[2]//text()').getall()
+                announcement = " ".join(text.replace("\n", "").replace("\r", "").strip() for text in announcement_texts)
+                announcement = announcement.replace("  ", "")
             except:
                 announcement = ""
             
             date = datetime.now()
-            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -258,6 +256,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
+            print(company_news)
     
     if Already_exist >= 1:
 

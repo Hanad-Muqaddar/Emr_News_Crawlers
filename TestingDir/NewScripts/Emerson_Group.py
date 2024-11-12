@@ -156,7 +156,7 @@ try:
             company_news['comment']=''
             company_news['Date']= news_date
             company_news['Crawled_on']=date
-            company_news['title']=title
+            company_news['title']=title.strip()
             company_news['Language']= language
             company_news['announcementType']= announcement_type
             company_news['Source'] = page_source

@@ -159,17 +159,18 @@ try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     Main_url = "https://chintglobal.com"
     Base_url = "https://chintglobal.com/blog/category/news/"
-    result = requests.get(Base_url,headers=headers)
+    result = requests.get(Base_url, headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
     
     news_links = []
-    links = soup.find_all('a',{ "class" : "elementor-post__thumbnail__link"})
+    links = soup.find_all('a', { "class" : "swiper-more-column-link"})
     for link in links:
         news_link = link.get('href')
         # print(news_link) 
         if news_link not in news_links:
             news_links.append( news_link) 
-
+    print(news_links)
+    
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
@@ -179,7 +180,6 @@ try:
     Emr_Crawlers_Logs(c_name+"_Second",page_source,news_links)
 
     for i in news_links:
-        
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -190,7 +190,7 @@ try:
             data = BeautifulSoup(response.content, 'lxml')
             response1 = Selector(response)
             try:
-                title = data.find('h1', {'class':"elementor-heading-title elementor-size-default"}).get_text(strip=True)
+                title = data.find('div', {'class':"news-detail-title-box"}).find('h1').get_text(strip=True)
                 print(title)
             except:
                 title = ""
@@ -220,8 +220,9 @@ try:
             except:
                 analysis = ""
             try:
-                date = data.find('meta', {"property":"article:published_time"}).get('content')
+                date = data.find('div', {'class':"news-detail-title-box"}).find('p').get_text(strip=True)
                 news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'MDY'} )
+                print((news_date))
             except:
                 news_date = ""
 
@@ -263,7 +264,7 @@ try:
             company_news['photo']= image
             company_news['videos']= video
             company_news['announcement']=announcement
-            company_news['historySubCategory']= sub_category
+            company_news['historySubCategory']= 'article'
             company_news['analysis'] = analysis
             company_news['emrExecutive'] = emr_executive
             company_news['emrEssential'] = emr_essentail

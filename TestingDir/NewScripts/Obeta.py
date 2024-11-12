@@ -219,27 +219,30 @@ try:
 
     json_payload = json.dumps(payload)
     response = requests.post(url, headers=headers, data=json_payload)
-
-    final_list = []
-
     returned_response = response.json()
     data = returned_response['data']['obetaNewsCollection']['data']
+    with open('.json', 'w', encoding='utf-8') as file:
+        json.dump(data, file, indent=4, ensure_ascii=False)
+    
+    news_links = []
+    titles = []
+    dates = []
     for item in data:
-        try:
-            url = item['attributes']['url']
-            if url:
-                link = "https://obeta.de" + url
-                try:
-                    news_image = item['attributes']['teaser']['data']['attributes']['url']
-                except:
-                    news_image = ""
-                final_list.append({"news_link":link,"news_title": item['attributes']['teaserText'],"news_date": item['attributes']['publishedAt'],"news_image": news_image})
-        except:
-            continue
-        
-    # print(final_list)
-    final_news = [item['news_link'] for item in final_list]
-    print(final_news)
+        id = item['id']
+        url = f'https://obeta.de/news-detail/{id}'
+        if item['attributes']['pinned'] == True:
+            temp_url = item['attributes']['url']
+            if temp_url:
+                url = f"https://obeta.de{item['attributes']['url']}"
+            title = item['attributes']['title']
+            date = item['attributes']['publishedAt']
+            news_links.append(url)
+            titles.append(title)
+            dates.append(date)
+            
+    print(news_links)
+    print(titles)
+    print(dates)
 
     def translate(Trans):
         translator = Translator()
@@ -251,49 +254,64 @@ try:
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,page_source,final_news)
+    Emr_Crawlers_Logs(c_name,page_source,news_links)
     
-    for i in final_list:   
-        news_weblink = i['news_link']
+    opts = Options()
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("start-maximized")
+    opts.add_argument("disable-infobars")
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    # opts.add_argument("--headless=new")
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'}
+    driver = webdriver.Chrome(options=opts)
+    
+    for news_weblink, title, news_date in zip(news_links, titles, dates):   
         if news_weblink in links_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
-
         else:
-            try:
-                title = i['news_title']
-                title = translate(title)
-                print(title)
-            except Exception as e:
-                print(e)
-            
+            driver.get(news_weblink)
+            time.sleep(5)
+            response = Selector(text=driver.page_source)
+
             announcement_type = "News"
             language = "en-us"
 
-            try:            
-                image = i['news_image']
-                # print(image)
+            try:
+                image = response.xpath('//div[@class="CustomImage_image-wrapper__8bqO9 obeta-custom-image"]/img/@src').get()
+                print(image)
             except:
                 image = ""
-       
-
-            sub_category = ""
-            analysis = ""
 
             try:
-                date = i['news_date']
-                news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
-                print(news_date)
+                sub_category = response.xpath('//meta[@property="og:type"]/@content').get()
             except:
-                news_date = ""
-          
-            announcement = ""
+                sub_category = ""
+            
+            try:
+                analysis_texts = response.xpath('//div[@style="position: relative; outline: none; white-space: pre-wrap; overflow-wrap: break-word;"]//p[@class="MuiTypography-root MuiTypography-body2 MuiTypography-paragraph css-ur5ubc"]//text()').getall()
+                analysis = " ".join(text.replace("\n", "").replace("\r", "").strip() for text in analysis_texts)
+            except:
+                analysis = ""
+
+            print(news_weblink)
+            
+            try:
+                announcement = fulltext(driver.page_source)
+                announcement = announcement.replace('\n','<br>')
+                print(announcement)
+            except:
+                announcement = ""
+            
+            news_date = dateparser.parse(news_date,  settings={'DATE_ORDER': 'YMD'})
+            print(news_date)
             
             date = datetime.now()
-            # Creating a list of links already avilable in database
-        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -308,13 +326,14 @@ try:
             company_news['photo']= image
             company_news['videos']= ''
             company_news['announcement']=announcement
-            company_news['historySubCategory']= sub_category
+            company_news['historySubCategory']= ""
             company_news['analysis'] = analysis
             try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
+            print(company_news)
             
     if Already_exist >= 1:
 

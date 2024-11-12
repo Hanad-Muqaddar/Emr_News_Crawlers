@@ -305,7 +305,7 @@ try:
                 except:
                     analysis = ""
                 try:
-                    image = response1.css(".cmp-container--full-width picture img::attr(href)").get()
+                    image = response1.css(".cmp-responsive-image picture img::attr(href)").get()
                 except:
                     image = ""
                 sub_category = ""

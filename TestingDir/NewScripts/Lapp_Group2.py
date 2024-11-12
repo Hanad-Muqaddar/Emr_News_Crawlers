@@ -152,7 +152,7 @@ try:
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
     opts.add_argument("--headless")
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'}
 
     # service = Service("C:\Program Files (x86)\chromedriver.exe")
     # chrome_options = webdriver.ChromeOptions()
@@ -232,8 +232,9 @@ try:
             print(news_weblink)
             
             try:
-                announcement = driver.find_element(By.XPATH, '//cx-page-slot/lapp-text/div[contains(@class,"lappComponent lappText slot50")]').text
-                print(announcement)
+                announcements = driver.find_elements(By.XPATH, '//lapp-text')
+                announcement_text = " ".join(ann.text for ann in announcements)
+                print(announcement_text)
             except:
                 announcement = ""
             
@@ -251,7 +252,7 @@ try:
             company_news['News_Weblink'] = news_weblink
             company_news['photo']= image
             company_news['videos']= ""
-            company_news['announcement']=announcement
+            company_news['announcement']=announcement_text
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
@@ -259,6 +260,7 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
+            print(company_news)
     
     if Already_exist >= 1:
 
@@ -271,6 +273,7 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.now()
+    
 except:
     Error_Time =  datetime.now()
 
