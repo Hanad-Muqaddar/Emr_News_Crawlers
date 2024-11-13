@@ -143,18 +143,20 @@ try:
     soup = BeautifulSoup(result.content , 'lxml')
     
     news_links = []
-
-    links = soup.find_all('a',{ "class" : "articleTile__item"})
+    links = soup.find_all('a', { "class" : "articleTile__item"})
     for link in links:
         news_link = link.get('href')
         if '//youtu.be' not in news_link and '://www.youtube.com' not in news_link:
-            if news_link not in news_links:
+            if news_link not in news_links and "http" not in news_link:
                 news_links.append(Main_url + news_link)
+            elif news_link not in news_links:
+                news_links.append(news_link)
+            else:
+                continue
 
     print(news_links)
     print(len(news_links))
 
-    # Creating a list of links already avilable in database
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
@@ -174,11 +176,10 @@ try:
             data = BeautifulSoup(response.content, 'lxml')
 
             try:
-                title = data.find('h1', {"class":"lead-text__headline"}).get_text(strip=True)            
+                title = data.find('title').get_text(strip=True).replace(" - Siedle", "")            
                 print(title)
             except:
-                title = soup.find('title').text
-                print(title)
+                title = ""
             
             announcement_type = "News"
 
@@ -189,7 +190,6 @@ try:
                 print(image)
             except:
                 image = ""
-                print(image)
 
             try:
                 sub_category = data.find('meta', attrs = {"name":"Type"}).get("content")
@@ -197,12 +197,11 @@ try:
                 sub_category = ""
             
             try:
-                analysis = data.find('meta', attrs = {"name":"Description"}).get("content")
+                analysis = ""
             except:
                 analysis = ""
             try:
                 news_date = dateparser.parse(datetime.now(),  settings={'DATE_ORDER': 'YMD'} )
-                print(news_date)
             except:
                 news_date = ""
 
@@ -235,7 +234,7 @@ try:
             company_news['videos']= ''
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
-            company_news['analysis'] = analysis
+            company_news['analysis'] = ""
             try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1
@@ -257,7 +256,8 @@ except:
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
-
+    
+    print(Reported_Error)
 
 # **************************************************************************
 rep = ''

@@ -47,18 +47,18 @@ from urllib.request import Request, urlopen
 
 from newspaper import fulltext
 from scrapy import Selector
-from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
-# # Comment these lines when you are running locally
-# import importlib.util
-# # Specify the absolute path to Emr_Crawlers_Optimization.py
-# module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
-# # Load the module using the absolute path
-# spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
-# Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
-# spec.loader.exec_module(Emr_Crawlers_Optimization)
-# Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
+# Comment these lines when you are running locally
+import importlib.util
+# Specify the absolute path to Emr_Crawlers_Optimization.py
+module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
+# Load the module using the absolute path
+spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
+Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(Emr_Crawlers_Optimization)
+Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # ================================================================================
 # defining variables
 
@@ -136,30 +136,46 @@ else:
 
 # *****************************************************************************
 try:
+    opts = Options()
+    opts.add_argument("--window-size=1080,1920")
+    opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    driver = webdriver.Chrome(options=opts)
+    driver.maximize_window()
+    
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'}
     Main_url = "https://press.siemens-energy.com"
-    Base_url = "https://press.siemens-energy.com/global/en/press-search"
-    result = requests.get(Base_url,headers=headers)
-    response = Selector(result)
+    Base_url = "https://www.siemens-energy.com/global/en/home/press-releases.html"
     
-    news_links = []
-    News = response.xpath('//div[@data-g-name="LatestPressReleases"]/a/@href').getall()
-    for n in News:
-        f_news_links = Main_url + n
-        # print(f_news_links)
-        news_links.append(f_news_links)
+    driver.get(Base_url)
+    time.sleep(5)
 
+    response = Selector(text=driver.page_source)
+
+    news_links = []
+    News = response.xpath('//div[@class="aem-results__press-item"]/div[1]/a/@href').getall()
+    for n in News:
+        if "https" in n:
+            f_news_links = n
+            news_links.append(f_news_links)
+        else:
+            f_news_links = Main_url + n
+            news_links.append(f_news_links)
     print(news_links)
     print(len(news_links))
 
-    # Creating a list of links already avilable in database
+    driver.quit()
+    
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
         links_list.append(x['News_Weblink'])
 
     Web_Page = "https://press.siemens-energy.com/global/en/press-search"
-
     Emr_Crawlers_Logs(c_name+"_Second",Web_Page,news_links)
     
     for n in news_links:   
@@ -173,7 +189,7 @@ try:
             response2 = Selector(result2)
             
             try:
-                title = response2.xpath('normalize-space(//div[@class="aem-press-header__title col-sm-11"]//h1)').get()
+                title = response2.xpath('normalize-space(//h1)').get()
                 print(title)
             except:
                 title = response2.xpath('//meta[@property="og:title"]/@content').get()
@@ -229,7 +245,7 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                collection.insert_one(company_news)
+                # collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)

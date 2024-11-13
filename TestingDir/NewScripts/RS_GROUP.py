@@ -46,18 +46,18 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from newspaper import fulltext
 from scrapy import  Selector 
-from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
+# from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # # ================================================================================
-# # Comment these lines when you are running locally
-# import importlib.util
-# # Specify the absolute path to Emr_Crawlers_Optimization.py
-# module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
-# # Load the module using the absolute path
-# spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
-# Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
-# spec.loader.exec_module(Emr_Crawlers_Optimization)
-# Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
+# Comment these lines when you are running locally
+import importlib.util
+# Specify the absolute path to Emr_Crawlers_Optimization.py
+module_path = '/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/EMR_Scripts/Emr_Crawlers_Optimization.py'
+# Load the module using the absolute path
+spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', module_path)
+Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(Emr_Crawlers_Optimization)
+Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 # # ================================================================================
 
 # ************************************************************************
@@ -138,12 +138,8 @@ else:
 # *****************************************************************************
 def parse_filtered_news(announcement):
     api_url = "https://admin.new.emr-online.com/api/history/filterbody"
-    payload = json.dumps({
-                            "originalBody": announcement
-                            })
-    headers = {
-                'Content-Type': 'application/json'
-                }
+    payload = json.dumps({"originalBody": announcement})
+    headers = {'Content-Type': 'application/json'}
     return_response = requests.request("POST", api_url, headers=headers, data=payload)
     new_data = return_response.text
     new_data = json.loads(new_data)
@@ -155,43 +151,54 @@ def parse_filtered_news(announcement):
         return new_data
 
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    opts = Options()
+    opts.add_argument("--window-size=1080,1920")
+    opts.add_argument("--disable-automation")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument('--profile-directory=Default')
+    opts.add_argument("--lang=en")
+    opts.add_argument("--enable-javascript")
+    opts.add_argument("--enable-cookies")
+    driver = webdriver.Chrome(options=opts)
+    driver.maximize_window()
+    
     Main_url = "https://www.rsgroup.com" 
-    Base_url = "https://www.rsgroup.com/media/press-releases/year/all" 
-    result = requests.get(Base_url,headers=headers)
-    soup = BeautifulSoup(result.content , 'lxml')
-
+    Base_url = "https://www.rsgroup.com/newshub/" 
+    driver.get(Base_url)
+    time.sleep(5)
+    
     news_links = []
-
-    links = soup.find_all('div',{"class":"card card-inverse card-primary news"})
+    soup = BeautifulSoup(driver.page_source , 'lxml')
+    section = soup.find('section', class_="page-block page-newsroom__block page-newsroom__block--news")
+    links = section.find_all('a', class_='h-cover')
     for link in links:
-        news_link = Main_url + link.find('a',{"class":"list-item-title"}).get('href')
-        # print(news_link) 
+        news_link = Main_url + link.get('href')
         if news_link not in news_links:
             news_links.append( news_link) 
-
+    print(news_links)
+    
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    page_source = "https://www.rsgroup.com/media/press-releases/year/all" 
-    # Emr_Crawlers_Logs(c_name,page_source,news_links)
-
+    page_source = "https://www.rsgroup.com/newshub/" 
+    Emr_Crawlers_Logs(c_name, page_source, news_links)
+    
     for i in news_links:
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
-
         else:        
-            response = requests.get(i, headers=headers)
-            data = BeautifulSoup(response.content, 'lxml')
-            response1 = Selector(response)
+            driver.get(i)
+            time.sleep(3)
+            data = BeautifulSoup(driver.page_source, 'lxml')
+            response1 = Selector(text=driver.page_source)
             try:
-                title = data.find('div', {"class":"list-item-desc"}).find('h2').get_text(strip=True)
-                # print(title)
+                title = data.find('h1').get_text(strip=True)
+                print(title)
             except:
                 title = ""
             
@@ -200,7 +207,7 @@ try:
             language = "en-us"
 
             try:
-                image = data.find('meta',attrs = {'property':'og:image'}).get('content')
+                image = "https://www.rsgroup.com/" + data.find('picture', attrs = {'class': 'masthead__hero'}).find('img').get('src')
             except:
                 image = ""
 
@@ -210,11 +217,11 @@ try:
                 sub_category = ""
             
             try:
-                analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
+                analysis = response1.xpath('normalize-space(//div[@class="editor"]/p[1])').get()
             except:
                 analysis = ""
             try:
-                date = data.find('div', {"class":"list-item-date"}).get_text(strip=True)
+                date = response1.xpath('normalize-space(//span[@class="masthead-article__date"])').get()
                 news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
             except:
                 news_date = ""
@@ -224,25 +231,22 @@ try:
             
             try:
                 # announcement = data.find('div', {"class":"list-item-desc"}).get_text(strip=True)
-                announcement = response1.css(".list-item-desc").get()
-                replace1 = response1.css(".list-item-desc h2").get()
-                announcement = announcement.replace(replace1, "")
-                return_data = parse_filtered_news(announcement)
-                announcement = return_data['filteredBody']
-                emr_essentail = return_data['emrEssential']
-                emr_executive = return_data['emrExecutive']
-                emr_lite = return_data['emrLite']
-                emr_html = return_data['emrHtmlText']
+                announcement = ''.join(response1.xpath('//div[@class="editor"]/p//text()').getall())
+                announcement = announcement.replace("\n", "<br/>").replace("  ", " ")
+                # return_data = parse_filtered_news(announcement)
+                # announcement = return_data['filteredBody']
+                # emr_essentail = return_data['emrEssential']
+                # emr_executive = return_data['emrExecutive']
+                # emr_lite = return_data['emrLite']
+                # emr_html = return_data['emrHtmlText']
             except:
                 announcement = ""
-                emr_essentail = ""
-                emr_executive = ""
-                emr_lite = ""
-                emr_html = ""
+                # emr_essentail = ""
+                # emr_executive = ""
+                # emr_lite = ""
+                # emr_html = ""
             
             date = datetime.now()
-            # Creating a list of links already avilable in database
-            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -259,15 +263,16 @@ try:
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
-            company_news['emrExecutive'] = emr_executive
-            company_news['emrEssential'] = emr_essentail
-            company_news['emrLite'] = emr_lite
-            company_news['News_Html'] = emr_html
+            # company_news['emrExecutive'] = emr_executive
+            # company_news['emrEssential'] = emr_essentail
+            # company_news['emrLite'] = emr_lite
+            # company_news['News_Html'] = emr_html
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
+            print(company_news)
     
     if Already_exist >= 1:
 
@@ -280,11 +285,14 @@ try:
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
     ended_on = datetime.now()
+
 except:
+    
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
-
+    
+    print(Reported_Error)
 
 # **************************************************************************
 rep = ''

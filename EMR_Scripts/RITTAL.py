@@ -173,7 +173,7 @@ try:
             result = requests.get(j)
             soup = BeautifulSoup(result.content, 'lxml')
             try:
-                title = soup.find("meta", attrs={"property":"og:title"}).get("content")
+                title = soup.find("h1").text.strip()
                 print(title)
             except:
                 title = ""
