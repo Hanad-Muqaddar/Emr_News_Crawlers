@@ -198,9 +198,9 @@ try:
             res = Selector(response)
 
             try:
-                title = data.find('meta', attrs = {"property":"og:title"}).get("content")
+                title = data.find('meta', attrs = {"property":"og:title"}).get("content").replace(" | SIMON", "")
             except:
-                title = data.find('title').text
+                title = data.find('title').text.replace(" | SIMON", "")
             
             announcement_type = "Press Release"
 
@@ -220,8 +220,9 @@ try:
                 analysis = data.find('meta', attrs = {"property":"og:description"}).get("content")
             except:
                 analysis = ""
+                
             try:
-                date = data.find('div', {"class":"field field--name-published-at field--type-published-at field--label-inline clearfix"}).find('div', {"class":"field__item"}).get_text().replace('de','')
+                date = res.xpath('//time[contains(text(), " 20")]/@datetime').get()
                 news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
                 print(news_date)
             except:
@@ -230,10 +231,10 @@ try:
             news_weblink = i
             
             try:
-                announcement = res.css(".layout--hiwc-full-1col-stacked").get()
-                replace_1 = res.css(".group-title").get()
+                announcement = res.xpath('//div[@class="group-header ds-1col clearfix"]').get()
+                replace_1 = res.xpath("//title/text()").get()
                 try:
-                    announcement = announcement.replace(replace_1, "")
+                    announcement = announcement.replace(replace_1, "").replace("\n", "<br/>").replace("  ", "")
                 except:
                     pass
                 return_data = parse_filtered_news(announcement)
@@ -278,10 +279,11 @@ try:
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
+            print(company_news)
     
     if Already_exist >= 1:
 
-        tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
+        tmp_txt = ' , from which ' + str(Already_exist) +' Links were Already Crawled '
 
     else:
 

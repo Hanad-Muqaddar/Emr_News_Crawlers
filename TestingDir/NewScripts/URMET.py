@@ -182,7 +182,7 @@ try:
             data = BeautifulSoup(response.content, 'lxml')
 
             try:
-                title = data.find('title').get_text(strip=True)
+                title = data.find('title').get_text(strip=True).replace(" - Portale Urmet", "")
                 print(title)
             except:
                 title = ""

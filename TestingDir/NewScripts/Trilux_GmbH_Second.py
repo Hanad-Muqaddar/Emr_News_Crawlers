@@ -145,7 +145,7 @@ try:
     result = requests.get(page_source,headers=headers)
     response = Selector(result)
        
-    news_links = response.xpath('//div[contains(@class,"xperience__articles xperience__articles")]/div[@class="item"]//a/@href').getall()
+    news_links = response.xpath('//div[@class="col-12 col-md-6 col-lg-4"]/a/@href').getall()
     f_news_links = [Main_url+l for l in news_links]
     print(len(f_news_links))
   
@@ -166,7 +166,7 @@ try:
             response2 = Selector(result2)
             
             try:
-                title = response2.xpath("normalize-space(//h1[@class='large-heading']/text())").get()
+                title = response2.xpath("normalize-space(//section[@class='section section--spacing-top-0']/h1)").get()
                 print(title)
             except:
                 title = ""
@@ -192,7 +192,7 @@ try:
             except:
                 analysis = ""
             try:
-                N_date = response2.xpath('//dl[@class="meta"]//time/text()').get()
+                N_date = response2.xpath('normalize-space(//time[@class="text--gray text--small"])').get()
                 news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
                 print(news_date)
             except:

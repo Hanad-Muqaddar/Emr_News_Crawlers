@@ -200,7 +200,7 @@ try:
             data = BeautifulSoup(response.content, 'lxml')
     
             try:
-                title = data.find('h1', {"class":"wg-headline"}).find('div').next_sibling.strip()
+                title = response.xpath('normalize-space(//h1[@class="wg-headline"])').get()
                 print(title)
             except:
                 title = data.find('title').text

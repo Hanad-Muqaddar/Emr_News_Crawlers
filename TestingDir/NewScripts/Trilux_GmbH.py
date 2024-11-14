@@ -150,8 +150,8 @@ try:
         non_empty_lines = [line.strip() for line in lines if line.strip()]
         return '\n'.join(non_empty_lines)
     
-    news_links = response.xpath('//div[@class="xperience__articles xperience__articles--start"]/div/a/@href').getall()
-    # print(news_links)
+    news_links = response.xpath('//div[@class="col-12 col-md-6 col-lg-4 wall__brick"]/a/@href').getall()
+    print(news_links)
   
     # Creating a list of links already avilable in database
     links_list = []
@@ -237,10 +237,12 @@ try:
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
             try:
-                collection.insert_one(company_news)
+                # collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
+            print(company_news)    
+            
     Emr_Crawlers_Logs(c_name,page_source,Optimization_links)
     if Already_exist >= 1:
 
@@ -258,7 +260,7 @@ except:
 
     Reported_Error = traceback.format_exc()
 
-
+    
 # **************************************************************************
 rep = ''
 
