@@ -186,7 +186,7 @@ try:
     page_source = "https://www.metz-connect.com/home/company/news.62.en.html"
     Emr_Crawlers_Logs(c_name,page_source,f_news_links)
 
-    for i,d in zip(f_news_links,news_dates):
+    for i, d in zip(f_news_links,news_dates):
         if i in links_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -195,13 +195,17 @@ try:
         else: 
             response = requests.get(i, headers=headers)
             data = BeautifulSoup(response.content, 'lxml')
-
+            
+            print(i)
             try:
                 title = data.find('h1', attrs = {"class":"headline medium black"}).get_text(strip=True)
                 print(title)
             except:
-                title = data.find('title').get_text(strip=True)
-                print(title)
+                try:
+                    title = data.find('title').get_text(strip=True)
+                    print(title)
+                except:
+                    continue
             
             announcement_type = "News"
 

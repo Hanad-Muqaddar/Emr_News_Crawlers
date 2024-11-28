@@ -30,7 +30,10 @@ from selenium.webdriver.common.by import By
 from urllib.parse import urlparse
 
 import re
-
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 import traceback
 
 import urllib
@@ -266,7 +269,7 @@ try:
     opts.add_argument("--enable-cookies")
     # opts.add_argument("--headless=new")
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'}
-    driver = webdriver.Chrome(options=opts)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=opts)
     
     for news_weblink, title, news_date in zip(news_links, titles, dates):   
         if news_weblink in links_list:

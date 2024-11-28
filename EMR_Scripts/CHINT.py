@@ -37,7 +37,7 @@ import urllib
 
 import dateparser
 
-from datetime import datetime
+import datetime
 
 from bson.objectid import ObjectId
 
@@ -68,7 +68,7 @@ Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
 
 running_Sequence = []
 
-started_on = datetime.now()
+started_on = datetime.datetime.now()
 
 c_name = 'CHINT' # Name of the Collection
 
@@ -118,9 +118,9 @@ except:
 
 if last_insertion == None:
 
-    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.now()))
+    running_Sequence.append('Fresh Starting News Crawler on -> ' + str(datetime.datetime.now()))
 
-    Crwl_time = datetime.now()
+    Crwl_time = datetime.datetime.now()
 
 else:
 
@@ -141,17 +141,20 @@ else:
 # *****************************************************************************
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    result = requests.get("https://chintglobal.com/news-center-14",headers=headers)
+    result = requests.get("https://www.chintglobal.com/global/en/about-us/news-center/news.html", headers=headers)
     response = Selector(result)
-    links = response.css(".chint-news-item-title a ::attr(href)").getall()
+    link_elements = response.xpath('//div[@class="swiper-wrapper swiper-flex-more-column"]//a/@href').getall()
+    links = list(dict.fromkeys(link_elements))
+    
     print(links)
-
+    print(len(links))
+    
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
         db_list.append(x['News_Weblink'])
         
-    Web_Page = "https://chintglobal.com/news-center-14"       
+    Web_Page = "https://www.chintglobal.com/global/en/about-us/news-center/news.html"       
     Emr_Crawlers_Logs(c_name,Web_Page,links)
 
     for i in links:
@@ -161,37 +164,44 @@ try:
             print("Already Crawled")
             continue
         else:
-            result1 = requests.get(i)
+            result1 = requests.get(i, headers=headers)
             response1 = Selector(result1)
-            data = response1.xpath('//script[@type="application/ld+json"]/text()').get()
-            data = json.loads(data)
+            print(result1.status_code)
+
             try:
-                news_date = data['datePublished']
+                news_date = response1.xpath('normalize-space(//div[@class="news-detail-title"]//p)').get()
                 news_date = dateparser.parse(news_date,  settings={'DATE_ORDER': 'YMD'} )
             except:
                 news_date = ""
+                
             try:
-                title = data['headline']
+                title = response1.xpath('normalize-space(//div[@class="news-detail-title"]//h1)').get()
             except:
                 title = ""
+                
             try:
                 analysis = response1.xpath("//meta[@name='description']/@content").get()
             except:
                 analysis = ""
+                
             try:
-                image = data['image'][0]
+                image = "https://www.chintglobal.com" + response1.xpath('//div[@class="centerlayout simpleimage-container public-vw-320"]//img/@src').get()
             except:
                 image = ""
+                
             sub_category = ""
+            
             try:
                 announcement = fulltext(result1.text)
                 announcement = announcement.replace('\n','<br>')
             except:
                 announcement = ""
+                
             try:
-                announcement_type = data['@type']
+                announcement_type = "News"
             except:
                 announcement_type = ""
+                
             language = "en-US"
             page_source = "https://chintglobal.com/news-center-14"
             crawled_date = datetime.datetime.now()
@@ -212,6 +222,7 @@ try:
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
+            print(company_news)
             try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1
@@ -229,7 +240,7 @@ try:
 
     ended_on = datetime.datetime.now()
 except:
-    Error_Time =  datetime.now()
+    Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()
 

@@ -159,7 +159,7 @@ try:
 
     # driver = webdriver.Chrome(service=service, options=opts)
 
-    driver = webdriver.Chrome(options=opts)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=opts)
     driver.get("https://www.lapp.com/en/de/news/press/e/000143")
     time.sleep(10)
      

@@ -30,7 +30,10 @@ import re
 import traceback
 
 import urllib
-
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 import dateparser
 
 import datetime
@@ -243,7 +246,7 @@ try:
     }
 
 
-    driver = webdriver.Chrome(options=opts)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=opts)
      
     Main_url = "https://www.hitachienergy.com"
     page_source = "https://www.hitachienergy.com/news"

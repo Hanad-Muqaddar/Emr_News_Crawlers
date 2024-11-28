@@ -2,6 +2,8 @@
 from functools import total_ordering
 import requests
 
+from scrapy import Selector
+
 import time
 
 import json
@@ -170,6 +172,7 @@ try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     response = requests.get(url, params=params, headers=headers)
     data = response.json()
+    print(data)
 
     news_links = [] 
     for d in data:
@@ -188,13 +191,13 @@ try:
             continue
         else:
 
-            page = requests.get(l,headers=headers)
+            page = requests.get(l, headers=headers)
             soup = BeautifulSoup(page.content, "html.parser")
-
+            response = Selector(text=page.text)
             print(l)   
             
             try: 
-                title = soup.find('h1').find('pre').get_text(strip=True)
+                title = response.xpath('normalize-space(//div[@class="title-wrapper left"]//h1)').get()
                 print(title)
             except:
                 title = ""

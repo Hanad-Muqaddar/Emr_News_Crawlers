@@ -24,7 +24,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 
 from selenium.webdriver.support import expected_conditions
-
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
 from urllib.parse import urlparse
@@ -159,7 +162,7 @@ try:
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
-    driver = webdriver.Chrome(options=opts)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=opts)
     driver.maximize_window()
     
     Main_url = "https://www.rsgroup.com" 

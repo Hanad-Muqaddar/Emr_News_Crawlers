@@ -44,7 +44,10 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
-
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 from newspaper import fulltext
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
@@ -147,12 +150,11 @@ try:
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
-    opts.add_argument('--headless=new')
+    # opts.add_argument('--headless=new')
     
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'}
-    driver = webdriver.Chrome(options=opts)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=opts)
     driver.get("https://news.avnet.com/press-releases/")
-    time.sleep(10)
     Main_url = "https://news.avnet.com"
 
     news_links = []
@@ -169,17 +171,18 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    Emr_Crawlers_Logs(c_name,news_links)
+    Emr_Crawlers_Logs(c_name, news_links, "https://news.avnet.com/press-releases/")
+    
     for i in news_links:
-        
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
             print("Already Crawled")
             continue
+        
         else:        
             driver.get(i)
-
+            
             try:
                 title = driver.find_element(By.XPATH, "//h3[@class='module-details_title']/span").text
                 print(title)
@@ -187,6 +190,7 @@ try:
                 title = ""
             
             announcement_type = "News"
+            
             language = "en-us"
 
             image = ""
@@ -197,6 +201,7 @@ try:
                 analysis = driver.find_element(By.XPATH, "//meta[@property='og:description']").get_attribute('content')
             except:
                 analysis = ""
+                
             try:
                 N_date = driver.find_element(By.XPATH, "//div[@class='module_date-time']/span").text
                 print(N_date)
@@ -206,8 +211,10 @@ try:
                 news_date = ""
 
             page_source = "https://news.avnet.com/press-releases/"
+            
             news_weblink = i
             print(news_weblink)
+            
             try:
                 announcement = driver.find_element(By.XPATH, '//div[@class="module_body"]').text
                 print(announcement)
@@ -215,8 +222,6 @@ try:
                 announcement = ""
             
             date = datetime.now()
-            # Creating a list of links already avilable in database
-            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -233,6 +238,7 @@ try:
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
+            
             try:
                 collection.insert_one(company_news)
                 total_crwalled_links += 1
@@ -254,6 +260,7 @@ except:
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
+    print(Reported_Error)
 
 
 # **************************************************************************

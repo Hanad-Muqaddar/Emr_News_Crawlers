@@ -14,7 +14,10 @@ from pymongo import MongoClient
 from bs4 import BeautifulSoup
 
 from selenium import webdriver
-
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 # from webdriver_manager.chrome import ChromeDriver
 
 from selenium.webdriver.chrome.options import Options
@@ -174,7 +177,7 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    driver = webdriver.Chrome(options=opts)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=opts)
     Optimization_links = []
 
     # links = ['https://z.lighting/en/group/news-insights/?category=company', 'https://z.lighting/en/group/news-insights/?category=zumtobel']

@@ -32,7 +32,10 @@ from urllib.parse import urlparse
 import re
 
 import traceback
-
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 import urllib
 
 import dateparser
@@ -150,7 +153,7 @@ try:
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
-    driver = webdriver.Chrome(options=opts)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=opts)
     driver.get(page_source)
     time.sleep(10)
     

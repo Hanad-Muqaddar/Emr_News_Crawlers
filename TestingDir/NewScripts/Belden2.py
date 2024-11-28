@@ -153,7 +153,7 @@ try:
     opts.add_argument("--enable-cookies")
     opts.add_argument(f'--user-agent={user_agent}')
     opts.headless = False
-    driver = webdriver.Chrome(options=opts)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=opts)
     driver.maximize_window()
 
     # headers = {
@@ -163,7 +163,7 @@ try:
     #     }
     
 
-    Web_Page = "https://investor.belden.com/overview/default.aspx"
+    Web_Page = "https://investor.belden.com/news/default.aspx"
     driver.get(Web_Page)
     time.sleep(5)
     Main_url = "https://investor.belden.com"
@@ -195,9 +195,10 @@ try:
             response1 = Selector(text=driver.page_source)
 
             try:
-                title = response1.xpath('//h3[contains(@class,"evergreen-news-title")]/span/text()').get()
+                title = response1.xpath('normalize-space(//h3[contains(@class,"evergreen-news-title")])').get()
                 print(title)
             except:
+                continue
                 title = ""
             
             announcement_type = "News"

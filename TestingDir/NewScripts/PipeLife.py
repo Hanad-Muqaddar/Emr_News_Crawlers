@@ -15,7 +15,10 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
 import traceback
-
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 import dateparser
 
 import datetime
@@ -118,7 +121,7 @@ try:
     # opts.add_argument("--headless=new")
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'}
-    driver = webdriver.Chrome(options=opts)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=opts)
   
     Web_Page = "https://www.pipelife.com/service/news-and-projects.html"
     driver.get(Web_Page)

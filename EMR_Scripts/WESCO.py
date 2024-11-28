@@ -165,7 +165,7 @@ try:
     page_source = "https://investors.wesco.com/news-events/news-releases"
     main_url = "https://investors.wesco.com"
 
-    driver = webdriver.Chrome(options=opts)   
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=opts)   
     driver.get("https://investors.wesco.com/news-events/news-releases")
     time.sleep(10)
 

@@ -162,7 +162,7 @@ try:
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
 
-    driver = webdriver.Chrome(options=opts)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=opts)
     Web_Page = "https://alexander-buerkle.com/de-de/magazin-news"
     driver.get(Web_Page)
     time.sleep(10)

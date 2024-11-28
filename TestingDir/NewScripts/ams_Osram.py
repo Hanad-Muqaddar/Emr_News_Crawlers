@@ -18,7 +18,10 @@ import dateparser
 from datetime import datetime
 
 from newspaper import fulltext
-
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 from scrapy import Selector
 
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
@@ -120,7 +123,7 @@ try:
     opts.add_argument("--enable-cookies")
     # opts.add_argument("--headless=new")
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'}
-    driver = webdriver.Chrome(options=opts)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=opts)
 
     Main_url = "https://ams-osram.com"
     page_source = "https://ams-osram.com/news"

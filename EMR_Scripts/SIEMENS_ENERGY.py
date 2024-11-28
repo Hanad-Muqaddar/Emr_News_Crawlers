@@ -47,6 +47,12 @@ from urllib.request import Request, urlopen
 
 from newspaper import fulltext
 from scrapy import Selector
+
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
+
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -144,7 +150,7 @@ try:
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
-    driver = webdriver.Chrome(options=opts)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=opts)
     driver.maximize_window()
     
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'}

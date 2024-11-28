@@ -162,7 +162,7 @@ try:
     page_source = "https://www.trilux.com/en/blog/" 
     for n in news_links:   
         n = Main_url + remove_empty_lines(n)
-        print(n)
+        # print(n)
         Optimization_links.append(n)
         if n in links_list:
             total_crwalled_links += 1
@@ -171,11 +171,10 @@ try:
             continue
         else:     
             result2 = requests.get(n, headers=headers)
-            response2 = Selector(result2)
+            response2 = Selector(text=result2.text)
             
             try:
-                title = response2.xpath("normalize-space(//h1[@class='large-heading']/text())").get()
-                print(title)
+                title = response2.xpath('//meta[@property="og:title"]/@content').get()
             except:
                 title = ""
             
@@ -183,7 +182,7 @@ try:
             
             try:
                 image = response2.xpath('//meta[@property="og:image"]/@content').get()
-                print(image)
+                # print(image)
             except:
                 image = ""
 
@@ -196,13 +195,13 @@ try:
             
             try:
                 analysis = response2.xpath('//meta[@property="og:description"]/@content').get()
-                print(analysis)
+                # print(analysis)
             except:
                 analysis = ""
             try:
                 N_date = response2.xpath('//dl[@class="meta"]//time/text()').get()
                 news_date = dateparser.parse(N_date,  settings={'DATE_ORDER': 'DMY'})
-                print(news_date)
+                # print(news_date)
             except:
                 news_date = ""
 
@@ -212,14 +211,13 @@ try:
             try:
                 announcement = fulltext(result2.text)
                 announcement = announcement.replace('\n','<br>')
-                print(announcement)
+                # print(announcement)
                 
             except:
                 announcement = response2.xpath('//section[@class="section no-border--all no-padding--bottom"]/section//text()[normalize-space()]').get()
-                print(announcement)
+                # print(announcement)
             
             date = datetime.now()
-        
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -236,12 +234,12 @@ try:
             company_news['announcement']=announcement
             company_news['historySubCategory']= sub_category
             company_news['analysis'] = analysis
+            print(company_news)
             try:
-                # collection.insert_one(company_news)
+                collection.insert_one(company_news)
                 total_crwalled_links += 1
             except Exception as e:
                 running_Sequence.append(e)
-            print(company_news)    
             
     Emr_Crawlers_Logs(c_name,page_source,Optimization_links)
     if Already_exist >= 1:

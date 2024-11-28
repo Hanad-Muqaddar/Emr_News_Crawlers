@@ -161,7 +161,7 @@ try:
     opts.headless = True
 
     Web_Page = "https://www.belden.com/news#sort=%40contentpublisheddate%20descending"    
-    driver = webdriver.Chrome(options=opts)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=opts)
     driver.get(Web_Page)
     time.sleep(4)
 

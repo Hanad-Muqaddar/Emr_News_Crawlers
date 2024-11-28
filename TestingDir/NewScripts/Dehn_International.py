@@ -150,16 +150,16 @@ try:
         f_news_links = Main_url + n.xpath('.//a[contains(text() ,"Read more")]/@href').get()
         news_links.append(f_news_links)
         try:
-            n_date = n.xpath('./div[contains(@class,"grid-margin-x")]/h2[contains(@class,"dehn-chapter--headline")]/text()').get()
+            n_date = n.xpath('normalize-space(./div[contains(@class,"grid-margin-x")]/h2[contains(@class,"dehn-chapter--headline")])').get()
             news_dates.append(n_date)
         except:
             n_date = ""
             news_dates.append(n_date)
 
-    # print(news_links)
-    # print(news_dates)
-    # print(len(news_links))
-    # print(len(news_dates))
+    print(news_links)
+    print(news_dates)
+    print(len(news_links))
+    print(len(news_dates))
 
     # Creating a list of links already avilable in database
     links_list = []
