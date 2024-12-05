@@ -30,10 +30,7 @@ import re
 import traceback
 
 import urllib
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
+
 import dateparser
 
 import datetime
@@ -53,7 +50,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import unicodedata
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
-# ================================================================================
+# # ================================================================================
 # Comment these lines when you are running locally
 import importlib.util
 # Specify the absolute path to Emr_Crawlers_Optimization.py
@@ -63,7 +60,7 @@ spec = importlib.util.spec_from_file_location('Emr_Crawlers_Optimization', modul
 Emr_Crawlers_Optimization = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(Emr_Crawlers_Optimization)
 Emr_Crawlers_Logs = Emr_Crawlers_Optimization.Emr_Crawlers_Logs
-# # ================================================================================
+# # # ================================================================================
 
 # ************************************************************************
 running_Sequence = []
@@ -154,8 +151,12 @@ def parse_news_date(response):
 
 def parse_filtered_news(announcement):
         api_url = "https://admin.new.emr-online.com/api/history/filterbody"
-        payload = json.dumps({"originalBody": announcement})
-        headers = {'Content-Type': 'application/json'}
+        payload = json.dumps({
+                                "originalBody": announcement
+                                })
+        headers = {
+                    'Content-Type': 'application/json'
+                    }
         return_response = requests.request("POST", api_url, headers=headers, data=payload)
         new_data = return_response.text
         new_data = json.loads(new_data)
@@ -226,24 +227,25 @@ try:
     opts.add_argument("--lang=en")
     opts.add_argument("--enable-javascript")
     opts.add_argument("--enable-cookies")
-    opts.add_argument("--headless")
+    # opts.add_argument('--headless=new')
+
     # headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
 
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-        'Accept': '*/*',
-        'Accept-Encoding': 'gzip, deflate, br, zstd',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'If-Modified-Since': 'Thu, 13 Jun 2024 04:41:47 GMT',
-        'Origin': 'https://www.hitachienergy.com',
-        'Priority': 'u=1, i',
-        'Sec-Ch-Ua': '"Google Chrome";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
-        'Sec-Ch-Ua-Mobile': '?0',
-        'Sec-Ch-Ua-Platform': '"Windows"',
-        'Sec-Fetch-Dest': 'empty',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Site': 'cross-site'
-    }
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+    'Accept': '*/*',
+    'Accept-Encoding': 'gzip, deflate, br, zstd',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'If-Modified-Since': 'Thu, 13 Jun 2024 04:41:47 GMT',
+    'Origin': 'https://www.hitachienergy.com',
+    'Priority': 'u=1, i',
+    'Sec-Ch-Ua': '"Google Chrome";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
+    'Sec-Ch-Ua-Mobile': '?0',
+    'Sec-Ch-Ua-Platform': '"Windows"',
+    'Sec-Fetch-Dest': 'empty',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'cross-site'
+}
 
 
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=opts)
@@ -255,13 +257,11 @@ try:
     time.sleep(10)
     
     news_links = []
-    links = driver.find_elements(By.XPATH, '//ul[contains(@class,"cmp-newslist__news-list")]/li[@class="cmp-newslist__news-item"]')
+    links = driver.find_elements(By.XPATH, '//div[@class="cmp-filterable-list__card "]')
     for link in links:
-        news_link = link.find_element(By.XPATH, './a[@class="cmp-newslist__news-item-link"]').get_attribute('href')
+        news_link = link.find_element(By.XPATH, './a').get_attribute('href')
         news_links.append(news_link)
-    
-    driver.quit()
-    
+
     print(news_links)
     print(len(news_links))
 
@@ -276,7 +276,6 @@ try:
         All_title_list.append(x['title'])
 
     Emr_Crawlers_Logs(c_name,page_source,news_links)
-    
     for i in news_links:
         if i in db_list:
             Already_exist += 1
@@ -308,7 +307,7 @@ try:
                 except:
                     analysis = ""
                 try:
-                    image = response1.css(".cmp-responsive-image picture img::attr(href)").get()
+                    image = response1.xpath('//img[@fetchpriority="high"]/@src').get()
                 except:
                     image = ""
                 sub_category = ""
@@ -320,7 +319,6 @@ try:
                     emr_lite = ""
                     emr_executive = ""
                     emr_html = ""
-                    
                 announcement_type = "Press Release"
                 language = "en-US"
                 
@@ -341,7 +339,7 @@ try:
                 company_news['videos']= ''
                 company_news['announcement']=announcement
                 company_news['historySubCategory']= sub_category
-                # company_news['analysis'] = analysis
+                company_news['analysis'] = analysis
                 # company_news['emrExecutive'] = emr_executive
                 # company_news['emrEssential'] = emr_essentail
                 # company_news['emrLite'] = emr_lite
@@ -367,6 +365,8 @@ except Exception as e:
     Error_Time =  datetime.datetime.now()
 
     Reported_Error = traceback.format_exc()
+    
+    print(Reported_Error)
 
     running_Sequence.append(e)
 
@@ -412,4 +412,4 @@ log['Last_news_crawl_time'] = last_time
 
 log['Browser'] = 'Chrome'
 
-error_logs.insert_one(log)
+# error_logs.insert_one(log)

@@ -150,7 +150,7 @@ try:
             news_links.append(news_link)
 
     print(news_links)
-     # Creating a list of links already avilable in database
+
     links_list = []
     mydoc = collection.find()
     for x in mydoc:
@@ -170,6 +170,7 @@ try:
 
             try:
                 title = data.find('meta', attrs = {"property":"og:title"}).get("content")
+                print(title)
             except:
                 title = ""
 
@@ -179,12 +180,12 @@ try:
             analysis = ""
 
             try:
-                image = Main_url + data.find("div", {"class":"ce-inner"}).find("source").get('srcset')
+                image = Main_url + data.find("img", {"loading":"eager"}).get('data-src')
             except:
-                image = Main_url + data.find("div", {"class":"fce frame frame-default frame-type-burgkundenspezifisch_container_header_slider_wrapper frame-layout-0"}).find("source").get('srcset')
-
+                image = ""
+                
             try:
-                date = data.find('div', attrs = {"class":"fce frame frame-default frame-type-text frame-layout-0"}).find("p", class_="h4").get_text(strip=True)
+                date = data.find('time').get('datetime')
                 news_date = dateparser.parse(date,  settings={'DATE_ORDER': 'YMD'} )
                 print(news_date)
             except:
@@ -194,7 +195,6 @@ try:
             
             try:
                 announcement = data.find("div", class_="ce-bodytext").get_text(strip=True)
-
             except:
                 announcement = ""
             
@@ -223,11 +223,9 @@ try:
                 running_Sequence.append(e)
 
     Emr_Crawlers_Logs(c_name,Base_url,news_links)
-
     if Already_exist >= 1:
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
     else:
-
         tmp_txt = ''
 
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
@@ -247,7 +245,9 @@ try:
     Error = {}
 
     Error['Error_Detail'] = Reported_Error
-
+    
+    print(Reported_Error)
+    
     Error['Error_Time'] = Error_Time
 
 except Exception as e:

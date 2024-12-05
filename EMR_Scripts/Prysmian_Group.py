@@ -77,16 +77,9 @@ Already_exist = 0
 # trying to connect with mongodb
 
 try:
-    file = open("/home/ubuntu/Emr-Crawlers/Emr_News_Crawlers/config.json")
-    data = json.load(file)
-    db_path = data[0]['Db_Path']
-    client = MongoClient(db_path)
-
-    # client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
+    client = MongoClient('mongodb://su-du-ad:updatedSuperDuperAdmin@18.156.208.71:27017/emrweb?authSource=admin') # Staging DB 
     running_Sequence.append('Connected to DB Server')
-
 except:
-
     running_Sequence.append('Not Connected')
 
 # *************************************************************************
@@ -140,13 +133,17 @@ else:
 # *****************************************************************************
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
-    links = ["https://www.prysmiangroup.com/en/media/news","https://www.prysmiangroup.com/en/media/press-releases"]
+    links = [
+        # "https://www.prysmiangroup.com/en/media/news",
+        "https://www.prysmiangroup.com/en/media/press-releases"
+    ]
     for i in links:
         result = requests.get(i,headers=headers)
         page_source = i
         soup = BeautifulSoup(result.content, 'lxml')
         all_links = soup.find_all("a", class_='btn btn-default btn-discover toggle-stick-to-bottom')
         dates = soup.find_all("div", class_="news-archive-date")
+        
         dates_list = []
         for z in dates:
             dates_list.append(z.text.strip())
@@ -160,8 +157,9 @@ try:
         for x in mydoc:
             db_list.append(x['News_Weblink'])
         
-        for k,l in zip(links_list, dates_list):
-            
+        for k, l in zip(links_list, dates_list):
+            print(k)
+            print(l)
             if k in db_list:
                 total_crwalled_links += 1
                 Already_exist += 1
@@ -172,7 +170,8 @@ try:
                 soup = BeautifulSoup(res.content, 'lxml')
                 try:
                     title = soup.find("meta", attrs = {"property":"og:title"}).get("content")
-                    print(title)
+                    if "|" in title:
+                        title = title.split("|")[0].strip()
                 except:
                     title = ""
                 try:
@@ -188,7 +187,7 @@ try:
                 except:
                     analysis = ""
                 try:
-                    image = soup.find("meta", attrs = {"property":"og:image"}).get("content")
+                    image = "" + soup.find("meta", attrs = {"property":"og:image"}).get("content")
                 except:
                     image = ""
                 try:

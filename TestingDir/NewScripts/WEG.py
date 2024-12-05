@@ -1,5 +1,7 @@
 import time
 
+from scrapy import Selector
+
 from pymongo import MongoClient
 
 from selenium import webdriver
@@ -145,7 +147,6 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
     
-    
     Emr_Crawlers_Logs(c_name,Web_Page,news_links)
 
     for i in news_links:
@@ -156,14 +157,11 @@ try:
             print("Already Crawled")
             continue
         else:        
+            driver.get(i)
+            response = Selector(text=driver.page_source)
+            
             try:
-                driver.get(i)
-            except Exception as e:
-                print(e)
-
-            try:
-                title = driver.find_element(By.XPATH, "//h2[@class='xtt-title-border']").text
-                title = translate(title)
+                title = response.xpath("normalize-space(//h2[@class='xtt-title-border'])").get()
                 print(title)
             except:
                 title = ""

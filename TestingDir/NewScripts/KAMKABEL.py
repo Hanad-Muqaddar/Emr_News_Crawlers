@@ -107,19 +107,19 @@ try:
     Main_url = "https://www.kamkabel.ru"
     Base_url = "https://www.kamkabel.ru/press/news/"
     
-    result = requests.get(Base_url,headers=headers)
+    result = requests.get(Base_url, headers=headers)
     soup = BeautifulSoup(result.content , 'lxml')
 
     def translate(Trans):
         translator = Translator()
-        Trans_text = translator.translate(Trans,dest='en')
+        Trans_text = translator.translate(Trans, dest='en')
         return Trans_text.text
     
     news_links = []
     
-    links = soup.find('div',{ "class" : "items row"}).find_all('div',{ "class" : "col-md-12"})
+    links = soup.find('div', { "class" : "items row"}).find_all('div', { "class" : "col-md-12"})
     for link in links:
-        news_link = Main_url + link.find('a',{ "class" : "btn btn-default btn-sm"}).get('href')
+        news_link = Main_url + link.find('a', { "class" : "btn btn-default btn-sm"}).get('href')
         if news_link not in news_links:
             news_links.append(news_link)
 
@@ -132,7 +132,7 @@ try:
         links_list.append(x['News_Weblink'])
 
     page_source = "https://www.kamkabel.ru/press/news/"
-    Emr_Crawlers_Logs(c_name,page_source,news_links)
+    Emr_Crawlers_Logs(c_name, page_source, news_links)
 
     for i in news_links:
         

@@ -139,14 +139,16 @@ else:
 
 # *****************************************************************************
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'}
     Main_url = 'https://www.siteco.com'
     page_source = 'https://www.siteco.com/news'
-    result = requests.get(page_source, headers=headers)
+    result = requests.get(page_source, headers=headers, allow_redirects=False)
+    with open("output.html", "w", encoding="utf-8") as file:
+        file.write(result.text)
     response = Selector(result)
 
-    news_links = response.xpath('//div[@class="block"]//div[@class="textmedia__text"]//a/@href').getall()
-    news_links = [Main_url + l if not "https" in l else Main_url for l in news_links]
+    news_links = response.xpath('//div[@class="textmedia__text"]//a/@href').getall()
+    news_links = list(set(Main_url + l if not "http" in l else l for l in news_links))
     print(news_links)
   
     links_list = []
@@ -163,11 +165,12 @@ try:
             print("Already Crawled")
             continue
         else:     
-            result2 = requests.get(n, headers=headers)
+            result2 = requests.get(n, headers=headers, allow_redirects=True)
             response2 = Selector(result2)
+            # print(n)
             
             try:
-                title = response2.xpath('//meta[@property="og:title"]/@content').get() or response2.xpath('normalize-space(//title)').get()
+                title = response2.xpath('//title/text()').get()
                 print(title)
             except:
                 title = ""
@@ -176,7 +179,7 @@ try:
             
             try:
                 image = Main_url + response2.xpath('//img/@src').get()
-                print(image)
+                # print(image)
             except:
                 image = ""
 
@@ -189,7 +192,7 @@ try:
             
             try:
                 analysis = response2.xpath('//meta[@property="og:description"]/@content').get()
-                print(analysis)
+                # print(analysis)
             except:
                 analysis = ""
             
@@ -199,14 +202,14 @@ try:
             try:
                 announcement = fulltext(result2.text)
                 announcement = announcement.replace('\n','<br>')
-                print(announcement)
+                # print(announcement)
                 
             except:
                 announ = response2.xpath('//div[@class="block"]//text()[normalize-space()]').getall()
                 announcement = ''
                 for i in announ: 
                     announcement = announcement + ' ' + i
-                print(announcement)
+                # print(announcement)
             
             date = datetime.now()
             company_news = {}
