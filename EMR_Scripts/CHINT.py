@@ -140,7 +140,7 @@ else:
 
 # *****************************************************************************
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'}
     result = requests.get("https://www.chintglobal.com/global/en/about-us/news-center/news.html", headers=headers)
     response = Selector(result)
     link_elements = response.xpath('//div[@class="swiper-wrapper swiper-flex-more-column"]//a/@href').getall()

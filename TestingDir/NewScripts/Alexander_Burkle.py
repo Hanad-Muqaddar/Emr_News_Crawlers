@@ -183,11 +183,10 @@ try:
             news_Date = ""
             news_Dates.append(news_Date)
 
-    # print(news_links)
-    # print(len(news_links))
-    # print(news_Dates)
-    # print(len(news_Dates))
-
+    print(news_links)
+    print(len(news_links))
+    print(news_Dates)
+    print(len(news_Dates))
 
     db_list = []
     mydoc = collection.find()
@@ -195,7 +194,6 @@ try:
         db_list.append(x['News_Weblink'])
     
     for i,d in zip(news_links,news_Dates):
-        
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -205,7 +203,6 @@ try:
             driver.get(i)
             time.sleep(3)
             try:
-                # title = driver.find_element(By.XPATH, '//title').text
                 title = driver.find_element(By.XPATH, '//h1[contains(@class,"styled__StyledHeadline")]').text
                 title = translate(title)
                 print(title)
@@ -214,7 +211,6 @@ try:
             
             announcement_type = "News"
             language = "en-us"
-
             image = ""
 
             try:
@@ -229,6 +225,7 @@ try:
                 print(analysis)
             except:
                 analysis = ""
+                
             try:
                 news_date = dateparser.parse(d,  settings={'DATE_ORDER': 'DMY'})
                 print(news_date)
@@ -237,6 +234,7 @@ try:
 
             news_weblink = i
             print(news_weblink)
+            
             try:
                 print("Announcement")
                 announcement = driver.find_element(By.XPATH, '//span[@type="body"]').text
@@ -247,8 +245,6 @@ try:
                 announcement = ""
             
             date = datetime.now()
-            # Creating a list of links already avilable in database
-            
             company_news = {}
             company_news['companyId'] = ''
             company_news['location']=''
@@ -271,24 +267,20 @@ try:
             except Exception as e:
                 running_Sequence.append(e)
 
-    Emr_Crawlers_Logs(c_name,Web_Page,news_links)
+    Emr_Crawlers_Logs(c_name, Web_Page, news_links)
     
     if Already_exist >= 1:
-
         tmp_txt = ' , from which '+str(Already_exist) +' Links were Already Crawled '
-
     else:
-
         tmp_txt = ''
 
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
-
     ended_on = datetime.now()
+    
 except:
+    
     Error_Time =  datetime.now()
-
     Reported_Error = traceback.format_exc()
-
 
 # **************************************************************************
 rep = ''

@@ -148,8 +148,11 @@ try:
         news_link = link.text
         if "en/media-and-publications/media-articles/" in news_link and news_link not in news_links:
             news_links.append(news_link)
-    news_links.append("https://hagergroup.com/en/media-and-publications/media-articles/hagergroup-acquires-advizeo")
+    
+    news_links.append("https://hagergroup.com/en/media-and-publications/media-articles/hager-ecovadis-platinum-2024")
+    news_links.append("https://hagergroup.com/en/media-and-publications/media-articles/hager-taranis-power-lab")
     print(news_links)
+    
     db_list = []
     mydoc = collection.find()
     for x in mydoc:
@@ -250,7 +253,8 @@ except:
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
-
+    
+    print(Reported_Error)
 
 # **************************************************************************
 rep = ''
