@@ -45,12 +45,12 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
-from newspaper import fulltext
+# from newspaper import fulltext
 from scrapy import Selector
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from googletrans import Translator
+# from googletrans import Translator
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -226,7 +226,8 @@ try:
             news_weblink = n
             
             try:
-                announcement = fulltext(result2.text)
+                # announcement = fulltext(result2.text)
+                announcement = result2.text
                 announcement = announcement.replace('\n','<br>')
                 print(announcement)
                 

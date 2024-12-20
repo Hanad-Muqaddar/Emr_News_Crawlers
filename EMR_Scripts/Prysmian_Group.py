@@ -40,7 +40,7 @@ import dateparser
 
 from datetime import datetime
 
-from bson.objectid import ObjectId
+# from bson.objectid import ObjectId
 
 from urllib.error import HTTPError
 
@@ -138,7 +138,7 @@ try:
         "https://www.prysmiangroup.com/en/media/press-releases"
     ]
     for i in links:
-        result = requests.get(i,headers=headers)
+        result = requests.get(i, headers=headers)
         page_source = i
         soup = BeautifulSoup(result.content, 'lxml')
         all_links = soup.find_all("a", class_='btn btn-default btn-discover toggle-stick-to-bottom')

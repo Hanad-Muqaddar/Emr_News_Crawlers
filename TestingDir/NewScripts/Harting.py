@@ -47,7 +47,7 @@ from bson.objectid import ObjectId
 from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
-from newspaper import fulltext
+# from newspaper import fulltext
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
 
 # ================================================================================
@@ -215,9 +215,9 @@ try:
             print(news_weblink)
             
             try:
-                announcement = fulltext(driver.page_source)
+                announcement = driver.page_source
                 announcement = announcement.replace('\n','<br>')
-                print(announcement)
+                # print(announcement)
             except:
                 announcement = ""
             

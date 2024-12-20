@@ -47,7 +47,7 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
-from newspaper import fulltext
+# from newspaper import fulltext
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
@@ -169,10 +169,10 @@ try:
         date1 = link.find_element(By.XPATH, './/div[@class="style__StyledNewsCardDate-ojiq1d-2 duzsjo"]').text
         news_dates.append(date1)
 
-    # print(news_links)
-    # print(len(news_links))
-    # print(news_dates)
-    # print(len(news_dates))
+    print(news_links)
+    print(len(news_links))
+    print(news_dates)
+    print(len(news_dates))
 
     # Creating a list of links already avilable in database
     links_list = []
@@ -193,6 +193,7 @@ try:
         else:
         # for i in news_links:
             response = requests.get(i, headers=headers)
+            # print(response.text)
             data = BeautifulSoup(response.content, 'lxml')
             try:
                 title = data.find('meta', attrs = {"property":"og:title"}).get("content")
@@ -228,7 +229,7 @@ try:
 
             try:        
                 html = requests.get(i).text
-                announcement = fulltext(html)
+                # announcement = fulltext(html)
                 announcement = announcement.replace('\n','<br>')
                 # print(announcement)
                     

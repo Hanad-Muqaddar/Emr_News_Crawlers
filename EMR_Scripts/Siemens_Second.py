@@ -45,9 +45,9 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
-from newspaper import fulltext
+# from newspaper import fulltext
 
-from googletrans import Translator
+# from googletrans import Translator
 
 from scrapy import Selector
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
@@ -196,7 +196,7 @@ try:
             sub_category = ""
 
             try:
-                announcement = fulltext(result1.text)
+                announcement = result1.text
                 announcement = announcement.replace('\n','<br>')
                 print(announcement)
             except:

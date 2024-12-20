@@ -43,7 +43,7 @@ from urllib.request import Request, urlopen
 
 from scrapy import Selector
 
-from newspaper import fulltext
+# from newspaper import fulltext
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
@@ -276,6 +276,7 @@ try:
         All_title_list.append(x['title'])
 
     Emr_Crawlers_Logs(c_name,page_source,news_links)
+    
     for i in news_links:
         if i in db_list:
             Already_exist += 1

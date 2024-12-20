@@ -45,7 +45,7 @@ from urllib.error import HTTPError
 
 from urllib.request import Request, urlopen
 
-from newspaper import fulltext
+# from newspaper import fulltext
 from scrapy import Selector
 from googletrans import Translator
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
@@ -146,7 +146,8 @@ try:
     response = Selector(result)
     
     news_links = response.xpath('//a[@class="panel__link"]/@href').getall()
-
+    print(news_links)    
+    
     def translate(Trans):
         translator = Translator()
         Trans_text = translator.translate(Trans,dest='en')
@@ -161,7 +162,6 @@ try:
     Emr_Crawlers_Logs(c_name,page_source,news_links)
 
     for n in news_links: 
-        print(n)     
         if n in links_list:
             total_crwalled_links += 1
             Already_exist += 1
@@ -172,7 +172,7 @@ try:
             response2 = Selector(result2)
             
             try:
-                title = response2.xpath('//article[@class="panel"]//h1[@class="panel__title"]/text()').get()
+                title = response2.xpath('normalize-space(//h1[@class="panel__title"])').get()
                 title = translate(title)
                 print(title)
             except:
@@ -201,7 +201,7 @@ try:
             except:
                 analysis = ""
             try:
-                N_date = response2.xpath('//article[@class="panel"]//time/@datetime').get()
+                N_date = response2.xpath('//time/@datetime').get()
                 T_N_date = translate(N_date)
                 news_date = dateparser.parse(T_N_date,  settings={'DATE_ORDER': 'YMD'})
                 # print(news_date)
@@ -212,9 +212,9 @@ try:
             news_weblink = n
             
             try:
-                announcement = fulltext(result2.text)
+                announcement = result2.text
                 announcement = announcement.replace('\n','<br>')
-                announcement = translate(announcement)
+                # announcement = translate(announcement)
                 print(announcement)
                 
             except:
@@ -260,6 +260,7 @@ except:
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
+    print(Reported_Error)
 
 
 # **************************************************************************

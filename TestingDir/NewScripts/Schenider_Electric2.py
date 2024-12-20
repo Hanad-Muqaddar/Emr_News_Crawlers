@@ -163,10 +163,10 @@ try:
         'accept-encoding': 'gzip, deflate, br, zstd',
         'accept-language': 'en-US,en;q=0.9',
         'cache-control': 'no-cache',
-        'cookie': 'visitorOriginStatus=external; AWSALB=ee0d8sdIANgWz3qfUQpXLwlpjSLG0fvIFKWTZevqXEhJFJ/vRVq9T81vSsUfdhuBtUEYcSjcGK/DJ57uf7flp5A3ND9hn6BU/HDBGVj1I44QGtSpRJB5E0oPUxLd; AWSALBCORS=ee0d8sdIANgWz3qfUQpXLwlpjSLG0fvIFKWTZevqXEhJFJ/vRVq9T81vSsUfdhuBtUEYcSjcGK/DJ57uf7flp5A3ND9hn6BU/HDBGVj1I44QGtSpRJB5E0oPUxLd; _gcl_au=1.1.1700038501.1721053979; OptanonAlertBoxClosed=2024-07-15T14:33:00.312Z; _fbp=fb.1.1721053980428.915424709765820502; visitorOriginStatus=external; _ga=GA1.1.1081535430.1721053982; _mkto_trk=id:178-GYD-668&token:_mch-www.se.com-1721053982357-87505; _evga_c320={%22uuid%22:%2281d216181558237d%22}; _sfid_10cb={%22anonymousId%22:%2281d216181558237d%22%2C%22consents%22:[]}; _cs_c=0; mdLogger=false; kampyle_userid=c940-4397-b899-2fb9-7816-14b5-84ea-5c05; AKA_A2=A; __gtm_campaign_url=; ak_bmsc=964DB2658AE7256D2F99B0CF9D822E78~000000000000000000000000000000~YAAQVJ42FyTrMWiSAQAANgJKdhmni4WfmPm1TMUNo3tw6FJG2+LRDwpGoVzl8TZVKprmTmQplP5HY9IX0x9GJc25BwuR3AC6EAqR4HbK0pSamcs8wzJauOAJ/hdmUGMF2s46wZvEVIVufHYUDWYBzsn1mFXZ8DhYi1Hwe6NJAUZHHAgg2DZsAmEGx63Y0C5aWVBxSvJ2rnT6hX1xNADX35nyFQkGmgYW47NjYFGIHlDSQ7SO7a4ObmSf167dvVZTWGeWY+HIUCl3E+CjX3oJe4JTETsgUPFUawveHzkizaUR53yaZrjC+sX/RDv6SyJH+JquixZjiNVkekkvn3DEKVXuu1YNC/coks6UBepsIfrfSsPK+J2c/7KsUIVy4lwU/KUNYRqJ8L1Kv4lcrhEsF/8XeSrg+j8BRtWcQ+RLfGnqJMuOY+crNC+wrfyg1scCuZbCyMxICDkjXiSf; OptanonConsent=isGpcEnabled=0&datestamp=Thu+Oct+10+2024+16%3A56%3A55+GMT%2B0500+(Pakistan+Standard+Time)&version=202407.2.0&browserGpcFlag=0&isIABGlobal=false&hosts=&consentId=bc4a5bae-01b5-4181-b245-1946a9c7afef&interactionCount=1&isAnonUser=1&landingPath=NotLandingPage&groups=C0001%3A1%2CC0002%3A1%2CC0003%3A1%2CC0004%3A1&intType=3&geolocation=PK%3BPB&AwaitingReconsent=false; TEAL=v:1190b6cfacb882145216592064068536f2878677960$t:1728563216193$sn:2$en:1$s:1728561416192%3Bexp-sess; _cs_cvars=%7B%7D; _cs_id=9b105d11-cd03-a0e6-9425-da34198c6078.1721053983.2.1728561416.1728561416.1708007454.1755217983326.1; _mkto_trk=id:178-GYD-668&token:_mch-www.se.com-1721053982357-87505; _cs_s=1.0.1.1728563217520; bm_sv=869F16D7F0FA4D18CDB4851998F68813~YAAQVJ42FyLtMWiSAQAA+hZKdhl+Vnt+G1kMKTBLkkJPKFQ0y1zPWs6AY9cNalMZhz5IwcEnF2gMxSPAyjEWWE/OiHDYyFOYu5UC8eHqSV99fiwSb7Ko2V49cbd6aa/DqPBmYxqoJfjX7hxGNxHaPs5EN6NbSs4yTb9dpQrLlIekm6U1sNSXvO9PG1DmP4Lpwkw8vcSGBAPCvfNxLpiU7GIZbsaLEot9Qzly55KDj7dGF8uL/0Q7IWEVE29qWWvL~1; _ga_MXD394MGXR=GS1.1.1728561416.2.0.1728561420.0.0.0; kampyleUserSession=1728561420353; kampyleUserSessionsCount=2; kampyleSessionPageCounter=1; kampyleUserPercentile=79.78088371373941; kampylePageLoadedTimestamp=1728561420376',
+        'cookie': '__gtm_campaign_url=; OptanonAlertBoxClosed=2024-12-20T10:35:55.450Z; OptanonConsent=isGpcEnabled=0&datestamp=Fri+Dec+20+2024+15%3A35%3A55+GMT%2B0500+(Pakistan+Standard+Time)&version=202410.1.0&browserGpcFlag=0&isIABGlobal=false&hosts=&consentId=fcb23695-fdaf-43f9-b3dc-e8535cd6f476&interactionCount=3&isAnonUser=1&landingPath=NotLandingPage&groups=C0001%3A1%2CC0002%3A1%2CC0003%3A1%2CC0004%3A1&intType=1; TEAL=v:2193e3a3646b33494322956559491536f53306737d0$t:1734692758753$s:1734690956403%3Bexp-sess$sn:1$en:2; _ga=GA1.1.1267902491.1734690961; _gcl_au=1.1.449186749.1734690961; _rdt_uuid=1734690969874.322ef938-da4a-476e-b1e0-5de03037ba98; drift_campaign_refresh=4cb91656-18e6-4839-9180-1022078f2480; _cs_c=0; kampyle_userid=10a9-6998-937f-a8db-ab3d-77a3-3f10-4b30; kampyleUserSession=1734690971089; kampyleUserSessionsCount=1; kampyleSessionPageCounter=1; kampyleUserPercentile=47.01120137018269; kampylePageLoadedTimestamp=1734690971236; _cs_id=e85c3796-d1bc-a354-da47-17ebe5a3cf84.1731669863.3.1734690971.1734689961.1708007454.1765833863488.1; _mkto_trk=id:178-GYD-668&token:_mch-se.com-c74c7dd22a4f865a2d8c696089091637; _ga_MXD394MGXR=GS1.1.1734690960.1.0.1734690972.0.0.0; _cs_s=6.0.1.9.1734692773042; _fbp=fb.1.1734690974053.656297913992928818',
         'pragma': 'no-cache',
         'priority': 'u=0, i',
-        'sec-ch-ua': '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
+        'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
         'sec-ch-ua-mobile': '?0',
         'sec-ch-ua-platform': '"Windows"',
         'sec-fetch-dest': 'document',
@@ -174,7 +174,7 @@ try:
         'sec-fetch-site': 'none',
         'sec-fetch-user': '?1',
         'upgrade-insecure-requests': '1',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
     }
     proxies = {}
     db_list = []
@@ -182,7 +182,7 @@ try:
     for x in mydoc:
         db_list.append(x['News_Weblink'])
 
-    result = requests.get("https://www.se.com/us/en/about-us/newsroom/news/", headers=headers, proxies=proxies)
+    result = requests.get("https://www.se.com/us/en/about-us/newsroom/news/", proxies=proxies)
     res = Selector(result)
 
     # data = res.css(".sdl-wiztopic-press-releases_wiztopic-card .wiztopic-content")
@@ -200,7 +200,7 @@ try:
             print("Already Crawled")
             continue
         else:
-            result2 = requests.get(news_weblink, headers=headers)
+            result2 = requests.get(news_weblink)
             response1 = Selector(result2)
             date_get = response1.css(".sdl-wiztopic-press-release_publication-data p:nth-child(2) span").xpath("normalize-space()").get()
             location = response1.css('.sdl-wiztopic-press-release_publication-data p:nth-child(1) span').xpath("normalize-space()").get()

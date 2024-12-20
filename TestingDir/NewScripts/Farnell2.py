@@ -48,7 +48,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
-from newspaper import fulltext
+# from newspaper import fulltext
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 # from Emr_Crawlers_Optimization import Emr_Crawlers_Logs
