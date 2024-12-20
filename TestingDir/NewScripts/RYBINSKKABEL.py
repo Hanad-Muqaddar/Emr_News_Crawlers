@@ -130,7 +130,7 @@ else:
 
     last_time = last_insertion['Date']
 
-    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date'].date()))
+    running_Sequence.append('Last News Crawled on -> '+str(last_insertion['Date']))
 
     Crwl_time = last_insertion['Date']
 
@@ -274,6 +274,8 @@ try:
 
     running_Sequence.append(str(total_crwalled_links) + ' Links are crawled ' + tmp_txt)
 
+    Reported_Error = ""
+    
     ended_on = datetime.now()
 except:
     Error_Time =  datetime.now()
