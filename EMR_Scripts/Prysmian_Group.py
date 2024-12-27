@@ -132,15 +132,15 @@ else:
 
 # *****************************************************************************
 try:
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
+    driver = webdriver.Chrome()
     links = [
-        # "https://www.prysmiangroup.com/en/media/news",
+        "https://www.prysmiangroup.com/en/media/news",
         "https://www.prysmiangroup.com/en/media/press-releases"
     ]
     for i in links:
-        result = requests.get(i, headers=headers)
+        driver.get(i)
         page_source = i
-        soup = BeautifulSoup(result.content, 'lxml')
+        soup = BeautifulSoup(driver.page_source, 'lxml')
         all_links = soup.find_all("a", class_='btn btn-default btn-discover toggle-stick-to-bottom')
         dates = soup.find_all("div", class_="news-archive-date")
         
@@ -166,8 +166,8 @@ try:
                 print("Already Crawled")
                 continue
             else:
-                res = requests.get(k,headers=headers)
-                soup = BeautifulSoup(res.content, 'lxml')
+                driver.get(k)
+                soup = BeautifulSoup(driver.page_source, 'lxml')
                 try:
                     title = soup.find("meta", attrs = {"property":"og:title"}).get("content")
                     if "|" in title:
@@ -245,6 +245,7 @@ except:
     Error_Time =  datetime.now()
 
     Reported_Error = traceback.format_exc()
+    print(Reported_Error)
 
 
 # **************************************************************************
