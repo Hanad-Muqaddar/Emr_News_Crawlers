@@ -143,7 +143,7 @@ else:
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'}
     Optimization_links = []
-    result = requests.get("https://www.ensto.com/api/newsroom/getList?lang=en&areasOfInterestTag=&categoryTag=&Keyword=&rootPage=64&page=1",headers=headers)
+    result = requests.get("https://www.ensto.com/api/newsroom/getList?lang=en&areasOfInterestTag=&categoryTag=&Keyword=&rootPage=64&page=1", headers=headers)
     data = json.loads(result.text)
     
     for obj in data['items']:
