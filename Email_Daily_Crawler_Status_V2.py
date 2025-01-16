@@ -174,7 +174,7 @@ def process_Email():
     # For Email
     message = Mail(
     from_email='info@emr-online.com',
-    to_emails=['manuel.gielsdorf@emr-online.com','abdul.ghaffar@techletspk.com','salman.ansari@techletspk.com','muhammad.asad@techletspk.com'],
+    to_emails=['manuel.gielsdorf@emr-online.com','shahnoor@techletspk.com','salman.ansari@techletspk.com','muhammad.asad@techletspk.com'],
     # to_emails=['abdul.ghaffar@techletspk.com'],
     subject='EMR Crawlers Daily status V2 Excel Sheet ',
     html_content=f'<strong>Kindly Download the Excel File From this link : </strong> {success}')
