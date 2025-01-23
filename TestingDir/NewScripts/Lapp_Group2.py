@@ -188,7 +188,7 @@ try:
 
     Emr_Crawlers_Logs(c_name,page_source,news_links)
 
-    for i,d in zip(news_links,N_dates):
+    for i, d in zip(news_links,N_dates):
         if i in db_list:
             total_crwalled_links += 1
             Already_exist += 1

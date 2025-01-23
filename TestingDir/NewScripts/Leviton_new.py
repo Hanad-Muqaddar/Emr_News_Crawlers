@@ -149,7 +149,6 @@ try:
     Main_url = "https://leviton.com"
     page_source = "https://leviton.com/company/press-releases"
     
-
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'}
     result = requests.get(page_source,headers=headers)
     response = Selector(result)
@@ -163,7 +162,6 @@ try:
         N_Date = n.xpath('.//br/following-sibling::text()[1]').get()
         N_Date = N_Date.replace('\r\n','')
         N_Dates.append(N_Date)
-
 
     # print(N_links)
     # print(N_Dates)
